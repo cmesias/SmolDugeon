@@ -57,7 +57,7 @@ public:	// animation for light Tile
 	// 296 - 303:	top of light tile
 	// 328 - 335:	bottom of light tile
 	float animTimer;
-	const float animTimerSpe = 2;
+	const float animTimerSpe = 5;
 
 public:	// Initial
 	void initTile(Tile tile[]);

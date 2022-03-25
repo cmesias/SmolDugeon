@@ -66,7 +66,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 
 	if (!respawn){
 		score 			= 0;
-		lives 			= 1;
+		hearts 			= 3;
 	}
 
 	// Always reset these
@@ -149,17 +149,26 @@ void Players::Load(SDL_Renderer* gRenderer){
 	gPlayer.loadFromFile(gRenderer, "resource/gfx/player/player.png");
 	gPlayerShadow.loadFromFile(gRenderer, "resource/gfx/player/player_shadow.png");
 	gShield.loadFromFile(gRenderer, "resource/gfx/player/shield.png");
+	gSwords.loadFromFile(gRenderer, "resource/gfx/author_0x72/0x72_16x16DungeonTileset_swords.png");
+
+	// Clip player texture
 	rPlayer[0] = {0,0,48,48};			// Walking 			0
 	rPlayer[1] = {48,0,48,48};			// Walking 			1
 	rPlayer[2] = {96,0,48,48};			// Walking 			2
 	rPlayer[3] = {144,0,48,48};			// Walking 			3
 
-	rPlayer[4] = {0,48,48,48};			// Before Slash 	4
-	rPlayer[5] = {48,48,62,48};			// Slash attack 	5
+	rPlayer[4] = {0,48,48,48};			// Befozre Slash 	4
+	rPlayer[5] = {48,48,75,48};			// Slash attack 	5
 	rPlayer[6] = {0,96,48,48};			// Parry 			6
-	rPlayer[7] = {144,48,48,55};		// Down-Stab attack 7
+	rPlayer[7] = {144,48,48,74};		// Down-Stab attzack 7
 	rPlayer[8] = {48,96,48,48};			// Dash frame 0:	9
 	rPlayer[9] = {96,96,48,48};			// Dash frame 1:	9
+
+	// Clip swords texture
+	rSwords[0] = {0,0,10,21};			// Wooden sword
+	rSwords[1] = {10,0,10,21};			// Rusty sword
+	rSwords[2] = {20,0,10,21};			// Iron sword
+	rSwords[24] = {60,50,10,10};		// Heart (Used in UI, not in inventory or maybe it should? TODO)
 
 	for (int i=0; i<7; i++){setClips(rShield[i], i*48, 0, 48, 48);}
 
@@ -182,8 +191,9 @@ void Players::Free(){
 
     // Free textures
 	gPlayer.free();
-    gShield.free();
     gPlayerShadow.free();
+    gShield.free();
+    gSwords.free();
 
     // Free audio
 	Mix_FreeChunk(sCast);
@@ -266,7 +276,7 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 				// recoil of gun
 
 				// play audio
-				Mix_PlayChannel(1, sCastSFX, 0);
+				/*Mix_PlayChannel(1, sCastSFX, 0);
 
 				// Offset to spawn the Slash Attack
 				int offSetX =0;
@@ -291,7 +301,7 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 					   false, 0);
 
 				// Subtract mana
-				this->mana -= 2;
+				this->mana -= 2;*/
 			}
 		}
 
@@ -957,14 +967,14 @@ void Players::Update(Map &map,
 								   rand() % 9 + 2, 1);
 			}
 
-			// Take away lives
-			lives-= 1;
+			// Take away hearts
+			hearts-= 1;
 
 			// Reset Player
 			Init(spawnX, spawnY, name, true);
 
-			// Player ran out of lives, que Death Screen
-			if (lives<=0){
+			// Player ran out of hearts, que Death Screen
+			if (hearts<=0){
 
 				// Reset some accumulated stuff
 				e_dummy.ENEMY_SPAWN = 1;
@@ -1132,20 +1142,33 @@ void Players::Render(int mx, int my, int camx, int camy, LWindow gWindow, SDL_Re
 		// render player
 		{
 			// Render shadow
-			int shadowH = 48;
-			gPlayerShadow.setAlpha(110);
-			gPlayerShadow.render(gRenderer, x+w/2-shadowW/2-camx,
-											y+h-shadowH-camy,
-											shadowW, shadowH, NULL, 0.0, NULL);
-
-			// The '-9", in the y coordinate is adjusting the sprite to the appropriiate position
+			{
+				int shadowH = 10;
+				gPlayerShadow.setAlpha(110);
+				//gPlayerShadow.render(gRenderer, x+w/2-shadowW/2-camx,
+				//								y+h+yOffset-shadowH/2-camy,
+				//								shadowW, shadowH, NULL, 0.0, NULL);
+			}
 
 			// Slash, looking left or right
-			if (sprite_index == 5) {
+			if (sprite_index == 5)
+			{
+				// Looking Right
 				if (facing == "right") {
-					gPlayer.render(gRenderer, x-camx, y+yOffset-camy, 62, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
-				}else{
-					gPlayer.render(gRenderer, x-18-camx, y+yOffset-camy, 62, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
+					gPlayer.render(gRenderer, x-camx, y+yOffset-camy, 75, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
+
+					// Render player sword
+					gSwords.render(gRenderer, x+xOffSetSwordSlashingRight-camx, y+yOffSetSwordSlashing-camy,
+							swordW, swordH, &rSwords[swordInHand_Index], 90, NULL, flipW);
+				}
+
+				// Looking Left
+				else{
+					gPlayer.render(gRenderer, x+xOffSetSlashingLeft-camx, y+yOffset-camy, 75, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
+
+					// Render player sword
+					gSwords.render(gRenderer, x+xOffSetSwordSlashingLeft-camx, y+yOffSetSwordSlashing-camy,
+							swordW, swordH, &rSwords[swordInHand_Index], -90, NULL, flipW);
 				}
 			}
 
@@ -1160,7 +1183,19 @@ void Players::Render(int mx, int my, int camx, int camy, LWindow gWindow, SDL_Re
 
 			// Walking and dashing
 			else{
-				gPlayer.render(gRenderer, x-12-camx, y+yOffset-camy, realw, realh, &rPlayer[sprite_index], 0.0, NULL, flipW);
+				gPlayer.render(gRenderer, x+xOffSetWalkingRight-camx, y+yOffset-camy, realw, realh, &rPlayer[sprite_index], 0.0, NULL, flipW);
+
+				// Looking Right
+				if (facing == "right") {
+					// Render player sword
+					gSwords.render(gRenderer, x+xOffSetWalkingRight+xOffSetSwordWalkAndDash-camx, y+yOffSetSword-camy, swordW, swordH, &rSwords[swordInHand_Index], 0.0, NULL, flipW);
+				}
+
+				// Looking Left
+				else {
+					// Render player sword
+					gSwords.render(gRenderer, x-xOffSetSwordWalkAndDash/2-camx, y+yOffSetSword-camy, swordW, swordH, &rSwords[swordInHand_Index], 0.0, NULL, flipW);
+				}
 			}
 		}
 
@@ -1377,11 +1412,13 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 		}
 	}
 
-	// Render number of lives left
-	/*for (int i=0; i<lives; i++){
-		//gPlayer.render(gRenderer, screenWidth-32-i*16, 90, 16, 16);
-		spr_player_head.render(gRenderer, screenWidth/2+i*16, 72, 16, 16);
-	}*/
+	// Render number of hearts left
+	for (int i=0; i<hearts; i++){
+		int marginW = 12;
+		int tempX = screenWidth - ((1+i)*32) - marginW;
+		gSwords.render(gRenderer, tempX, 12, 32, 32,
+								  &rSwords[24], 0, NULL, flipW);
+	}
 
 	// Highscore text
 	std::stringstream tempsi;
@@ -1527,6 +1564,15 @@ void Players::OnKeyDown(SDL_Keycode sym )
 
 		// Activate Dash
 		ActivateDash();
+		break;
+	case SDLK_1:
+		swordInHand_Index = 0;
+		break;
+	case SDLK_2:
+		swordInHand_Index = 1;
+		break;
+	case SDLK_3:
+		swordInHand_Index = 2;
 		break;
 	}
 }

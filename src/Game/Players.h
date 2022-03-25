@@ -38,6 +38,17 @@ public:	// resources
 	LTexture gPlayer;
 	LTexture gPlayerShadow;
 	LTexture gShield;
+	LTexture gSwords;
+
+	/* Sword types
+	 * 0  - 10: Swords
+	 * 11 - 12: Rapier and Hammer
+	 * 13 - 18: Better Swords
+	 * 19 - 22: Broken Swords
+	 * 23: 		Bomb
+	 * 24: 		Heart
+	 */
+	SDL_Rect rSwords[25];
 
 	// Audio
 	Mix_Chunk *sCast 			= NULL;
@@ -129,7 +140,7 @@ public:	// variables
 	bool trigger 		= false;
 
 	// Lives
-	int lives 			= 1;
+	int hearts 			= 3;
 	int health			= 100;
 	const int healthMax	= 100;
 
@@ -151,7 +162,7 @@ public: // attack variables
 	std::string facing;
 	SDL_RendererFlip flipW;
 	int attackTimer;
-	int attackTimerSpe = 3;	// default: 1
+	int attackTimerSpe = 1;	// default: 1 or 3 for fast attacks
 	int attackFrame;
 	int attackType;	// 0: slash, 1: down stab
 	int stunTimer;
@@ -162,12 +173,6 @@ public: // attack variables
 	bool spawnAttack;
     //float *tempXX;
     //float *tempYY;
-
-private:	// Variables used in Textures
-
-	const float xOffset = 0;
-	const float yOffset = -5;
-	int shadowW = 44;
 
 public:	// functions
 	// Functions
@@ -250,6 +255,45 @@ private:	// Private variables
 	int invurnerableT;
 	bool invurnerable;
 
+
+private:	// Variables used in Textures
+
+	const float xOffset = 0;
+	const float yOffset = -5;
+	int shadowW = 44;
+
+	/* Sword Types (TODO [ ] (3-25-2022) - save this in player data)
+	 * 0: Wooden sword
+	 * 1: Rusty sword
+	 * 2: Iron sword
+	 */
+	int swordInHand_Index = 0;
+	int swordW = 20;
+	int swordH = 42;
+
+
+	//--------------- Sword offsets ---------------
+	// X offset Sword Slashing Left
+	const float xOffSetSwordSlashingLeft = -24;
+
+	// X offset Sword Slashing Left
+	const float xOffSetSwordSlashingRight = 30;
+
+	// X offset walking right and left
+	const float xOffSetSwordWalkAndDash = 30;
+
+	// Y offset Sword default
+	const float yOffSetSword = 3;
+
+	// Y offset Sword Slashing
+	const float yOffSetSwordSlashing = 15;
+
+	//--------------- Player offsets ---------------
+	// X offset Player Slashing Left
+	const float xOffSetSlashingLeft = -48;
+
+	// X offset Player Walking Right
+	const float xOffSetWalkingRight = -12;
 
 public:	// Functions to do stuff?
 
