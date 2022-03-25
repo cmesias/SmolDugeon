@@ -43,8 +43,6 @@ public:
 	 * 3: Roof 				- Always rendered on top of Player
 	 */
 	int layer;
-	int animTimer;
-	int animFrame;
 	bool mouse;				// Mouse point
 	bool mouseBox;			// Mouse box
 	bool screen;
@@ -53,6 +51,13 @@ public:
 	std::string side;		// collision with player
 	std::string sideSlime;	// collision with Slime
 	bool collisionTile;		// If true, this Tile is considered a collision tile
+
+public:	// animation for light Tile
+
+	// 296 - 303:	top of light tile
+	// 328 - 335:	bottom of light tile
+	float animTimer;
+	const float animTimerSpe = 2;
 
 public:	// Initial
 	void initTile(Tile tile[]);
@@ -90,15 +95,15 @@ public:	// core game functions
 	bool checkCollisionRect( SDL_Rect a, SDL_Rect b );
 
 	// Tile collision check, player x position
-	void checkCollisionXY(Tile tile[], float &x, float &y, int w, int h, float &vX, float &vY, std::string &jumpstate, int &jumps);
+	void checkCollisionXY(Tile tile[], float &x, float &y, int w, int h, float &vX, float &vY);
 
 	void renderTile(SDL_Renderer *gRenderer, Tile tile[], int layer_dummy, int camx, int camy);
 
 	bool PlayerBehindTile;
 
-	void RenderBehindPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerToRender, int camx, int camy);
+	void RenderBehindPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerToRender, int camx, int camy, SDL_Rect rTiles[]);
 
-	void RenderOnTopOfPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerToRender, int camx, int camy);
+	void RenderOnTopOfPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerToRender, int camx, int camy, SDL_Rect rTiles[]);
 
 	// Render Tile Debug info
 	void renderTileDebug(SDL_Renderer *gRenderer, Tile tile[], int newMx, int newMy, int mex, int mey, int camx, int camy, SDL_Rect rTiles[]);

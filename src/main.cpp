@@ -74,22 +74,48 @@ int main(int argc, char *argv[]) {
  * TODO [x] (3-18-2022) - Change Player bullet texture to Slash Textures instead of Bullet textures
  * TODO [x] Create damage multiplier for player when " " happens
  * TODO [x] Render text for damage multiplier above player
- * TODO [ ] When player loads a new level, and returns to the old level it loads int he rong spot. Maybe create a "lastKnownPosition"
+ * TODO [x] When player loads a new level, and returns to the old level it loads in the rong spot. Maybe create a "lastKnownPosition"
  * 			variable so when the player loads a previous area, it will save where they used to. Maybe we can create some kind of grid system
  * 			Where we can make a Level.mp that is already in the right position on the x and y position if it were a huge map.
- *
  * 			For example:
  * 			[][][]
  * 			[][][]
  * 			[][][]
- *
  * 			- Each grid is an area (level) we can load. When we create
  * 			  a level, the positions of the next areas will be going off the x and y positions of the previous areas.
- *
  * 			- For example if Area (0,0) start on (0,0) and ends in (500,500) pixels,
  * 			  then Area (0,1) will start on on (500,0) and ends in (1000,500);
  *
  *
+ * TODO [ ] (3-25-2022) - Change player texture with a character form the dungeon tileset
+ * TODO [ ] (3-25-2022) - Integrate Enemies.cpp into PlayGame.cpp to spawn different types of monsters
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ * //------------------- Future
  * TODO [ ] - Create End Screen after defeating Boss, and add a transition to go into next Level.
  * TODO [ ] - Also after defeating the boss, make sure to save into the save file "levelsUnlocked.mp" to save how many levels the Player has completed
  * TODO [ ] - When we have 2 or more Boss's spawned, they used up the max number of particles we have started with, making it look like the Boss is not shooting its full attack
@@ -109,6 +135,7 @@ int main(int argc, char *argv[]) {
  * 					 4. How many bullets the Player blocked/parried
  * 					 5. How many times the Player died
  * TODO [ ] - Create re-bind keys section in Settings
+ *
  *
  * [Game Features (2)]
  *

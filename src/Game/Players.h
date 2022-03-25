@@ -97,8 +97,6 @@ public:	// variables
 	float vY 			= 0.0;
 	const float velMax 	= 4;
 	const float velSpeed= 2;
-	float thrustSpeed 	= 0.0;
-	float vYMax			= 10;
 	bool camlocked 		= true;
 	bool moveleft 		= false,
 		 moveright 		= false,
@@ -106,11 +104,7 @@ public:	// variables
 		 movedown		= false,
 		 rotateLeft 	= false,
 		 rotateRight 	= false;
-	bool thrust 		= false;
-	int thrustT 		= 0;
 	bool shift 			= false;
-	int timer2 			= 0;
-	double time 		= 0;
 	bool deathScreen	= false;
 	bool alive;
 	bool returned		= false;
@@ -127,26 +121,12 @@ public:	// variables
 	unsigned int highscore = 0;
 
 	// Fire-rate
-	//string power-up 		= "LAZER";
-	int newmx			= 0;	// new mouse position
-	int newmy			= 0;	// new mouse position
-	int powerup 		= 1;
-	double barrelX		= 0;	// gun barrel position
-	double barrelY		= 0;
-	double barrelW		= 0;	// whether to add width or subtract from gun barrel position
-	double barrelH		= 0;
-	double bulletW 		= 92;	// position the bullet will come out of the player ONLY if player
-	double bulletH 		= 21;	// is centered (have angle at 0.0 to test)
 	double particleW 	= 48;
 	double particleH 	= 48;
 	float delayT 		= 0;
 	bool delay 			= false;
 	bool initialshot 	= false;
 	bool trigger 		= false;
-	bool renderFlash	= false; // shuts off right after 1 frame
-	bool playSFXDownStabHittingFloor	= true;
-	double recoilX = 0;			 // gun recoil
-	double recoilY = 0;
 
 	// Lives
 	int lives 			= 1;
@@ -165,22 +145,11 @@ public:	// variables
 	int dir 		= 1;
 	int indexSaved 	= -1;
 
-	/* This will bring the player
-	 * to life. At least, that's what
-	 * it'll look like. This will rustle
-	 * the player's armor as they move
-	 */
-	float rustleW = 0;
-	float rustleH = 0;
-	float rustleDirX = 1;
-	float rustleDirY = 1;
-
 	bool moving = false;
 
 public: // attack variables
 	std::string facing;
 	SDL_RendererFlip flipW;
-	int jumps;
 	int attackTimer;
 	int attackTimerSpe = 3;	// default: 1
 	int attackFrame;
@@ -196,6 +165,8 @@ public: // attack variables
 
 private:	// Variables used in Textures
 
+	const float xOffset = 0;
+	const float yOffset = -5;
 	int shadowW = 44;
 
 public:	// functions

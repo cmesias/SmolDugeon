@@ -19,6 +19,9 @@ class MainMenu : public Helper, public Options  {
 public:	// Resources
 	LTexture gMenu;
 	LTexture gText;
+
+	// Mouse cursor
+	LTexture gCursor;
 public:
 	enum MenuResult { Nothing, NewGame, HowToPlay, Options, Credits, Exit };
 	void Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuResult &result);

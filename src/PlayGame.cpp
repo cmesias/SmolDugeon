@@ -35,6 +35,8 @@ void PlayGame::Init() {
 	frame 				= 0;
     cap 				= true;
 	int i = 0;
+	lastKnownPositionX = 100;
+	lastKnownPositionY = 0;
 
 
 	// Tiles
@@ -218,6 +220,9 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 	// Set level to load to a local variable
 	// that is only available inside PlayGame.cpp
 	this->LevelToLoad = LevelToLoad;
+
+	// Previous level
+	this->previousLevel = LevelToLoad;
 
 	// Initialize
 	Init();
@@ -915,10 +920,10 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 		//tl.renderTile(gRenderer, tile, 2, camx, camy);
 
 		// Render Tile in behind player sprite
-		tl.RenderBehindPlayer(gRenderer, tile, 1, camx, camy);
+		tl.RenderBehindPlayer(gRenderer, tile, 1, camx, camy, &rTiles[0]);
 
 		// Render Tile in behind player sprite
-		tl.RenderBehindPlayer(gRenderer, tile, 2, camx, camy);
+		tl.RenderBehindPlayer(gRenderer, tile, 2, camx, camy, &rTiles[0]);
 
 		// Render Boss Shadow on floor
 		bos.RenderShadow(gRenderer, boss, camx, camy);
@@ -940,10 +945,10 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 		part.renderBulletParticle(particles, camx, camy, 1, gRenderer);
 
 		// Render Tile on top of player
-		tl.RenderOnTopOfPlayer(gRenderer, tile, 1, camx, camy);
+		tl.RenderOnTopOfPlayer(gRenderer, tile, 1, camx, camy, &rTiles[0]);
 
 		// Render Tile on top of player
-		tl.RenderOnTopOfPlayer(gRenderer, tile, 2, camx, camy);
+		tl.RenderOnTopOfPlayer(gRenderer, tile, 2, camx, camy, &rTiles[0]);
 
 		// Render Tile, ceiling
 		tl.renderTile(gRenderer, tile, 3, camx, camy);
@@ -1045,23 +1050,25 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 
 		// Render Tilec debug texts
 		tlc.RenderDebug(gRenderer, tilec, camx, camy);
+
+		// Render hand debug info
+		std::stringstream tempss;
+		tempss << "previousLevel: " 				<< previousLevel << ", LevelToLoad: " 				<< this->LevelToLoad
+			   << ", lastX: " 	<< lastKnownPositionX 		<< ", lastY: " 	<< lastKnownPositionY;
+		tempss << ", Tiles: " 				<< tl.tileCount 		<< ", Tilecs: " 	<< tlc.count 		<< ", Bosss: " << bos.count;
+		tempss << ", place_type: " 			<< place_type 			<< ", tl.id: " 		<< tl.id 			<< ", tlc.id: " << tlc.id;
+		tempss << ", tl.collisionTile: " 	<< tl.collisionTile 	<< ", layer: " 		<< tl.layer;
+		tempss << ", tilew: " 				<< tl.tilew 			<< ", tileh: " 		<< tl.tileh			<< ", LevelToLoad: " << tlc.LevelToLoad;
+				/*	   << ", layer: " 		<< tl.layer<< ", tlc.layer: " << tlc.layer << ", editor: " << editor
+			   << ", tl.multiW: " 	<< tl.multiW << ", tl.multiH: " << tl.multiH << ", tl.count: " << tl.tileCount;
+		tempss << ", tlc.multiW: " 	<< tlc.multiW << ", tlc.multiH: " << tlc.multiH << ", tlc.count: " << tlc.count;*/
+		gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont13, 250);
+		gText.setAlpha(255);
+		gText.render(gRenderer, 0+screenWidth-gText.getWidth(), 220, gText.getWidth(), gText.getHeight());
 	}
 
 	// Editor debug menu
 	if (editor) {
-
-		// Render hand debug info
-		std::stringstream tempss;
-		tempss << "Tiles: " 				<< tl.tileCount 		<< ", Tilecs: " 	<< tlc.count 		<< ", Bosss: " << bos.count;
-		tempss << "place_type: " 			<< place_type 			<< ", tl.id: " 		<< tl.id 			<< ", tlc.id: " << tlc.id;
-		tempss << ", tl.collisionTile: " 	<< tl.collisionTile 	<< ", layer: " 		<< tl.layer;
-		tempss << ", tilew: " 				<< tl.tilew 			<< ", tileh: " 		<< tl.tileh			<< "LevelToLoad: " << tlc.LevelToLoad;
-				/*	   << ", layer: " 		<< tl.layer<< ", tlc.layer: " << tlc.layer << ", editor: " << editor
-			   << ", tl.multiW: " 	<< tl.multiW << ", tl.multiH: " << tl.multiH << ", tl.count: " << tl.tileCount;
-		tempss << ", tlc.multiW: " 	<< tlc.multiW << ", tlc.multiH: " << tlc.multiH << ", tlc.count: " << tlc.count;*/
-		gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont26, 200);
-		gText.setAlpha(255);
-		gText.render(gRenderer, 0+screenWidth-gText.getWidth(), 100, gText.getWidth(), gText.getHeight());
 
 		// Render tile debug
 		if (debug){
@@ -1482,25 +1489,6 @@ void PlayGame::checkBossTileCollision()
 					// Reverse Boss walking direction
 					boss[i].vY -= boss[i].vY;
 				}*/
-			}
-		}
-	}
-}
-
-void PlayGame::checkPlayerTilceCollision() {
-	for (int i = 0; i < tlc.max; i++) {
-		if (tilec[i].alive){
-			if (tilec[i].LevelToLoad >= 1)
-			{
-				// If player collides with a Tilece that can load levels
-				if (checkCollision(player.getX(), player.getY(), player.getW(), player.getH(),
-								   tilec[i].x, tilec[i].y, tilec[i].w, tilec[i].h))
-				{
-					// Load next level or stage
-					this->LevelToLoad = tilec[i].LevelToLoad;
-					LevelToLoad = tilec[i].LevelToLoad;
-					LoadLevel();
-				}
 			}
 		}
 	}
@@ -2587,13 +2575,41 @@ PlayGame::Result PlayGame::mouseReleased(SDL_Event event){
 void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 {
 	switch (sym) {
+	case SDLK_w:
+		if (shift) {
+			tb.moveBarSelection(tilebar, "up");
+		}else{
+			camUp = true;
+		}
+		break;
+	case SDLK_s:
+		if (shift) {
+			tb.moveBarSelection(tilebar, "down");
+		}else{
+			camDown = true;
+		}
+		break;
+	case SDLK_a:
+		if (shift) {
+			tb.moveBarSelection(tilebar, "left");
+		}else{
+			camLeft = true;
+		}
+		break;
+	case SDLK_d:
+		if (shift) {
+			tb.moveBarSelection(tilebar, "right");
+		}else{
+			camRight = true;
+		}
+		break;
 	case SDLK_UP:				// camera up
 		if (shift) {
 			tl.MoveTiles(tile, "up");
 			tlc.MoveTilecs(tilec, "up");
 			spawnY -= 64;
 		} else {
-			camUp = true;
+			//
 		}
 		break;
 	case SDLK_DOWN:				// camera down
@@ -2602,7 +2618,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 			tlc.MoveTilecs(tilec, "down");
 			spawnY += 64;
 		} else {
-			camDown = true;
+			//
 		}
 		break;
 	case SDLK_LEFT:				// camera left
@@ -2611,7 +2627,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 			tlc.MoveTilecs(tilec, "left");
 			spawnX -= 64;
 		} else {
-			camLeft = true;
+			//
 		}
 		break;
 	case SDLK_RIGHT:			// camera right
@@ -2620,18 +2636,11 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 			tlc.MoveTilecs(tilec, "right");
 			spawnX += 64;
 		} else {
-			camRight = true;
+			//
 		}
 		break;
 	case SDLK_y:				// camera lock
 		camlock = (!camlock);
-		break;
-	case SDLK_w:
-		if (shift) {
-			tb.moveBarSelection(tilebar, "up");
-		}else{
-			camy-=10;
-		}
 		break;
 	case SDLK_x:				// Save spawn point
 		spawnX = newMx+camx;
@@ -2640,27 +2649,6 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 			//loadSpawnPoint();
 		}else{
 			//saveSpawnPoint();
-		}
-		break;
-	case SDLK_s:
-		if (shift) {
-			tb.moveBarSelection(tilebar, "down");
-		}else{
-			camy+=10;
-		}
-		break;
-	case SDLK_a:
-		if (shift) {
-			tb.moveBarSelection(tilebar, "left");
-		}else{
-			camx-=10;
-		}
-		break;
-	case SDLK_d:
-		if (shift) {
-			tb.moveBarSelection(tilebar, "right");
-		}else{
-			camx+=10;
 		}
 		break;
 	case SDLK_q:								// Change place type (i.e. Tiles or Collision Tiles)
@@ -2904,16 +2892,17 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 }
 void PlayGame::editorOnKeyUp( SDL_Keycode sym ) {
 	switch (sym) {
-	case SDLK_UP:
+
+	case SDLK_w:
 		camUp = false;
 		break;
-	case SDLK_DOWN:
+	case SDLK_s:
 		camDown = false;
 		break;
-	case SDLK_LEFT:
+	case SDLK_a:
 		camLeft = false;
 		break;
-	case SDLK_RIGHT:
+	case SDLK_d:
 		camRight = false;
 		break;
 	}
@@ -3023,10 +3012,36 @@ void PlayGame::LoadHighScore() {
 	}
 }
 
-// Load level
+void PlayGame::checkPlayerTilceCollision() {
+	for (int i = 0; i < tlc.max; i++) {
+		if (tilec[i].alive){
+			if (tilec[i].LevelToLoad >= 1)
+			{
+				// If player collides with a Tilec that can load levels
+				if (checkCollision(player.getX(), player.getY(), player.getW(), player.getH(),
+								   tilec[i].x, tilec[i].y, tilec[i].w, tilec[i].h))
+				{
+
+					// Save last known position for loading if we come back
+					lastKnownPositionX = player.getX();
+					lastKnownPositionY = player.getY();
+
+					// Save our current level in our previousLevel variables
+					previousLevel = LevelToLoad;
+
+					// Set next level or stage to whatever the Tilec has stored
+					this->LevelToLoad = tilec[i].LevelToLoad;
+
+					// Load next level or stage
+					LoadLevel();
+				}
+			}
+		}
+	}
+}
+
 void PlayGame::LoadLevel()
 {
-
 	// Remove everything
 	{
 		// Remove particles tiles
@@ -3063,12 +3078,33 @@ void PlayGame::LoadLevel()
 		bos.LoadData(boss, fileTileDataL);
 
 		// Load Player spawn point
-		fileTileDataL >>  spawnX >> spawnY;
-		player.x		= spawnX;
-		player.y		= spawnY;
+		fileTileDataL >>  this->spawnX >> this->spawnY;
+		//player.x		= this->spawnX;
+		//player.y		= this->spawnY;
 
 		// Break out of file
 		break;
 	}
 	fileTileDataL.close();
+
+	// Left -> Right
+	if (previousLevel < LevelToLoad) {
+		player.x		= 272;
+		player.y		= lastKnownPositionY;
+	}
+
+
+	// Left <- Right
+	if (previousLevel > LevelToLoad) {
+		player.x		= 1200;
+		player.y		= lastKnownPositionY;
+	}
+
+	// Spawn on left side of level
+	//player.x		= 272;
+	//player.y		= 320;
+
+	// Spawn on right side of level
+	//player.x		= 1200;
+	//player.y		= 320;
 }

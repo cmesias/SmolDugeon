@@ -50,7 +50,6 @@ void Tile::initTile(Tile tile[]) {
 		tile[i].alpha = 255;
 		tile[i].layer = -1;
 		tile[i].animTimer = 0;
-		tile[i].animFrame = 0;
 		tile[i].mouse = false;
 		tile[i].mouseBox = false;
 		tile[i].screen = false;
@@ -79,7 +78,6 @@ void Tile::placeTile(Tile tile[], float x, float y,
 			tile[i].collisionTile 	= collisionTile;
 			tile[i].PlayerBehindTile = false;
 			tile[i].animTimer = 0;
-			tile[i].animFrame = 0;
 			tile[i].mouse 	= false;
 			tile[i].mouseBox = false;
 			tile[i].screen 	= false;
@@ -225,58 +223,38 @@ void Tile::updateTile(Tile tile[], LWindow &gWindow,
 			}
 
 			// Animations
-			/*if (tile[i].id == 143) {
-				tile[i].animTimer++;
-				if (tile[i].animTimer > 30) {
+
+			// If on first light Tile frame
+			if (tile[i].id >= 328 && tile[i].id < 335) {
+				// Start animation timer
+				tile[i].animTimer += this->animTimerSpe;
+
+				// If animation timer goes over 60 frames
+				if (tile[i].animTimer > 60) {
+
+					// Reset animation timer again
 					tile[i].animTimer = 0;
-					tile[i].animFrame++;
-				}
-				if (tile[i].animFrame > 2) {
-					tile[i].animFrame=0;
-					tile[i].animTimer=0;
-					tile[i].id = 142;
-					tile[i].clip = rTiles[142];
+
+					// Change tile into next light Tile id/frame
+					tile[i].id++;
 				}
 			}
-			if (tile[i].id == 142) {
-				tile[i].animTimer++;
-				if (tile[i].animTimer > 30) {
+
+			// If on last light Tile frame, loop around
+			else if (tile[i].id == 335) {
+				// Start animation timer
+				tile[i].animTimer += this->animTimerSpe;
+
+				// If animation timer goes over 60 frames
+				if (tile[i].animTimer > 60) {
+
+					// Reset animation timer again
 					tile[i].animTimer = 0;
-					tile[i].animFrame++;
-				}
-				if (tile[i].animFrame > 2) {
-					tile[i].animFrame=0;
-					tile[i].animTimer=0;
-					tile[i].id = 143;
-					tile[i].clip = rTiles[143];
+
+					// Change tile into next light Tile id/frame
+					tile[i].id = 328;
 				}
 			}
-			if (tile[i].id == 166) {
-				tile[i].animTimer++;
-				if (tile[i].animTimer > 9) {
-					tile[i].animTimer = 0;
-					tile[i].animFrame++;
-				}
-				if (tile[i].animFrame > 2) {
-					tile[i].animFrame=0;
-					tile[i].animTimer=0;
-					tile[i].id = 167;
-					tile[i].clip = rTiles[167];
-				}
-			}
-			if (tile[i].id == 167) {
-				tile[i].animTimer++;
-				if (tile[i].animTimer > 9) {
-					tile[i].animTimer = 0;
-					tile[i].animFrame++;
-				}
-				if (tile[i].animFrame > 2) {
-					tile[i].animFrame=0;
-					tile[i].animTimer=0;
-					tile[i].id = 166;
-					tile[i].clip = rTiles[166];
-				}
-			}*/
 		}
 	}
 }
@@ -331,8 +309,7 @@ bool Tile::checkCollisionRect( SDL_Rect a, SDL_Rect b )
 void Tile::checkCollisionXY(Tile tile[],
 		float &x, float &y,
 		int w, int h,
-		float &vX, float &vY,
-		std::string &jumpstate, int &jumps) {
+		float &vX, float &vY) {
 
 	{
 		// Update collision with Tiles
@@ -468,7 +445,7 @@ void Tile::renderTile(SDL_Renderer *gRenderer, Tile tile[], int layer_dummy, int
 }
 
 
-void Tile::RenderBehindPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerToRender, int camx, int camy) {
+void Tile::RenderBehindPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerToRender, int camx, int camy, SDL_Rect rTiles[]) {
 	for (int i = 0; i < max; i++) {
 		if (tile[i].alive) {
 
@@ -493,9 +470,44 @@ void Tile::RenderBehindPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerToR
 				{
 					// Render all Tiles that are layer 1 and above
 					if (tile[i].layer == layerToRender) {
-						// Render tile
-						gTiles.setAlpha(tile[i].alpha);
-						gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
+
+						// For loop to loop through all 8 light Tiles
+						for (int j=0; j<8; j++) {
+
+							////////////////////////////////////////////////////////////////////////////
+							// -----------------------------------------------------------------------//
+							// ---------------- This will render ONLY light Tiles: -------------------//
+							// ----------------------- id's 296 through 303 --------------------------//
+							// ----------------------- id's 328 through 335 --------------------------//
+							if (tile[i].id == 328 + j )
+							{
+								// Render top half of light tile
+								gTiles.setAlpha(tile[i].alpha);
+								int topLightTileId = tile[i].id-32;
+								gTiles.render(gRenderer, tile[i].x - camx, tile[i].y-tile[i].h - camy, tile[i].w, tile[i].h, &rTiles[topLightTileId]);
+
+								// Render bottom half of light tile
+								gTiles.setAlpha(tile[i].alpha);
+								gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
+							}
+							// ----------------------- id's 328 through 335 --------------------------//
+							// ----------------------- id's 296 through 303 --------------------------//
+							// ---------------- This will render ONLY light Tiles: -------------------//
+							// -----------------------------------------------------------------------//
+							////////////////////////////////////////////////////////////////////////////
+
+							////////////////////////////////////////////////////////////////////////////
+							// -----------------------------------------------------------------------//
+							// ---------------- This will render all other Tiles ---------------------//
+							else {
+								// Render tile
+								gTiles.setAlpha(tile[i].alpha);
+								gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
+							}
+							// -----------------------------------------------------------------------//
+							// ---------------- This will render all other Tiles ---------------------//
+							////////////////////////////////////////////////////////////////////////////
+						}
 					}
 				}
 			}
@@ -503,7 +515,7 @@ void Tile::RenderBehindPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerToR
 	}
 }
 
-void Tile::RenderOnTopOfPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerToRender, int camx, int camy) {
+void Tile::RenderOnTopOfPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerToRender, int camx, int camy, SDL_Rect rTiles[]) {
 	for (int i = 0; i < max; i++) {
 		if (tile[i].alive) {
 
@@ -522,9 +534,44 @@ void Tile::RenderOnTopOfPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerTo
 				{
 					// Render all Tiles that are layer 1 and above
 					if (layerToRender== tile[i].layer) {
-						// Render tile
-						gTiles.setAlpha(tile[i].alpha);
-						gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
+
+						// For loop to loop through all 8 light Tiles
+						for (int j=0; j<8; j++) {
+
+							////////////////////////////////////////////////////////////////////////////
+							// -----------------------------------------------------------------------//
+							// ---------------- This will render ONLY light Tiles: -------------------//
+							// ----------------------- id's 296 through 303 --------------------------//
+							// ----------------------- id's 328 through 335 --------------------------//
+							if (tile[i].id == 328 + j )
+							{
+								// Render top half of light tile
+								gTiles.setAlpha(tile[i].alpha);
+								int topLightTileId = tile[i].id-32;
+								gTiles.render(gRenderer, tile[i].x - camx, tile[i].y-tile[i].h - camy, tile[i].w, tile[i].h, &rTiles[topLightTileId]);
+
+								// Render bottom half of light tile
+								gTiles.setAlpha(tile[i].alpha);
+								gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
+							}
+							// ----------------------- id's 328 through 335 --------------------------//
+							// ----------------------- id's 296 through 303 --------------------------//
+							// ---------------- This will render ONLY light Tiles: -------------------//
+							// -----------------------------------------------------------------------//
+							////////////////////////////////////////////////////////////////////////////
+
+							////////////////////////////////////////////////////////////////////////////
+							// -----------------------------------------------------------------------//
+							// ---------------- This will render all other Tiles ---------------------//
+							else {
+								// Render tile
+								gTiles.setAlpha(tile[i].alpha);
+								gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
+							}
+							// -----------------------------------------------------------------------//
+							// ---------------- This will render all other Tiles ---------------------//
+							////////////////////////////////////////////////////////////////////////////
+						}
 					}
 				}
 
@@ -542,11 +589,17 @@ void Tile::RenderOnTopOfPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerTo
 void Tile::renderTileDebug(SDL_Renderer *gRenderer, Tile tile[], int newMx, int newMy, int mex, int mey, int camx, int camy, SDL_Rect rTiles[]){
 	for (int i = 0; i < max; i++) {
 		if (tile[i].alive){
-			// If its a collision tile, render filled blue square on top left inside the Tile
-			if (tile[i].collisionTile) {
-				SDL_Rect tempr = {tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h};
-				SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
-				SDL_RenderDrawRect(gRenderer, &tempr);
+			if (tile[i].layer == layer) {
+				// If its a collision tile, render filled blue square on top left inside the Tile
+				if (tile[i].collisionTile) {
+					SDL_Rect tempr = {tile[i].x - camx, tile[i].y - camy, 4, 8};
+					SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
+					SDL_RenderFillRect(gRenderer, &tempr);
+				} else {
+					SDL_Rect tempr = {tile[i].x - camx, tile[i].y - camy, 4, 8};
+					SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+					SDL_RenderFillRect(gRenderer, &tempr);
+				}
 			}
 		}
 	}

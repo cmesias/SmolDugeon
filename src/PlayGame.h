@@ -23,7 +23,6 @@
 class PlayGame : public Helper, public Options {
 public:	// Global World Variables
 	double gravity = 0.6;
-	unsigned int LevelToLoad;
 	bool RestartLevel = false;
 
 public: // global functions
@@ -250,9 +249,6 @@ public:	// Functions mixed with other classes
 	// Check collision between Boss & Tile
 	void checkBossTileCollision();
 
-	// Check collision between Player & Tilec
-	void checkPlayerTilceCollision();
-
 	//------------------ Hurts Boss
 	// Check collision between Player attacks & Boss
 	void checkPlayerAttacksCollisionBoss();
@@ -301,6 +297,13 @@ private:	// Load level
 
 	// Load previous high-score for Level
 	void LoadHighScore();
+
+	// Check collision between Player & Tilec
+	void checkPlayerTilceCollision();
+
+	unsigned int previousLevel = -1;
+	unsigned int LevelToLoad;
+	float lastKnownPositionX, lastKnownPositionY;
 
 	// Load level
 	void LoadLevel();

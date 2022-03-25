@@ -36,7 +36,6 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	health				= 100;
 	delay 				= false;
 	initialshot 		= false;
-	thrust 				= false;
 	deathScreen 		= false;
 	alive 				= true;
 	returned			= false;
@@ -46,39 +45,14 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	invurnerableT		= 300;
 	invurnerable		= true;
 
-	controls 			= 0;
-	A 					= false;
-	B 					= false;
-	X 					= false;
-	Y 					= false;
-	D_UP 				= false;
-	D_DOWN 				= false;
-	D_LEFT 				= false;
-	D_RIGHT 			= false;
-	LB 					= false;
-	RB 					= false;
-	BACK 				= false;
-	START 				= false;
-	L3 					= false;
-	R3 					= false;
-	LAngle 				= 0.0;
-	RAngle 				= 0.0;
-	zAxisLeft 			= 0.0;
-	zAxisRight 			= 0.0;
-	leftclick 			= false;
-	rightclick 			= false;
-	test 				= false;
 	trigger 			= false;
 	moving				= false;
 	moveleft 			= false;
 	moveright 			= false;
 	moveup 				= false;
 	movedown			= false;
-	renderFlash 		= false;
-	playSFXDownStabHittingFloor	= true;
 	facing				= "right";
 	flipW				= SDL_FLIP_NONE;
-	jumps				= 1;
 	walkTimer 			= 0;
 	walkTimerVFX 		= 0;
 	sprite_index 		= 0;
@@ -127,6 +101,31 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	this->castDamage			= 25;
 	this->knockBackPower		= 1.58;
 
+	// Joystick controls
+	{
+		controls 			= 0;
+		A 					= false;
+		B 					= false;
+		X 					= false;
+		Y 					= false;
+		D_UP 				= false;
+		D_DOWN 				= false;
+		D_LEFT 				= false;
+		D_RIGHT 			= false;
+		LB 					= false;
+		RB 					= false;
+		BACK 				= false;
+		START 				= false;
+		L3 					= false;
+		R3 					= false;
+		LAngle 				= 0.0;
+		RAngle 				= 0.0;
+		zAxisLeft 			= 0.0;
+		zAxisRight 			= 0.0;
+		leftclick 			= false;
+		rightclick 			= false;
+		test 				= false;
+	}
 }
 
 // Check collision between 2 objects
@@ -241,31 +240,6 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 	radianCos = floor(cos(radians)*10+0.5)/10;
 	radianSin = floor(sin(radians)*10+0.5)/10;
 
-	// get player new center position
-	//x2 = (x+w/2 + (41 * (-radianCos)) - radius);
-	//y2 = (y+h/2 + (41 * (-radianSin)) - radius);
-	/////int newW = 41 * (-radianCos);
-	//////int newH = 41 * (-radianSin);
-
-	/* If the object is at a rotation of 0.0 (facing right),
-	 * then this will be the distance the particle
-	 * will spawn from the center of the object,
-	 *
-	 * This will provide the correct distance from the center
-	 * when the object is rotated from its center.
-	 *
-	 * With this distance you may add this to your objects x and y center,
-	 * and this will be where your particle will spawn
-	 */
-	barrelW  = (bulletW * cos(radians) ) - (bulletH * sin(radians) );	// add this to center of zombie (this will give us the guns barrel position)
-	barrelH  = (bulletW * sin(radians) ) + (bulletH * cos(radians) );
-
-	int wDifference = realw - w;
-	int hDifference = realh - h;
-
-	barrelX = x+realw/2-wDifference/2 - particleW/2 + barrelW;
-	barrelY = y+realh/2-hDifference/2 - particleH/2 + barrelH;
-
 	/*int newmx = mx-particleW/2;
 	int newmy = my-particleH/2;
 	float distance = sqrt((newmx - barrelX) * (newmx - barrelX)+
@@ -289,43 +263,35 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 			{
 				delay = true;
 
-				if (powerup == 1)
-				{
-					// recoil of gun
-					recoilX = 11 * radianCos;
-					recoilY = 11 * radianSin;
+				// recoil of gun
 
-					// play audio
-					Mix_PlayChannel(1, sCastSFX, 0);
+				// play audio
+				Mix_PlayChannel(1, sCastSFX, 0);
 
-					// Offset to spawn the Slash Attack
-					int offSetX =0;
-					if (facing == "left") {
-						offSetX = 32;
-					}
-					else if (facing == "right") {
-						offSetX = 0;
-					}
-
-					// spawn particle
-					p_dummy.spawnParticleAngle(particle, 0,
-							x+w/2-offSetX,
-							y+w/2,
-							particleW, particleH,
-						   angle, 21,
-						   this->castDamage, this->castDamage, 0,
-						   {255, 255,0}, 1,
-						   1, 1,
-						   255, 0,
-						   100, 2,
-						   false, 0);
-
-					// Subtract mana
-					this->mana -= 2;
-
-					// muzzle flash
-					renderFlash = true;
+				// Offset to spawn the Slash Attack
+				int offSetX =0;
+				if (facing == "left") {
+					offSetX = 32;
 				}
+				else if (facing == "right") {
+					offSetX = 0;
+				}
+
+				// spawn particle
+				p_dummy.spawnParticleAngle(particle, 0,
+						x+w/2-offSetX,
+						y+w/2,
+						particleW, particleH,
+					   angle, 21,
+					   this->castDamage, this->castDamage, 0,
+					   {255, 255,0}, 1,
+					   1, 1,
+					   255, 0,
+					   100, 2,
+					   false, 0);
+
+				// Subtract mana
+				this->mana -= 2;
 			}
 		}
 
@@ -360,81 +326,6 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 			delayT = 0;
 		}
 	}
-
-	/*bool trigger = false;
-	// Player shoot
-	if (controls==0){
-		trigger = initialshot;
-	}else if(controls==1){
-		trigger = A;
-	}*/
-
-	//if (test){
-		//if (!delay) {
-			//if (A) {
-				//A = false;
-				//trigger = false;
-				//delay = true;
-
-				// Remove shield
-				/*if (shield){
-					shield 	= false;
-					shieldT 	= 300;
-				}*/
-
-				// Shoot particle
-				/*if (powerup == "LAZER") {
-					Mix_PlayChannel(-1, sLazer, 0);
-
-					p_dummy.spawnParticleAngle(particle,
-							   x+w/2-4/2+(cos(radians)*9)+(sin(radians)*12),
-							   y+h/2-4/2+(sin(radians)*9)-(cos(radians)*12),
-							   4, 4,
-							   angle, 21,
-							   255, 0,
-							   100, 2,
-							   100, "LAZER",
-							   {255, 255,0}, 1,
-							   1, 1,
-							   false, 0);
-					p_dummy.spawnParticleAngle(particle,
-							   x+w/2-4/2+(cos(radians)*9)-(sin(radians)*12),
-							   y+h/2-4/2+(sin(radians)*9)+(cos(radians)*12),
-							   4, 4,
-							   angle, 21,
-							   255, 0,
-							   100, 2,
-							   100, "LAZER",
-							   {255, 255,0}, 1,
-							   1, 1,
-							   false, 0);
-				}*/
-			//}
-		/*}
-		//Start delay timer after our first shot!
-		if (delay) {
-			delayT += AttackSpeed;
-			if (delayT > 60) {
-				delay = false;
-				delayT = 0;
-			}
-		}*/
-	//}
-
-	// Handle gun recoil
-	if (recoilX < 0) {
-		recoilX += 2.5;
-	}
-	if (recoilX > 0) {
-		recoilX -= 2.5;
-	}
-	if (recoilY < 0) {
-		recoilY += 2.5;
-	}
-	if (recoilY > 0) {
-		recoilY -= 2.5;
-	}
-
 }
 
 // Update Player
@@ -460,7 +351,6 @@ void Players::Update(Map &map,
 		returned 		= false;
 		leftclick 	= false;
 		initialshot 	= false;
-		thrust		= false;
 		A				= false;
 		RB			= false;
 	}
@@ -472,14 +362,15 @@ void Players::Update(Map &map,
 		//----------------------------------- Player Move -------------------------------------------------//
 		//-------------------------------------------------------------------------------------------------//
 		bool trigger = false;
+
 		// Get Angle
 		if (this->controls==0){
-			trigger = this->thrust;
+			//
 		}else if(this->controls==1){
 			this->angle = this->LAngle;
 			trigger = this->RB;
 		}else if(this->controls==2){
-			trigger = this->thrust;
+			//
 		}
 
 		// Player angle by rotation
@@ -585,20 +476,18 @@ void Players::Update(Map &map,
 		////////////////////////////////////////////////////////////////////////////////////
 		//--------------------------------------------------------------------------------//
 		//--------------------------- Movement & Collision w/ Tiles ----------------------//
-		std::string tempHere = "";
+
 		// Handle movement of player, and handle collision with Tiles
 		tl.checkCollisionXY(tile,
 				this->x, this->y,
 				this->w, this->h,
-				this->vX, this->vY,
-				tempHere, this->jumps);
+				this->vX, this->vY);
 
 		//--------------------------- Movement & Collision w/ Tiles ----------------------//
 		//--------------------------------------------------------------------------------//
 		////////////////////////////////////////////////////////////////////////////////////
 
 
-	    // TODO [ ] - Do !Parrying and !Attack and !Parry
 	    ////////////////////////////////////////////////////////////////////////////
 	    //------------------------------------------------------------------------//
 	    //--------------------------------- Do !Parrying -------------------------//
@@ -997,25 +886,6 @@ void Players::Update(Map &map,
 		this->swordX = this->x;
 		this->swordY = this->y+35;
 
-		// Rustle timer
-		// player left and right swaying
-		if (moving) {
-			rustleW += 1 * rustleDirX;
-			rustleH += 1 * rustleDirY;
-		}
-		if (rustleW > 4) {
-			rustleDirX = rustleDirX * -1;
-		}
-		if (rustleW < -4) {
-			rustleDirX = rustleDirX * -1;
-		}
-		if (rustleH > 4) {
-			rustleDirY = rustleDirY * -1;
-		}
-		if (rustleH < -4) {
-			rustleDirY = rustleDirY * -1;
-		}
-
 		// Player not moving X
 		if (!moveleft && !moveright && !dash) {
 	        vX = vX - vX * 0.2;
@@ -1259,92 +1129,45 @@ void Players::Render(int mx, int my, int camx, int camy, LWindow gWindow, SDL_Re
 	// If alive
 	if (alive){
 
-		/* Get difference of real size and collision size,
-		 * with this you can center the player by subtracting
-		 * this with the player's position
-		 */
-		int wDifference = realw - w;				// get difference between player's collision size and actual size in pixels
-		int hDifference = realh - h;
-		int newX = x-wDifference/2;					// player starting position
-		int newY = y-hDifference/2;
-		int newRustleW = rustleW * radianCos;		// make swaying motions while moving
-		int newRustleH = rustleH * radianSin;
-
 		// render player
 		{
 			// Render shadow
 			int shadowH = 48;
 			gPlayerShadow.setAlpha(110);
 			gPlayerShadow.render(gRenderer, x+w/2-shadowW/2-camx,
-											y+shadowH/4-2-camy,
+											y+h-shadowH-camy,
 											shadowW, shadowH, NULL, 0.0, NULL);
 
-			//gPlayer.render(gRenderer, newX-recoilX+newRustleW-camx, newY-recoilY+newRustleH-camy, realw, realh, &rPlayer[sprite_index], 0.0);
-			// Adjust player sprite if on attack animation
 			// The '-9", in the y coordinate is adjusting the sprite to the appropriiate position
+
+			// Slash, looking left or right
 			if (sprite_index == 5) {
 				if (facing == "right") {
-					gPlayer.render(gRenderer, x-camx, y-camy, 62, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
+					gPlayer.render(gRenderer, x-camx, y+yOffset-camy, 62, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
 				}else{
-					gPlayer.render(gRenderer, x-18-camx, y-camy, 62, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
+					gPlayer.render(gRenderer, x-18-camx, y+yOffset-camy, 62, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
 				}
-			}else if (sprite_index == 7) {
+			}
+
+			// Down stab
+			else if (sprite_index == 7) {
 				if (facing == "right") {
-					gPlayer.render(gRenderer, x-camx, y-camy, 48, 55, &rPlayer[sprite_index], 0.0, NULL, flipW);
+					gPlayer.render(gRenderer, x-camx, y+yOffset-camy, 48, 55, &rPlayer[sprite_index], 0.0, NULL, flipW);
 				}else{
-					gPlayer.render(gRenderer, x-camx, y-camy, 48, 55, &rPlayer[sprite_index], 0.0, NULL, flipW);
+					gPlayer.render(gRenderer, x-camx, y+yOffset-camy, 48, 55, &rPlayer[sprite_index], 0.0, NULL, flipW);
 				}
-			}else{
-				gPlayer.render(gRenderer, x-12-camx, y-camy, realw, realh, &rPlayer[sprite_index], 0.0, NULL, flipW);
+			}
+
+			// Walking and dashing
+			else{
+				gPlayer.render(gRenderer, x-12-camx, y+yOffset-camy, realw, realh, &rPlayer[sprite_index], 0.0, NULL, flipW);
 			}
 		}
 
-		// muzzle flash
-		if (renderFlash) {
-			renderFlash = false;
-			//double barrelW  = (((bulletW+45) * cos(radians) ) - (bulletH * sin(radians) )) - 120/2;
-			//double barrelH  = (((bulletW+45) * sin(radians) ) + (bulletH * cos(radians) )) - 120/2;
-			// render muzzle flash
-
-		}
-
-
-		/*SDL_SetRenderDrawColor(gRenderer, 200, 200, 200, 255);
-		SDL_RenderDrawLine(gRenderer, x+w/2 + barrelW-camx,
-									  y+h/2 + barrelH-camy,
-									  mx, my);*/
-
-		// Player sight to mouse
-		//SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
-		//SDL_RenderDrawLine(gRenderer, x+w/2-camx, y+h/2-camy, mx, my);
-
 		// Render Shield
 		if (invurnerable){
-
 			gShield.render(gRenderer, x+w/2 - 96/2 - camx, y+h/2 - 96/2 + 2 - camy, 96, 96, &rShield[invurnerableFrame], 180);
-
-			/*SDL_Rect tempRect = {X-camx, Y-16-camy, (w*shieldT)/300, 3};
-			SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-			SDL_RenderFillRect(gRenderer, &tempRect);*/
 		}
-
-		// Render number of lives left
-		/*for (int i=0; i<lives; i++){
-			//gPlayer.render(gRenderer, screenWidth-32-i*16, 90, 16, 16);
-			spr_player_head.render(gRenderer, screenWidth/2+i*16, 72, 16, 16);
-		}*/
-
-
-		// reticle
-		//double wedth = 21 * radianSin;
-		//double hedth = 19 * radianCos;
-		//SDL_SetRenderDrawColor(gRenderer, 255, 255, 0, 255);
-		//SDL_RenderDrawLine(gRenderer, mx-16-wedth, my+hedth, mx+16-wedth, my+hedth);
-		//SDL_RenderDrawLine(gRenderer, mx-wedth, my-16+hedth, mx-wedth, my+16+hedth);
-
-		/*SDL_Rect tempRect = {mx-24-wedth, my-24+hedth, 48, 48};
-		SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
-		SDL_RenderDrawRect(gRenderer, &tempRect);*/
 	}
 }
 
@@ -1554,6 +1377,12 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 		}
 	}
 
+	// Render number of lives left
+	/*for (int i=0; i<lives; i++){
+		//gPlayer.render(gRenderer, screenWidth-32-i*16, 90, 16, 16);
+		spr_player_head.render(gRenderer, screenWidth/2+i*16, 72, 16, 16);
+	}*/
+
 	// Highscore text
 	std::stringstream tempsi;
 	tempsi << "Highscore: " << this->highscore;
@@ -1593,9 +1422,9 @@ void Players::RenderDebug(SDL_Renderer *gRenderer, int camX, int camY)
 	//--------------------------------------------------------//
 
 	std::stringstream tempsi;
-	tempsi << "attack: " << attack;
+	tempsi << "x: " << x << ", y: " << y;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255,255,255}, gFont24);
-	gText.render(gRenderer, 0, 31, gText.getWidth(), gText.getHeight());
+	gText.render(gRenderer, x-camX, y-camY-gText.getHeight(), gText.getWidth(), gText.getHeight());
 
 	tempsi.str( std::string() );
 	tempsi << "attackType: " << attackType;
@@ -1743,7 +1572,6 @@ void Players::mouseClickState(SDL_Event &e){
 		if (e.button.button == SDL_BUTTON_RIGHT) {
 			this->controls = 0;
 			this->rightclick = true;
-			this->thrust = true;
 		}
 	}else if (e.type == SDL_MOUSEBUTTONUP) {
 		if (e.button.button == SDL_BUTTON_LEFT) {
@@ -1754,7 +1582,6 @@ void Players::mouseClickState(SDL_Event &e){
 		}
 		if (e.button.button == SDL_BUTTON_RIGHT) {
 			this->rightclick = false;
-			this->thrust = false;
 		}
 	}
 }

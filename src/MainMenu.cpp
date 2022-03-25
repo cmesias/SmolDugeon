@@ -28,6 +28,7 @@ void MainMenu::Load(SDL_Renderer *gRenderer) {
 	applyMasterAudioCFG();
 	// Textures
 	gMenu.loadFromFile(gRenderer, "resource/gfx/menu.png");
+	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
 	// Fonts
 	gFont 	= TTF_OpenFont("resource/fonts/FredokaOne-Regular.ttf", 18);
 	gFont13 = TTF_OpenFont("resource/fonts/FredokaOne-Regular.ttf", 13);
@@ -45,6 +46,7 @@ void MainMenu::Free() {
 	// Free audio files
 	FreeAudioFiles();
 	gMenu.free();
+	gCursor.free();
 	gText.free();
 	TTF_CloseFont(gFont);
 	TTF_CloseFont(gFont13);
@@ -57,10 +59,6 @@ void MainMenu::Free() {
 }
 
 void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuResult &result) {
-
-	// Mouse cursor
-	LTexture gCursor;
-	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
 
 	// Upon entry
 	quit = false;
@@ -288,7 +286,7 @@ void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuRes
 		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
 		SDL_RenderClear(gRenderer);
 
-			gMenu.render(gRenderer, 0, 0, 1920, 1080);
+			//gMenu.render(gRenderer, 0, 0, 1920, 1080);
 
 			Render(gRenderer);
 
@@ -300,7 +298,6 @@ void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuRes
 	}
 
 	// Free everything
-	gCursor.free();
 	Free();
 }
 
@@ -377,6 +374,12 @@ void MainMenu::Render(SDL_Renderer *gRenderer)
 		gText.render(gRenderer, levelsBox[i].x+5,
 				levelsBox[i].y + levelsBox[i].h/2 - newHeight/2,
 				newWidth, newHeight);
+
+		//Render text input
+		tempSS.str(std::string());
+		tempSS << GameName.c_str();
+		gText.loadFromRenderedText(gRenderer, tempSS.str().c_str(), {255,255,255}, gFont13);
+		gText.render(gRenderer, screenWidth-gText.getWidth(), screenHeight-gText.getHeight(), gText.getWidth(), gText.getHeight());
 	}
 }
 

@@ -9,6 +9,10 @@
 #define LOCAL_HELPER_H_
 
 #include "Game/Timers.h"
+#include <iostream>
+
+static const std::string GameName = "SmolDungeon";
+
 
 class Helper {
 

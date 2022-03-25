@@ -47,16 +47,28 @@ public:	// Core Functions
 
 	void Update(Tilec tilec[], Map &map, int newMx, int newMy, int mex, int mey, int camx, int camy);
 
+public: // Editor functions
+
+	void RemoveTile(Tilec tilec[], int click);
+	void Copy(Tilec tilec[]);
+	void RemoveAll(Tilec tilec[]);
+	void Spawn(Tilec tilec[], float x, float y, int w, int h);
+	void SpawnAll(Tilec tilec[], int newMx, int newMy, int camx, int camy);
+	void MoveTilecs(Tilec tilec[], std::string direction);
+
+public: // Render functions
+
 	void Render(SDL_Renderer *gRenderer, Tilec tilec[], int layer, int camx, int camy);
 
 	void RenderDebug(SDL_Renderer *gRenderer, Tilec tilec[], int camx, int camy);
 
 	void RenderHand(SDL_Renderer *gRenderer, Tilec tilec[], int newMx, int newMy, int mex, int mey);
 
+public: // tile saving functions
+	void LoadData(Tilec tilec[], std::fstream &fileTileDataL);	// Load Tile data
+	std::string SaveData(Tilec tilec[]);	// Save Tile data
 
 public:	// Tile manipulation
-
-	void MoveTilecs(Tilec tilec[], std::string direction);
 
 public:	// Collision functions
 
@@ -68,16 +80,6 @@ public:	// Collision functions
 	// Tile collision check, player y position
 	void checkCollisionY(Tilec tilec[], float x, float &y, int w, int h, std::string &jumpstate, float &vY, int &jumps, bool &jump);
 
-public: // Editor functions
-	void RemoveTile(Tilec tilec[], int click);
-	void Copy(Tilec tilec[]);
-	void RemoveAll(Tilec tilec[]);
-	void Spawn(Tilec tilec[], float x, float y, int w, int h);
-	void SpawnAll(Tilec tilec[], int newMx, int newMy, int camx, int camy);
-
-public: // tile saving functions
-	void LoadData(Tilec tilec[], std::fstream &fileTileDataL);	// Load Tile data
-	std::string SaveData(Tilec tilec[]);	// Save Tile data
 };
 
 #endif /* TILEC_H_ */
