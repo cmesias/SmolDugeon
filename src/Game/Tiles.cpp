@@ -56,6 +56,7 @@ void Tile::initTile(Tile tile[]) {
 		tile[i].player = false;
 		tile[i].side = "right";
 		tile[i].collisionTile = false;
+		tile[i].collisionMobs = false;
 		tile[i].PlayerBehindTile = false;
 		tile[i].alive = false;
 	}
@@ -76,6 +77,7 @@ void Tile::placeTile(Tile tile[], float x, float y,
 			tile[i].clip 	= clip;
 			tile[i].layer 	= layer;
 			tile[i].collisionTile 	= collisionTile;
+			tile[i].collisionMobs = false;
 			tile[i].PlayerBehindTile = false;
 			tile[i].animTimer = 0;
 			tile[i].mouse 	= false;

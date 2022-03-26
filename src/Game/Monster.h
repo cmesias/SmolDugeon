@@ -27,6 +27,7 @@ public:
 	float distance;
 	bool alive;
 	bool collision;		// whether or not the monster is touching ANYTHING at THIS one time
+	bool hasVision;			// has vision of target
 	bool onScreen;
 
 public:	// States

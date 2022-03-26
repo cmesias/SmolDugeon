@@ -88,7 +88,12 @@ int main(int argc, char *argv[]) {
  *
  *
  * TODO [x] (3-25-2022) - Change player texture with a character form the dungeon tileset
+ * TODO [x] (3-25-2022) - Create simple pathfinding for Mobs to follow Player
  * TODO [ ] (3-25-2022) - Integrate Enemies.cpp into PlayGame.cpp to spawn different types of monsters
+ * TODO [ ] (3-25-2022) - Add coins variable to -> Player.cpp
+ * TODO [ ] (3-25-2022) - When Mobs die, have them drop coins -> Mob.cpp
+ * TODO [ ] (3-25-2022) - When Mobs die, have them drop coins -> Mob.cpp
+ *
  *
  * //---------- Item.cpp
  * TODO [x] (3-26-2022) - Create Item.cpp to create items that the player can pick up such as: Swords, Tools, Bombs and Hearts.

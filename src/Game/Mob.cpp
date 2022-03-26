@@ -279,33 +279,34 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 				{
 					// If player alive, have Mob follow player
 					if (playerAlive) {
-
-						// Change x velocity to go towards player
-						mob[i].vX = 1.5 * (mob[i].bmx - mob[i].bmx2) / mob[i].distance;
-						mob[i].vY = 1.5 * (mob[i].bmy - mob[i].bmy2) / mob[i].distance;
-
-						// Move Mob towards player
-						mob[i].x += mob[i].vX;
-						mob[i].y += mob[i].vY;
 					}
 
 					// Mob is on alert !
 					mob[i].alert = true;
-				} else
-				{
+				} //else
+				//{
 					// Mob is NOT on alert
-					mob[i].alert = false;
+					///mob[i].alert = false;
+				//}
+
+				// Once Mob is alerted, it will follow the player forever
+				if (mob[i].alert) {
+					// Change x velocity to go towards player
+					//mob[i].vX = 1.5 * (mob[i].bmx - mob[i].bmx2) / mob[i].distance;
+					//mob[i].vY = 1.5 * (mob[i].bmy - mob[i].bmy2) / mob[i].distance;
+					mob[i].vX = 1.5 * (mob[i].bmx - mob[i].bmx2) / mob[i].targetDistanceX;
+					mob[i].vY = 1.5 * (mob[i].bmy - mob[i].bmy2) / mob[i].targetDistanceY;
+
+					// Move Mob towards player
+					//mob[i].x += mob[i].vX;
+					//mob[i].y += mob[i].vY;
 				}
 
-				// If player is within 3 Tiles, start charging animation
-				if (mob[i].distance < 32*3 && !mob[i].chargingAttack)
+				// If player is within 2 Tiles, start charging animation
+				if (mob[i].distance < 32*2 && !mob[i].chargingAttack)
 				{
 					// Start charge-attack animation
 					mob[i].chargingAttack = true;
-
-					// Stop moving mob
-					mob[i].vX = 0.0;
-					mob[i].vY = 0.0;
 
 					// Choose random attack for Mob before starting Shooting animations
 					mob[i].randomAttack = rand() % 2;
@@ -323,6 +324,10 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 					 */
 					if (mob[i].type == 0) {
 						mob[i].animState = 1;
+
+						// Stop moving mob
+						mob[i].vX = 0.0;
+						mob[i].vY = 0.0;
 					}
 
 					// Crazy mob:
@@ -350,7 +355,8 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 					float tempY = mob[i].y + mob[i].h/2 - rands/2;
 
 					if (mob[i].chargeTime == 15) {
-						p_dummy.spawnParticleAngleFollow(particle, 1,
+						//p_dummy.spawnParticleAngleFollow(particle, 1,
+								p_dummy.spawnParticleAngle(particle, 1,
 										   tempX,
 										   tempY,
 										   rands, rands,
@@ -361,8 +367,8 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 										   255, 0,
 										   60*6, 1,
 										   false, 0,
-										   100, 10,
-										   true, mob[i].xFollow, mob[i].yFollow);
+										   100, 10);
+								   	   	   //true, mob[i].xFollow, mob[i].yFollow);
 
 						// Play SFX
 						Mix_PlayChannel(-1, sCast, 0);
@@ -818,6 +824,14 @@ void Mob::RenderDebug(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 				SDL_RenderDrawRect(gRenderer, &tempr);
 			}
 
+			// If mob has vision of player
+			if (mob[i].hasVision) {
+				// Render Green box
+				SDL_Rect tempr = {mob[i].x - camx, mob[i].y - camy, mob[i].w, mob[i].h};
+				SDL_SetRenderDrawColor(gRenderer, 0, 200, 200, 255);
+				SDL_RenderDrawRect(gRenderer, &tempr);
+			}
+
 
 			/// TEXT UNDER HERE
 
@@ -858,6 +872,11 @@ void Mob::GetDistanceOfPlayer(Mob mob[], float targetX, float targetY, float tar
 
 			////////////////////////////////////////////////////////////////////////////
 			/////////////////////////// GET DISTANCE OF PLAYER /////////////////////////
+
+			// Center of Mobs
+			mob[i].x2 				= mob[i].x+mob[i].w/2;
+			mob[i].y2 				= mob[i].y+mob[i].h/2;
+
 			// Get center of attack-object (spawned by the player attacking)
 			mob[i].bmx = targetX+targetW/2;
 			mob[i].bmy = targetY+targetH/2;
@@ -865,6 +884,12 @@ void Mob::GetDistanceOfPlayer(Mob mob[], float targetX, float targetY, float tar
 			// Get center of mob
 			mob[i].bmx2 = mob[i].x+mob[i].w/2;
 			mob[i].bmy2 = mob[i].y+mob[i].h/2;
+
+			// Get distance of target X and Y axis
+			mob[i].targetDistanceX = sqrt((mob[i].bmx - mob[i].bmx2) * (mob[i].bmx - mob[i].bmx2));
+			mob[i].targetDistanceY = sqrt((mob[i].bmy - mob[i].bmy2) * (mob[i].bmy - mob[i].bmy2));
+			if (mob[i].targetDistanceX < 0.1) { mob[i].targetDistanceX = 0.1; }
+			if (mob[i].targetDistanceY < 0.1) { mob[i].targetDistanceY = 0.1; }
 
 			// Target is right of Mob
 			if (mob[i].bmx > mob[i].bmx2) {

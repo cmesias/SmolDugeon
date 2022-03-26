@@ -263,12 +263,20 @@ public:	// Functions mixed with other classes
 	void checkCollisionParticleBoss();
 
 	//------------------ Hurts Mobs
-	// Check collision between Particle & Mobs
+	// Check collision between Mobs & Particle
 	void checkCollisionParticleMob();
 
 	//------------------ Hurts Mobs
-	// Check collision between Player attacks & Mobs
+	// Check collision between Mobs & Player attacks
 	void checkPlayerAttacksCollisionMob();
+
+	// Check if Mobs have vision of Player
+	void checkMobPlayerVision();
+
+	// Check collision between Mobs & Tile
+	// Checks collision with Tiles, while at the same
+	// time creates a path to go towards the Player while avoiding Tiles
+	void checkCollisionTileMob();
 
 	// Check collision between Boss & Tile
 	void checkBossTileCollision();

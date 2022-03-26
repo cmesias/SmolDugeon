@@ -809,6 +809,14 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		// Update Mob
 		mb.Update(mob, obj, object, particles, part, map, mex+camx, mey+camy, camx, camy, player.alive);
 
+		// Mobs.cpp
+		{
+			checkCollisionParticleMob();
+			checkPlayerAttacksCollisionMob();
+			checkMobPlayerVision();
+			checkCollisionTileMob();
+		}
+
 		// Update items
 		ite.Update(item, newMx+camx, newMy+camy, mex+camx, mey+camy, camx, camy,
 				         player.getX(), player.getY(), player.getW(), player.getH());
@@ -844,10 +852,6 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		// Check collision between Particle & Boss
 		checkCollisionParticleBoss();
 
-		// Mobs.cpp
-		checkCollisionParticleMob();
-		checkPlayerAttacksCollisionMob();
-
 		// Check collision between Boss & Tile
 		checkBossTileCollision();
 
@@ -858,7 +862,7 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		checkPlayerAttacksCollisionBoss();
 
 		// Check collision between Player attacks & Tile
-		checkPlayerAttacksTileCollision();
+		//checkPlayerAttacksTileCollision();
 
 		// Check collision between Player attacks & Boss Particle
 		checkPlayerAttacksBossParticleCollision();
@@ -1022,17 +1026,17 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 		// Render items
 		ite.RenderBehindPlayer(gRenderer, item, camx, camy);
 
+			// Render Boss
+			bos.RenderBack(gRenderer, boss, gFont13, gText, camx, camy);
+
+			// Render Mob
+			mb.RenderBack(gRenderer, mob, gFont13, gText, camx, camy);
+
 		// Render Tile in behind player sprite
 		tl.RenderBehindPlayer(gRenderer, tile, 1, camx, camy, &rTiles[0]);
 
 		// Render Tile in behind player sprite
 		tl.RenderBehindPlayer(gRenderer, tile, 2, camx, camy, &rTiles[0]);
-
-		// Render Boss
-		bos.RenderBack(gRenderer, boss, gFont13, gText, camx, camy);
-
-		// Render Mob
-		mb.RenderBack(gRenderer, mob, gFont13, gText, camx, camy);
 
 			// Render our player
 			player.Render(mex, mey, camx, camy, gWindow,
@@ -1550,6 +1554,136 @@ void PlayGame::checkCollisionParticleMob()
 	}
 }
 
+
+
+void PlayGame::checkCollisionTileMob()
+{
+	for (int i = 0; i < mb.max; i++) {
+		if (mob[i].alive) {
+			bool MonsterIsColliding = false;
+
+			// Update collision with Tiles
+			// Player Velocity X Axis
+
+			// Move only in x-axis
+			if (mob[i].targetDistanceX >= mob[i].targetDistanceY) {
+				if (mob[i].alert) {
+					// If Monster has vision of target
+					//if (mob[i].hasVision) {
+						mob[i].x += mob[i].vX;
+						//mob[i].x += mob[i].velX;
+					//}
+				}
+				SDL_Rect rectA;
+				if (mob[i].type == 0) {
+					rectA.x = mob[i].x;
+					rectA.y = mob[i].y;
+					rectA.w = mob[i].w;
+					rectA.h = mob[i].h;
+				}
+				bool moveBack;
+				moveBack = false;
+				for (int j = 0; j < tl.max; j++) {
+					if (tile[j].alive){
+						if (tile[j].collisionTile) {
+							SDL_Rect rectB;
+							rectB.x = tile[j].x;
+							rectB.y = tile[j].y;
+							rectB.w = tile[j].w;
+							rectB.h = tile[j].h;
+							if  ( checkCollisionRect( rectA, rectB )) {
+								// Continue handling collision
+								moveBack = true;
+
+								// If Mob's target Y is lower than Tile's Y
+								if (mob[i].bmy2 < tile[j].y+tile[j].h/2) {
+									// If colliding with a Tile, move in Y direction towards Player
+									mob[i].y -= 2;
+									//mob[i].vY -= 5;
+								} else {
+									// If colliding with a Tile, move in Y direction towards Player
+									mob[i].y += 2;
+								}
+							}
+						}
+					}
+				}
+				if (moveBack){
+					mob[i].x -= mob[i].vX;
+					//mob[i].x -= mob[i].velX;
+					MonsterIsColliding = true;
+				}
+			}
+
+			// Move only in y-axis
+			else{
+				// Player Velocity Y Axis
+				if (mob[i].alert) {
+					// If Monster has vision of target
+					//if (mob[i].hasVision) {
+						mob[i].y += mob[i].vY;
+					//}
+				}
+				//mob[i].y += mob[i].velY;
+				SDL_Rect rectA;
+				if (mob[i].type == 0) {
+					rectA.x = mob[i].x;
+					rectA.y = mob[i].y;
+					rectA.w = mob[i].w;
+					rectA.h = mob[i].h;
+				}
+				bool moveBack;
+				moveBack = false;
+				for (int j = 0; j < tl.max; j++) {
+					if (tile[j].alive){
+						if (tile[j].collisionTile) {
+							SDL_Rect rectB;
+							rectB.x = tile[j].x;
+							rectB.y = tile[j].y;
+							rectB.w = tile[j].w;
+							rectB.h = tile[j].h;
+							if  ( checkCollisionRect( rectA, rectB )) {
+								// Continue handling collision
+								moveBack = true;
+
+								// If Mob's target Y is lower than Tile's Y
+								if (mob[i].bmx2 < tile[j].x+tile[j].w/2) {
+									// If colliding with a Tile, move in Y direction towards Player
+									mob[i].x -= 2;
+									//mob[i].vY -= 5;
+								} else {
+									// If colliding with a Tile, move in Y direction towards Player
+									mob[i].x += 2;
+								}
+							}
+						}
+					}
+				}
+				if (moveBack){
+					mob[i].y -= mob[i].vY;
+					//mob[i].y -= mob[i].velY;
+					MonsterIsColliding = true;
+				}
+			}
+
+			//-------------------------------------------------------------------------------------------//
+			//-------------------------------------------------------------------------------------------//
+			//-------------------------------------------------------------------------------------------//
+
+			// This is used to determine if we should find the shortest route to the Player
+			if (MonsterIsColliding) {
+				mob[i].collision = true;
+			}else{
+				mob[i].collision = false;
+			}
+
+			// Decrease knockback velocity each frame
+			mob[i].vX = mob[i].vX - mob[i].vX * 0.08;
+			mob[i].vY = mob[i].vY - mob[i].vY * 0.08;
+		}
+	}
+}
+
 void PlayGame::checkPlayerAttacksCollisionMob() {
 	// Objects
 	for (int j = 0; j < obj.max; j++)
@@ -1655,6 +1789,69 @@ void PlayGame::checkPlayerAttacksCollisionMob() {
 					}
 				}
 			}
+		}
+	}
+}
+
+void PlayGame::checkMobPlayerVision() {
+	for (int i=0; i<mb.max; i++) {
+		if (mob[i].alive) {
+			Point p1, q1;
+			p1.x = mob[i].x2;
+			p1.y = mob[i].y2;
+			q1.x = player.getCenterX();
+			q1.y = player.getCenterY();
+
+			bool hasVision = true;
+
+			for (int j=0; j<tl.max; j++) {
+				if (tile[j].alive && tile[j].collisionTile) {
+					// a: top left
+					// b: top right
+					// c: bottom left
+					// d: bottom right
+					Point a, b, c, d;
+					// top left
+					a.x = tile[j].x;
+					a.y = tile[j].y;
+					// top right
+					b.x = tile[j].x+tile[j].w;
+					b.y = tile[j].y;
+					// bottom left
+					c.x = tile[j].x;
+					c.y = tile[j].y+tile[j].h;
+					// bottom right
+					d.x = tile[j].x+tile[j].w;
+					d.y = tile[j].y+tile[j].h;
+
+					// top side line
+					/*SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
+					SDL_RenderDrawLine(gRenderer, a.x-camx, a.y-camy, b.x-camx, b.y-camy);
+
+					// right side line
+					SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
+					SDL_RenderDrawLine(gRenderer, b.x-camx, b.y-camy, d.x-camx, d.y-camy);
+
+					// bottom side line
+					SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
+					SDL_RenderDrawLine(gRenderer, d.x-camx, d.y-camy, c.x-camx, c.y-camy);
+
+					// left side line
+					SDL_SetRenderDrawColor(gRenderer, 255, 0, 255, 255);
+					SDL_RenderDrawLine(gRenderer, a.x-camx, a.y-camy, c.x-camx, c.y-camy);*/
+
+					if (doIntersect(p1, q1, a, b)) {
+						hasVision = false;
+					}else if (doIntersect(p1, q1, b, d)) {
+						hasVision = false;
+					}else if (doIntersect(p1, q1, d, c)) {
+						hasVision = false;
+					}else if (doIntersect(p1, q1, c, a)) {
+						hasVision = false;
+					}
+				}
+			}
+			mob[i].hasVision = hasVision;
 		}
 	}
 }
@@ -2465,9 +2662,13 @@ void PlayGame::checkCollisionParticlePlayer() {
 								{
 									float distanceW = sqrt((bmx - bmx2) * (bmx - bmx2));
 									float distanceH = sqrt((bmy - bmy2) * (bmy - bmy2));
-									float tempVX 	= 5 * (bmx - bmx2) / distanceW;
-									float tempVY 	= 5 * (bmy - bmy2) / distanceH;
+									//float tempVX 	= 5 * (bmx - bmx2) / distanceW;
+									//float tempVY 	= 5 * (bmy - bmy2) / distanceH;
 
+									// Apply player's cast damage to the projectile we're deflecting back
+									particles[i].dmgToParticles = player.getCastDamage();
+
+									// Reverse particles velocity vX and vY
 									particles[i].vX += particles[i].vX * -2;
 									particles[i].vY += particles[i].vY * -2;
 								}

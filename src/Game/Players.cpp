@@ -85,7 +85,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	// Dash ability
 	this->dash 			= false;
 	this->dashSpeed 	= 10;
-	this->dashLength 	= 10;
+	this->dashLength 	= 5;
 	this->dashCounter 	= 0;
 	this->dashCoolCounter = 0;
 
@@ -97,7 +97,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	this->manaGainOnParry		= 5.25;
 	this->damage				= 40;
 	this->damageMultipler		= 1;
-	this->castDamage			= 25;
+	this->castDamage			= 80;
 	this->knockBackPower		= 1.58;
 
 	// Joystick controls

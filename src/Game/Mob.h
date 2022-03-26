@@ -89,6 +89,10 @@ public:	// Animations
 	// Self center
 	float bmx2, bmy2;
 
+	// Target center
+	float targetDistanceX;
+	float targetDistanceY;
+
 	bool renderInFront;
 	bool mouse;
 	bool flash;				// flash mobes texture on getting hit by players attacks

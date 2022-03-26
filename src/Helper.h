@@ -16,6 +16,14 @@ static const std::string GameName = "SmolDungeon";
 
 class Helper {
 
+
+public:
+	struct Point
+	{
+		int x;
+		int y;
+	};
+
 public:
     Timer fps;
 
@@ -63,6 +71,13 @@ public:
 
 	void RenderFillRect(SDL_Renderer *gRenderer, float x, float y, float w, float h, SDL_Color color);
 
+public:	// Check if 2 line segments intersect
+
+	bool onSegment(Point p, Point q, Point r);
+
+	int orientation(Point p, Point q, Point r);
+
+	bool doIntersect(Point p1, Point q1, Point p2, Point q2);
 };
 
 #endif /* LOCAL_HELPER_H_ */
