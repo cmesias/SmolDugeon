@@ -1,0 +1,138 @@
+/*
+ * Item.h
+ *
+ *  Created on: Apr 18, 2017
+ *      Author: Carl
+ */
+
+#ifndef ITEM_H_
+#define ITEM_H_
+
+#include "../Helper.h"
+#include <SDL2/SDL.h>
+
+class Item: public Helper  {
+
+public:	// Parent object Variables
+	static const int ITEMS_UNIQUE = 25;
+	int multiW = 1;
+	int multiH = 1;
+	const int max = 100;		// max number of instances
+	int count;					// number of instances
+
+	/* 25 Item types
+	 * 0  - 10: Swords
+	 * 11 - 12: Rapier and Hammer
+	 * 13 - 18: Better Swords
+	 * 19 - 22: Broken Swords
+	 * 23: 		Bomb
+	 * 24: 		Heart
+	 */
+	int id;			// id of instances
+
+public:	// Object Variables
+	float x, y;
+	float w, h;
+	float x2, y2;
+	float vX, vY;
+	bool collision;
+	bool mouse;
+	bool mouseBox;
+	bool onScreen;
+	bool alive;
+
+public:	// Resources
+	LTexture gSwords;
+
+	/* Sword types
+	 *
+	 * 0: Wooden Sword
+	 * 1: Rusty Sword
+	 * 2: Iron Sword
+	 *
+	 * 11: Tool? 						7 x 17
+	 * 12: Hammer 						10 x 21
+	 *
+	 * 13: Thicc Sword 					10 x 25
+	 * 14: Long Rapier 					8 x 27
+	 * 15: Golden Long Sword 			10 x 29
+	 * 16: Silver Sword 				6 x 27
+	 * 17: Silver Thicc Sword 			10 x 24
+	 * 18: Silver Thicc Sword w/ Gold 	10 x 24
+	 *
+	 * 19: Broken Iron sword short 		6 x 9
+	 * 20: Broken Iron sword 			6 x 12
+	 * 21: Broken Golden sword 			6 x 12
+	 * 22: Broken Silver sword 			6 x 12
+	 *
+	 * 23: Bomb							14 x 13
+	 * 24: Heart 						10 x 10
+	 */
+	SDL_Rect rSwords[25];
+
+public:	// Variables
+	float hoverAmount;
+	float hoverDir;
+	const float yOffset = -10;
+
+public:	// Core functions
+
+	// Initialize
+	void Init(Item item[]);
+
+	// Load
+	void Load(SDL_Renderer *gRenderer);
+
+	// Load
+	void Free();
+
+	// Copy
+	void Copy(Item item[]);
+
+	// Remove
+	void Remove(Item item[], int click);
+
+	// Remove all
+	void RemoveAll(Item item[]);
+
+	// Spawn
+	void Spawn(Item item[], float x, float y);
+
+	void SpawnAll(Item item[], int newMx, int newMy, int camx, int camy);
+
+	// Update
+	void Update(Item item[], int newMx, int newMy, int mex, int mey, int camx, int camy,
+			  float targetX, float targetY, float targetW, float targetH);
+
+	// Update
+	void UpdateEditor(Item item[], int newMx, int newMy, int mex, int mey, int camx, int camy);
+
+	bool PlayerBehindItem;
+
+	void RenderBehindPlayer(SDL_Renderer *gRenderer, Item item[], int camx, int camy);
+
+	void RenderOnTopOfPlayer(SDL_Renderer *gRenderer, Item item[], int camx, int camy);
+
+	// Render debug
+	void RenderDebug(SDL_Renderer *gRenderer, Item item[], int camx, int camy);
+
+	void RenderHand(SDL_Renderer *gRenderer, Item item[], int newMx, int newMy, int mex, int mey);
+
+public:	// Getter functions for Editor
+
+	// Get size of sword in Hand
+	int getItemSizeW();
+	int getItemSizeH();
+
+	// Get size of item from item[i]
+	int getW(Item item[], int i);
+	int getH(Item item[], int i);
+
+public: // Save functions
+
+	void LoadData(Item item[], std::fstream &fileTileDataL);
+
+	std::string SaveData(Item item[]);
+};
+
+#endif /* ITEM_H_ */

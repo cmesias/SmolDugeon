@@ -15,7 +15,7 @@
 
 class Tile: public Helper {
 public:
-	/* Tile Variables */
+	/* Tilec Variables */
 	const int max = 5000;
 	int tileCount = 0;
 	int multiW = 1;
@@ -26,11 +26,17 @@ public:
 	LTexture gTiles;
 	LTexture gText;
 	TTF_Font *gFont12 = NULL;
+
 public:
 	float x;
 	float y;
 	int w;
 	int h;
+
+	/*
+	 * 0: Used to collide with the player to move into a new area/level
+	 *
+	 */
 	int id;
 	int alpha;
 	SDL_Rect clip;

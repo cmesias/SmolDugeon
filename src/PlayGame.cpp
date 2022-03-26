@@ -70,6 +70,7 @@ void PlayGame::Init() {
 	tb.init(tilebar);
 	tb.placeTileBar(tilebar);
 	obj.init(object);
+	ite.Init(item);
 }
 /*
 void PlayGame::saveCFG(std::string fileName){
@@ -129,6 +130,7 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	gBG.loadFromFile(gRenderer, 		"resource/gfx/bg.png");
 	gBG2.loadFromFile(gRenderer, 		"resource/gfx/bg2.png");
 	gCircle.loadFromFile(gRenderer, 	"resource/gfx/circle.png");
+	gShadow.loadFromFile(gRenderer, 	"resource/gfx/shadow.png");
 	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
 
 	// load fonts
@@ -162,6 +164,7 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	tl.load(gRenderer);
 	tb.load(gRenderer);
 	tlc.Load();
+	ite.Load(gRenderer);
 }
 
 void PlayGame::Free() {
@@ -171,8 +174,8 @@ void PlayGame::Free() {
 	gBG.free();
 	gBG2.free();
 	gCircle.free();
+	gShadow.free();
 	gCursor.free();
-	tlc.Free();
 
 	// free fonts
 	TTF_CloseFont(gFont);
@@ -207,6 +210,10 @@ void PlayGame::Free() {
 	part.free();
 	enem.free();
 	spaw.free();
+	tb.free();
+	tl.free();
+	tlc.Free();
+	ite.Free();
 }
 
 /* 5-31-2017
@@ -484,34 +491,54 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 // Update everything
 void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 	// Variable limits
+
+	// Tiles: layers
 	if (tl.layer < -1) {
 		tl.layer = 6;
 	}
 	if (tl.layer > 6) {
 		tl.layer = -1;
 	}
+
+	// Tiles: id
 	if (tl.id < 0) {
 		tl.id = tb.TILES_UNIQUE;
 	}
 	if (tl.id > tb.TILES_UNIQUE) {
 		tl.id = 0;
 	}
+
+	// Tilecs: id
 	if (tlc.id > 2) {
 		tlc.id = 0;
 	}
+
+	// Tilecs: layer
 	if (tlc.layer < 0) {
 		tlc.layer = 0;
 	}
 	if (tlc.layer > 2) {
 		tlc.layer = 0;
 	}
+
+	// Item: id
+	if (ite.id < 0) {
+		ite.id = ite.ITEMS_UNIQUE-1;
+	}
+	if (ite.id > ite.ITEMS_UNIQUE-1) {
+		ite.id = 0;
+	}
+
+	// Tilecs: LevelToLoad
 	if (tlc.LevelToLoad < -1) {
 		tlc.LevelToLoad = 5;
 	}
 	if (tlc.LevelToLoad > 5) {
 		tlc.LevelToLoad = -1;
 	}
-	if (place_type > 2) {
+
+	// place_type
+	if (place_type > 3) {
 		place_type = 0;
 	}
 
@@ -562,6 +589,12 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 			}else{
 				clampSize = tl.tilew;
 			}
+		}else if (place_type == 3) {
+			if (shift) {
+				clampSize = ite.getItemSizeW()/2;
+			}else{
+				clampSize = ite.getItemSizeW();
+			}
 		}
 	}
 	int remainderW = oldMX % clampSize;
@@ -588,7 +621,7 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 	// Update tiles
 	tlc.Update(tilec, map, newMx+camx, newMy+camy, mex+camx, mey+camy, camx, camy);
 
-	// Update Tile bar
+	// Update Tile bar, newMx+camx, newMy+camy, mex+camx, mey+camy, camx, camy
 	tb.update(tilebar, gWindow, mex, mey, camx, camy);
 
 	// Editor
@@ -603,6 +636,9 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		// Update Editor boss
 		bos.UpdateEditor(boss, mex+camx, mey+camy, camx, camy);
 
+		// Update items
+		ite.UpdateEditor(item, newMx+camx, newMy+camy, mex+camx, mey+camy, camx, camy);
+
 		//--------------------------- Update editor Updates from other classes ---------------------------//
 		//------------------------------------------------------------------------------------------------//
 		////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -612,7 +648,7 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 			// If not on Tile-bar, place other tiles
 			if (!tb.touching) {
 
-				// If removing Tiles
+				// Remove Tiles
 				if (place_type == 0) {
 
 					// Remove Tiles if left clicking, "0" in second argument
@@ -620,14 +656,19 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 					tl.removeTile(tile, 0);
 				}
 
-				// If removing Tilecs
+				// Remove Tilecs
 				else if (place_type == 1) {
 					tlc.RemoveTile(tilec, 0);
 				}
 
-				// If removing Bosses
+				// Remove Bosses
 				else if (place_type == 2) {
 					bos.Remove(boss);
+				}
+
+				// Remove Items
+				else if (place_type == 3) {
+					ite.Remove(item, 0);
 				}
 			}else{
 				if (shift) {
@@ -657,6 +698,11 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 				// Boss
 				else if (place_type == 2) {
 					// Do nothing here
+				}
+
+				// Items
+				else if (place_type == 3) {
+					ite.SpawnAll(item, newMx, newMy, camx, camy);
 				}
 			}else{
 				// Pen Tool, select a Tile from the TileBar
@@ -739,6 +785,10 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 
 		// Update boss
 		bos.Update(boss, obj, object, particles, part, map, mex+camx, mey+camy, camx, camy, player.alive);
+
+		// Update items
+		ite.Update(item, newMx+camx, newMy+camy, mex+camx, mey+camy, camx, camy,
+				         player.getX(), player.getY(), player.getW(), player.getH());
 
 		// Update Player
 		player.Update(map,
@@ -888,6 +938,21 @@ void PlayGame::RenderFG(SDL_Renderer *gRenderer, LWindow &gWindow) {
 	}
 }
 
+// Render shadows
+void PlayGame::RenderShadows(SDL_Renderer *gRenderer, LWindow &gWindow) {
+	for (int i = 0; i < ite.max; i++) {
+		if (item[i].alive) {
+			gShadow.setAlpha(110);
+			int shadowSize = item[i].w/2 + item[i].hoverAmount;
+			int yOffsetShadow = -(shadowSize/4);
+			yOffsetShadow +=  item[i].yOffset;
+			gShadow.render(gRenderer, item[i].x+item[i].w/2-shadowSize/2 - camx,
+									  item[i].y+item[i].h-shadowSize/2+yOffsetShadow - camy,
+									  shadowSize, shadowSize);
+		}
+	}
+}
+
 // Render everything
 void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 
@@ -916,8 +981,11 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 		// Render tile, ground
 		tl.renderTile(gRenderer, tile, 0, camx, camy);
 
-		// Render tile, appliances
-		//tl.renderTile(gRenderer, tile, 2, camx, camy);
+			// Render shadows
+			RenderShadows(gRenderer, gWindow);
+
+		// Render items
+		ite.RenderBehindPlayer(gRenderer, item, camx, camy);
 
 		// Render Tile in behind player sprite
 		tl.RenderBehindPlayer(gRenderer, tile, 1, camx, camy, &rTiles[0]);
@@ -943,6 +1011,9 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 
 		// Render Particles
 		part.renderBulletParticle(particles, camx, camy, 1, gRenderer);
+
+		// Render items
+		ite.RenderOnTopOfPlayer(gRenderer, item, camx, camy);
 
 		// Render Tile on top of player
 		tl.RenderOnTopOfPlayer(gRenderer, tile, 1, camx, camy, &rTiles[0]);
@@ -998,34 +1069,8 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 		// Render Boss text
 		bos.RenderDebug(gRenderer, boss, gFont13, gText, camx, camy);
 
-		// Render Player spawn point
-		SDL_Rect tempRect = {spawnX-camx, spawnY-camy, tl.tilew, tl.tileh};
-		SDL_SetRenderDrawColor(gRenderer, 0, 255, 200, 255);
-		SDL_RenderDrawRect(gRenderer, &tempRect);
-
-		// Render which collision-tile we have selected for placement]
-		int NumberOfCollisionTilesWidth = 32 * 3;
-		for (int i=0; i<3; i++)
-		{
-			if (i == 0) {
-				SDL_Rect tempr = {0 + NumberOfCollisionTilesWidth  + i*32, screenHeight-34, 32, 32};
-				SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
-				SDL_RenderDrawRect(gRenderer, &tempr);
-			}else if (i == 1) {
-				SDL_Rect tempr = {0 + NumberOfCollisionTilesWidth + i*32, screenHeight-34, 32, 32};
-				SDL_SetRenderDrawColor(gRenderer, 255, 255, 0, 255);
-				SDL_RenderDrawRect(gRenderer, &tempr);
-			}else if (i == 2) {
-				SDL_Rect tempr = {0 + NumberOfCollisionTilesWidth + i*32, screenHeight-34, 32, 32};
-				SDL_SetRenderDrawColor(gRenderer, 255, 0, 255, 255);
-				SDL_RenderDrawRect(gRenderer, &tempr);
-			}
-		}
-
-		// Render level size
-		SDL_Rect tempr = {map.x-camx, map.y-camy, map.w, map.h};
-		SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
-		SDL_RenderDrawRect(gRenderer, &tempr);
+		// Render Item text
+		ite.RenderDebug(gRenderer, item, camx, camy);
 
 		// Render object text
 		for (int i = 0; i < obj.max; i++)
@@ -1051,14 +1096,45 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 		// Render Tilec debug texts
 		tlc.RenderDebug(gRenderer, tilec, camx, camy);
 
+		// Render which collision-tile we have selected for placement]
+		/*int NumberOfCollisionTilesWidth = 32 * 3;
+		for (int i=0; i<3; i++)
+		{
+			if (i == 0) {
+				SDL_Rect tempr = {0 + NumberOfCollisionTilesWidth  + i*32, screenHeight-34, 32, 32};
+				SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
+				SDL_RenderDrawRect(gRenderer, &tempr);
+			}else if (i == 1) {
+				SDL_Rect tempr = {0 + NumberOfCollisionTilesWidth + i*32, screenHeight-34, 32, 32};
+				SDL_SetRenderDrawColor(gRenderer, 255, 255, 0, 255);
+				SDL_RenderDrawRect(gRenderer, &tempr);
+			}else if (i == 2) {
+				SDL_Rect tempr = {0 + NumberOfCollisionTilesWidth + i*32, screenHeight-34, 32, 32};
+				SDL_SetRenderDrawColor(gRenderer, 255, 0, 255, 255);
+				SDL_RenderDrawRect(gRenderer, &tempr);
+			}
+		}*/
+
+		// Render Player spawn point
+		SDL_Rect tempRect = {spawnX-camx, spawnY-camy, tl.tilew, tl.tileh};
+		SDL_SetRenderDrawColor(gRenderer, 0, 255, 200, 255);
+		SDL_RenderDrawRect(gRenderer, &tempRect);
+
+		// Render level size
+		SDL_Rect tempr = {map.x-camx, map.y-camy, map.w, map.h};
+		SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
+		SDL_RenderDrawRect(gRenderer, &tempr);
+
 		// Render hand debug info
 		std::stringstream tempss;
-		tempss << "previousLevel: " 				<< previousLevel << ", LevelToLoad: " 				<< this->LevelToLoad
-			   << ", lastX: " 	<< lastKnownPositionX 		<< ", lastY: " 	<< lastKnownPositionY;
-		tempss << ", Tiles: " 				<< tl.tileCount 		<< ", Tilecs: " 	<< tlc.count 		<< ", Bosss: " << bos.count;
-		tempss << ", place_type: " 			<< place_type 			<< ", tl.id: " 		<< tl.id 			<< ", tlc.id: " << tlc.id;
-		tempss << ", tl.collisionTile: " 	<< tl.collisionTile 	<< ", layer: " 		<< tl.layer;
-		tempss << ", tilew: " 				<< tl.tilew 			<< ", tileh: " 		<< tl.tileh			<< ", LevelToLoad: " << tlc.LevelToLoad;
+		tempss << "previousLevel: " 		<< previousLevel 		<< ", LevelToLoad: " 	<< this->LevelToLoad;
+		tempss << "ite.count: " 				<< ite.count << "ite.id: " << ite.id
+			   << ", ite.multiW: " 			<< ite.multiW 			<< ", ite.multiH: " 				<< ite.multiH;
+		tempss << ", lastX: " 				<< lastKnownPositionX 	<< ", lastY: " 			<< lastKnownPositionY;
+		tempss << ", Tiles: " 				<< tl.tileCount 		<< ", Tilecs: " 		<< tlc.count 			<< ", Bosss: " << bos.count;
+		tempss << ", place_type: " 			<< place_type 			<< ", tl.id: " 			<< tl.id 				<< ", tlc.id: " << tlc.id;
+		tempss << ", tl.collisionTile: " 	<< tl.collisionTile 	<< ", layer: " 			<< tl.layer;
+		tempss << ", tilew: " 				<< tl.tilew 			<< ", tileh: " 			<< tl.tileh				<< ", LevelToLoad: " << tlc.LevelToLoad;
 				/*	   << ", layer: " 		<< tl.layer<< ", tlc.layer: " << tlc.layer << ", editor: " << editor
 			   << ", tl.multiW: " 	<< tl.multiW << ", tl.multiH: " << tl.multiH << ", tl.count: " << tl.tileCount;
 		tempss << ", tlc.multiW: " 	<< tlc.multiW << ", tlc.multiH: " << tlc.multiH << ", tlc.count: " << tlc.count;*/
@@ -1089,6 +1165,12 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 			else if (place_type == 2)
 			{
 				bos.RenderHand(gRenderer, boss, newMx, newMy, mex, mey, camx, camy);
+			}
+
+			// Render Item (Sword) in Hand
+			else if (place_type == 3)
+			{
+				ite.RenderHand(gRenderer, item, newMx, newMy, mex, mey);
 			}
 		}
 
@@ -2680,27 +2762,40 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 		}
 	case SDLK_i:								// Change tile id to place
 		if (shift) {
+			// Tiles
 			if (place_type==0) {
 				tl.id--;
-			}else if (place_type==1) {
-				tlc.id--;
 			}
-		}else{
-			if (place_type==0) {
-				tl.id++;
-			}else if (place_type==1) {
-				tlc.id++;
-			}
-		}
-		break;
-	case SDLK_o:								// LevelToLoad value for Tilec objects
-		if (shift) {
-			if (place_type==1) {
+
+			// Tilec
+			else if (place_type==1) {
 				tlc.LevelToLoad--;
 			}
+
+			// Items
+			else if (place_type==3) {
+				ite.id--;
+				if (ite.id < 0) {
+					ite.id = ite.ITEMS_UNIQUE-1;
+				}
+			}
 		}else{
-			if (place_type==1) {
+			// Tiles
+			if (place_type==0) {
+				tl.id++;
+			}
+
+			// Tilec
+			else if (place_type==1) {
 				tlc.LevelToLoad++;
+			}
+
+			// Items
+			else if (place_type==3) {
+				ite.id++;
+				if (ite.id > ite.ITEMS_UNIQUE-1) {
+					ite.id = 0;
+				}
 			}
 		}
 		break;
@@ -2719,6 +2814,8 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				tl.copyTile(tile);
 			}else if (place_type == 1) {
 				tlc.Copy(tilec);
+			}else if (place_type == 3) {
+				ite.Copy(item);
 			}
 		}
 		break;
@@ -2731,22 +2828,25 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				// Currently selected: Textured tiles
 				if (place_type == 0 )
 				{
-					// Remove textured tiles
 					tl.RemoveAll(tile);
 				}
 
 				// Currently selected: Collision tiles
 				else if (place_type == 1)
 				{
-					// Remove collision tiles
 					tlc.RemoveAll(tilec);
 				}
 
 				// Currently selected: Boss Objects
 				else if (place_type == 2)
 				{
-					// Remove bosss
 					bos.RemoveAll(boss);
+				}
+
+				// Currently selected: Items
+				else if (place_type == 3)
+				{
+					ite.RemoveAll(item);
 				}
 			}
 			// Remove all tiles
@@ -2755,10 +2855,13 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				tl.RemoveAll(tile);
 
 				// Remove collision tiles
-				//tlc.Clear(tilec);
+				tlc.RemoveAll(tilec);
 
-				// Remove bosss
+				// Remove bosses
 				bos.RemoveAll(boss);
+
+				// Remove items
+				ite.RemoveAll(item);
 			}
 		}
 		break;
@@ -2771,6 +2874,10 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 			if (tlc.multiW > 1) {
 				tlc.multiW -= 1;
 			}
+		}else if (place_type == 3) {
+			if (ite.multiW > 1) {
+				ite.multiW -= 1;
+			}
 		}
 		break;
 	case SDLK_RIGHTBRACKET:						// Tile, add parry in x-axis
@@ -2778,6 +2885,8 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 			tl.multiW += 1;
 		}else if (place_type == 1) {
 			tlc.multiW += 1;
+		}else if (place_type == 3) {
+			ite.multiW += 1;
 		}
 		break;
 	case SDLK_MINUS:							// Tile, subtract parry in y-axis
@@ -2789,6 +2898,10 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 			if (tlc.multiH> 1) {
 				tlc.multiH -= 1;
 			}
+		}else if (place_type == 3) {
+			if (ite.multiH> 1) {
+				ite.multiH -= 1;
+			}
 		}
 		break;
 	case SDLK_EQUALS:							// Tile, add parry in y-axis
@@ -2796,6 +2909,8 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 			tl.multiH += 1;
 		}else if (place_type == 1) {
 			tlc.multiH += 1;
+		}else if (place_type == 3) {
+			ite.multiH += 1;
 		}
 		break;
 	case SDLK_9: {								// Load Room
@@ -2825,6 +2940,9 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				// Save Boss data
 				aVeryLongString << bos.SaveData(boss);
 
+				// Save Item data
+				aVeryLongString << ite.SaveData(item);
+
 				// Save Player spawn point
 				aVeryLongString << saveSpawnPoint();
 
@@ -2840,7 +2958,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				// Open file
 				fileParrys2.open(tempNameParryNum2.str().c_str());
 
-				// Save tile count
+				// Save all data
 				fileParrys2 << aVeryLongString.str().c_str();
 
 				// Close file
@@ -3055,6 +3173,9 @@ void PlayGame::LoadLevel()
 
 		// Remove bosss
 		bos.RemoveAll(boss);
+
+		// Remove items
+		ite.RemoveAll(item);
 	}
 
 	// Set file path and name
@@ -3076,6 +3197,9 @@ void PlayGame::LoadLevel()
 
 		// Load Boss data
 		bos.LoadData(boss, fileTileDataL);
+
+		// Load Item data
+		ite.LoadData(item, fileTileDataL);
 
 		// Load Player spawn point
 		fileTileDataL >>  this->spawnX >> this->spawnY;

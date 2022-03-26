@@ -85,7 +85,7 @@ public:	// resources
 	 * 0: Keyboard
 	 * 1: Keyboard + Mouse
 	 */
-	int ControlsPreference = 1;	// default: 0
+	int ControlsPreference = 0;	// default: 0
 
 public:	// variables
 	std::string name;

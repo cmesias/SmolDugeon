@@ -26,7 +26,6 @@
 
 // Reset game
 void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn){
-	ControlsPreference  = 1;
 	x 					= spawnX;
 	y 					= spawnY;
 	name				= newName;
@@ -419,7 +418,7 @@ void Players::Update(Map &map,
 				}
 			}
 
-			// Direction facing
+			// If ControlsPreference is "1" then we will override the direction above ^
 			if (this->ControlsPreference == 1) {
 				if (mex+camx > this->x) {
 		        	this->facing = "right";
@@ -717,22 +716,22 @@ void Players::Update(Map &map,
 
 							// If facing right
 							int width;
+							// Attack-object's width and height
+							int tempHeight = 64;
+							int tempWidth = 38;
 							if (facing == "right") {
 
 								// Set attack object's x pos to the right of player's body
-								width = 38;
+								width = this->w;
 							}else{
 
 								// Set attack object's x pos to the left of player's body
-								width = -21;
+								width = -tempWidth;
 							}
-							// Attack-object's width and height
-							int tempWidth = 38;
-							int tempHeight = 64;
 
 							// Spawn attack object (it will appear in the world for 1 frame then remove itself)
-							obj.spawn(object, x+w/2-38/2+width,
-											  y-16,
+							obj.spawn(object, this->x+width,
+									this->y-16,
 											  tempWidth, tempHeight,
 											  0);
 						}
@@ -898,12 +897,12 @@ void Players::Update(Map &map,
 
 		// Player not moving X
 		if (!moveleft && !moveright && !dash) {
-	        vX = vX - vX * 0.2;
+	        vX = vX - vX * 0.6;
 		}
 
 		// Player not moving Y
 		if (!moveup && !movedown && !dash) {
-	        vY = vY - vY * 0.2;
+	        vY = vY - vY * 0.6;
 		}
 
 		// Player not moving

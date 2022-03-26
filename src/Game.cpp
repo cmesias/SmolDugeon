@@ -15,6 +15,7 @@
 #include "CustomizeCharacter.h"
 #include "ActSelection.h"
 #include "Credits.h"
+#include "Game/Item.h"
 #include "PlayGame.h"
 
 #include "stdlib.h"
@@ -40,7 +41,7 @@ void Game::Init() {
 
 	// Create window
 	//gWindow.create("CEngine V2", RESOLUTION, ANTI_ALIAS, FULLSCREEN, VSYNC | SDL_WINDOW_RESIZABLE );
-	gWindow.create("FattestBossFightEver", RESOLUTION, ANTI_ALIAS, FULLSCREEN, VSYNC);
+	gWindow.create(GameName.c_str(), RESOLUTION, ANTI_ALIAS, FULLSCREEN, VSYNC);
 
 	//SDL_SetWindowFullscreen(mWindow, SDL_TRUE);
 	//SDL_SetWindowPosition(mWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);

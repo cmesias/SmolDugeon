@@ -17,6 +17,7 @@
 #include "Game/TileBar.h"
 #include "Game/Tiles.h"
 #include "Game/Tilec.h"
+#include "Game/Item.h"
 #include "Helper.h"
 #include "Options.h"
 
@@ -35,6 +36,7 @@ public:	// globals
 	/* 0: Textured tiles
 	 * 1: Collision Tiles
 	 * 2: Boss objects
+	 * 3: Item objects
 	 *
 	 */
 	int place_type;
@@ -59,6 +61,7 @@ public:	// Scene textures
 	LTexture gBG2;
 	LTexture gTargetTexture;
 	LTexture gCircle;
+	LTexture gShadow;
 
 	// Mouse cursor
 	LTexture gCursor;
@@ -170,6 +173,10 @@ public:	// Other classes
 	Boss bos;
 	Boss boss[100];
 
+	// Items (mostly swords)
+	Item ite;
+	Item item[100];
+
 public: // Tile Variables
 
 	const int HowManyTilesVertical   = 16;
@@ -221,6 +228,9 @@ public:	// Core functions
 
 	// Render foreground
 	void RenderFG(SDL_Renderer *gRenderer, LWindow &gWindow);
+
+	// Render shadows
+	void RenderShadows(SDL_Renderer *gRenderer, LWindow &gWindow);
 
 	// Render game objects
 	void Render(SDL_Renderer *gRenderer, LWindow &gWindow);
