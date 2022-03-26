@@ -87,32 +87,15 @@ int main(int argc, char *argv[]) {
  * 			  then Area (0,1) will start on on (500,0) and ends in (1000,500);
  *
  *
- * TODO [ ] (3-25-2022) - Change player texture with a character form the dungeon tileset
+ * TODO [x] (3-25-2022) - Change player texture with a character form the dungeon tileset
  * TODO [ ] (3-25-2022) - Integrate Enemies.cpp into PlayGame.cpp to spawn different types of monsters
  *
+ * //---------- Item.cpp
+ * TODO [x] (3-26-2022) - Create Item.cpp to create items that the player can pick up such as: Swords, Tools, Bombs and Hearts.
+ * TODO [x] (3-26-2022) - Create collision check with Player.cpp
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * //---------- Player.cpp
+ * TODO [x] (3-26-2022) - Create inventory for Player.cpp?
  *
  *
  * //------------------- Future

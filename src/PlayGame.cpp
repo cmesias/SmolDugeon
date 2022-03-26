@@ -60,6 +60,7 @@ void PlayGame::Init() {
 
 	// Initialize
 	bos.Init(boss);
+	mb.Init(mob);
 	part.init(particles);
 	enem.init(enemy);
 	spaw.init(spawner);
@@ -157,6 +158,7 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 
 	// load media for other classes
 	bos.Load(gRenderer);
+	mb.Load(gRenderer);
 	part.load(gRenderer);
 	enem.load(gRenderer);
 	spaw.load(gRenderer);
@@ -206,6 +208,7 @@ void PlayGame::Free() {
 
 	// free media from other classes
 	bos.Free();
+	mb.Free();
 	player.Free();
 	part.free();
 	enem.free();
@@ -538,7 +541,7 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 	}
 
 	// place_type
-	if (place_type > 3) {
+	if (place_type > 4) {
 		place_type = 0;
 	}
 
@@ -595,6 +598,12 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 			}else{
 				clampSize = ite.getItemSizeW();
 			}
+		}else if (place_type == 4) {
+			if (shift) {
+				clampSize = mb.pixelSizeW/2;
+			}else{
+				clampSize = mb.pixelSizeW;
+			}
 		}
 	}
 	int remainderW = oldMX % clampSize;
@@ -636,6 +645,9 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		// Update Editor boss
 		bos.UpdateEditor(boss, mex+camx, mey+camy, camx, camy);
 
+		// Update Editor mob
+		mb.UpdateEditor(mob, mex+camx, mey+camy, camx, camy);
+
 		// Update items
 		ite.UpdateEditor(item, newMx+camx, newMy+camy, mex+camx, mey+camy, camx, camy);
 
@@ -669,6 +681,11 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 				// Remove Items
 				else if (place_type == 3) {
 					ite.Remove(item, 0);
+				}
+
+				// Remove Items
+				else if (place_type == 4) {
+					mb.Remove(mob);
 				}
 			}else{
 				if (shift) {
@@ -786,6 +803,12 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		// Update boss
 		bos.Update(boss, obj, object, particles, part, map, mex+camx, mey+camy, camx, camy, player.alive);
 
+		// Move Mob towards player
+		mb.GetDistanceOfPlayer(mob, player.getX(), player.getY(), player.getW(), player.getH(), &player.x2, &player.y2);
+
+		// Update Mob
+		mb.Update(mob, obj, object, particles, part, map, mex+camx, mey+camy, camx, camy, player.alive);
+
 		// Update items
 		ite.Update(item, newMx+camx, newMy+camy, mex+camx, mey+camy, camx, camy,
 				         player.getX(), player.getY(), player.getW(), player.getH());
@@ -821,6 +844,10 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		// Check collision between Particle & Boss
 		checkCollisionParticleBoss();
 
+		// Mobs.cpp
+		checkCollisionParticleMob();
+		checkPlayerAttacksCollisionMob();
+
 		// Check collision between Boss & Tile
 		checkBossTileCollision();
 
@@ -849,7 +876,7 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		checkCollisionParticleParticle();
 
 		//---------- Boss deafeated? Update levelsCompleted.mp
-		checkBossDied();
+		checkBossOrMobDied();
 
 		// Damage text: for zombie
 		tex.updateDamageText(text);
@@ -940,6 +967,8 @@ void PlayGame::RenderFG(SDL_Renderer *gRenderer, LWindow &gWindow) {
 
 // Render shadows
 void PlayGame::RenderShadows(SDL_Renderer *gRenderer, LWindow &gWindow) {
+
+	// Render shadow for Item.cpp
 	for (int i = 0; i < ite.max; i++) {
 		if (item[i].alive) {
 			gShadow.setAlpha(110);
@@ -951,6 +980,12 @@ void PlayGame::RenderShadows(SDL_Renderer *gRenderer, LWindow &gWindow) {
 									  shadowSize, shadowSize);
 		}
 	}
+
+	// Render Boss Shadow on floor
+	bos.RenderShadow(gRenderer, boss, camx, camy);
+
+	// Render Mob Shadow on floor
+	mb.RenderShadow(gRenderer, mob, camx, camy);
 }
 
 // Render everything
@@ -993,11 +1028,11 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 		// Render Tile in behind player sprite
 		tl.RenderBehindPlayer(gRenderer, tile, 2, camx, camy, &rTiles[0]);
 
-		// Render Boss Shadow on floor
-		bos.RenderShadow(gRenderer, boss, camx, camy);
-
 		// Render Boss
 		bos.RenderBack(gRenderer, boss, gFont13, gText, camx, camy);
+
+		// Render Mob
+		mb.RenderBack(gRenderer, mob, gFont13, gText, camx, camy);
 
 			// Render our player
 			player.Render(mex, mey, camx, camy, gWindow,
@@ -1005,6 +1040,9 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 
 		// Render Boss
 		bos.RenderFront(gRenderer, boss, gFont13, gText, camx, camy);
+
+		// Render Mob
+		mb.RenderFront(gRenderer, mob, gFont13, gText, camx, camy);
 
 		// Render Star particles
 		part.renderStarParticle(particles, camx, camy, 1, gRenderer);
@@ -1044,6 +1082,9 @@ void PlayGame::RenderUI(SDL_Renderer *gRenderer, LWindow &gWindow)
 	// Render Boss Health
 	bos.RenderUI(gRenderer, boss, camx, camy);
 
+	// Render Mob Health
+	mb.RenderUI(gRenderer, mob, camx, camy);
+
 	// Render Player Health
 	player.RenderUI(gRenderer, camx, camy, this->LevelToLoad);
 }
@@ -1068,6 +1109,9 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 
 		// Render Boss text
 		bos.RenderDebug(gRenderer, boss, gFont13, gText, camx, camy);
+
+		// Render Mob text
+		mb.RenderDebug(gRenderer, mob, gFont13, gText, camx, camy);
 
 		// Render Item text
 		ite.RenderDebug(gRenderer, item, camx, camy);
@@ -1131,7 +1175,7 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 		tempss << "ite.count: " 				<< ite.count << "ite.id: " << ite.id
 			   << ", ite.multiW: " 			<< ite.multiW 			<< ", ite.multiH: " 				<< ite.multiH;
 		tempss << ", lastX: " 				<< lastKnownPositionX 	<< ", lastY: " 			<< lastKnownPositionY;
-		tempss << ", Tiles: " 				<< tl.tileCount 		<< ", Tilecs: " 		<< tlc.count 			<< ", Bosss: " << bos.count;
+		tempss << ", Tiles: " 				<< tl.tileCount 		<< ", Tilecs: " 		<< tlc.count 			<< ", Mob: " << mb.count;
 		tempss << ", place_type: " 			<< place_type 			<< ", tl.id: " 			<< tl.id 				<< ", tlc.id: " << tlc.id;
 		tempss << ", tl.collisionTile: " 	<< tl.collisionTile 	<< ", layer: " 			<< tl.layer;
 		tempss << ", tilew: " 				<< tl.tilew 			<< ", tileh: " 			<< tl.tileh				<< ", LevelToLoad: " << tlc.LevelToLoad;
@@ -1171,6 +1215,12 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 			else if (place_type == 3)
 			{
 				ite.RenderHand(gRenderer, item, newMx, newMy, mex, mey);
+			}
+
+			// Render Mob in Hand
+			else if (place_type == 4)
+			{
+				mb.RenderHand(gRenderer, mob, newMx, newMy, mex, mey, camx, camy);
 			}
 		}
 
@@ -1316,7 +1366,6 @@ void PlayGame::checkCollisionParticleTile()
 
 void PlayGame::checkCollisionParticleBoss()
 {
-
 	for (int j = 0; j < part.max; j++)
 	{
 		if (particles[j].alive)
@@ -1401,6 +1450,208 @@ void PlayGame::checkCollisionParticleBoss()
 							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							//--------------------------------------------------------------------------------------------------------------------------------//
 						//}
+					}
+				}
+			}
+		}
+	}
+}
+
+void PlayGame::checkCollisionParticleMob()
+{
+	for (int j = 0; j < part.max; j++)
+	{
+		if (particles[j].alive)
+		{
+			if (particles[j].type == -1 || particles[j].type == 0)
+			{
+				for (int i = 0; i < mb.max; i++)
+				{
+					if (mob[i].alive)
+					{
+						// Get center of attack-particle (spawned by the player attacking)
+						float bmx = mob[i].x+mob[i].w/2;
+						float bmy = mob[i].y+mob[i].h/2;
+
+						// Get center of particles
+						float bmx2 = particles[j].x+particles[j].w/2;
+						float bmy2 = particles[j].y+particles[j].h/2;
+
+						// Get distance
+						float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
+											  (bmy - bmy2) * (bmy - bmy2));
+
+						// If distance is less than 50 pixels
+						//if (distance < 50)
+						//{
+							// Get angle of mob relative to attack-particle
+							float angle = atan2(bmy - bmy2,bmx - bmx2);
+							angle = angle * (180 / 3.1416);
+							if (angle < 0) {
+								angle = 360 - (-angle);
+							}
+
+							// Handle radians, cos, sin
+							float radians = (3.1415926536/180)*(angle);
+							float Cos = floor(cos(radians)*10+0.5)/10;
+							float Sin = floor(sin(radians)*10+0.5)/10;
+
+							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							//--------------------------------------------------------------------------------------------------------------------------------//
+							//----------------------------- Collision Detection based on player-attack hit-box and Mob hit-box -----------------------------//
+							// If particle slash if within X distance then move the mob away
+							// collision occurred
+							if (distance < mob[i].w/2 + particles[j].w/2)
+							{
+								// Flash Mobes sprite
+								mob[i].flash = true;
+
+								// Remove particle
+								particles[j].time = 0;
+								particles[j].alive = false;
+								part.count--;
+
+								// New velocity going away from Bullet Particle
+								float newvX = 0.25 * (bmx - bmx2) / distance;
+								float newvY = 0.25 * (bmy - bmy2) / distance;
+
+								// Move the mob in someway
+								mob[i].vX += newvX;
+								mob[i].vY += newvY;
+								//mob[i].vX += player.getKnockBackPower()/2 * xDir;
+
+								// Play hit sound effect
+				                Mix_PlayChannel(-1, sCastHitBoss, 0);
+
+				                // Subtract mob health
+				                mob[i].health -= player.getCastDamage();
+
+				                // Increase player score
+				                if (particles[j].type == -1) {
+					                player.IncreaseScore(10);
+				                }
+				                if (particles[j].type == 0) {
+					                player.IncreaseScore(5);
+				                }
+
+				                // Show damage text (it will print how much damage the player did to the mob)
+				    			std::stringstream tempss;
+				    			tempss << player.getCastDamage();
+				    			tex.spawn(text, mob[i].x+mob[i].w/2, mob[i].y+mob[i].w/2-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
+							}
+							//----------------------------- Collision Detection based on player-attack hit-box and Mob hit-box -----------------------------//
+							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							//--------------------------------------------------------------------------------------------------------------------------------//
+						//}
+					}
+				}
+			}
+		}
+	}
+}
+
+void PlayGame::checkPlayerAttacksCollisionMob() {
+	// Objects
+	for (int j = 0; j < obj.max; j++)
+	{
+		if (object[j].alive)
+		{
+			if (object[j].id != 2)
+			{
+				// Mobs
+				for (int i = 0; i < mb.max; i++)
+				{
+					if (mob[i].alive)
+					{
+						// Get center of attack-particle (spawned by the player attacking)
+						float bmx = mob[i].x+mob[i].w/2;
+						float bmy = mob[i].y+mob[i].h/2;
+
+						// Get center of object
+						float bmx2 = object[j].x+object[j].w/2;
+						float bmy2 = object[j].y+object[j].h/2;
+
+						// Get distance
+						float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
+											  (bmy - bmy2) * (bmy - bmy2));
+
+						// If distance is less than 50 pixels
+						if (distance < 384/2 +  50)
+						{
+							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							//--------------------------------------------------------------------------------------------------------------------------------//
+							//----------------------------- Collision Detection based on player-attack hit-box and Mob hit-box -----------------------------//
+							// Check collision between object and mob
+							if (checkCollision(object[j].x, object[j].y, object[j].w, object[j].h, mob[i].x, mob[i].y, mob[i].w, mob[i].h))
+							{
+								// If attack-type: Slash
+								if (player.attackType == 0)
+								{
+									// Play hit sound effect: Slash attack
+					                Mix_PlayChannel(-1, sSlashHitBoss, 0);
+								}
+
+								// If attack-type: Down-stab
+								else if (player.attackType == 1)
+								{
+									// Play hit sound effect: Down-stab attack
+					                Mix_PlayChannel(-1, sDownStabHitTilec, 0);
+
+									// Knockback player back in the air (only if doing down-stab)
+									//player.y -= 10;
+									//player.vY = -8;
+								}
+
+								// Knockback Mob
+								{
+									float distanceW = sqrt((bmx - bmx2) * (bmx - bmx2));
+									float distanceH = sqrt((bmy - bmy2) * (bmy - bmy2));
+									float tempVX 	= 0.8 * (bmx - bmx2) / distanceW;
+									float tempVY 	= 0.8 * (bmy - bmy2) / distanceH;
+
+									mob[i].vX += tempVX;
+									mob[i].vY += tempVY;
+								}
+
+								// Knockback Mob - Depracated
+								{
+									/*// If particle is coming from the right of Mob
+									int xDir, yDir;
+									if (player.getCenterX() > object[j].x+object[j].w/2) {
+										xDir = -1;
+									}
+									// If particle is coming from the left of Mob
+									else {
+										xDir = 1;
+									}
+									if (player.getCenterY() > object[j].y+object[j].h/2) {
+										yDir = -1;
+									}
+									// If particle is coming from the left of Mob
+									else {
+										yDir = 1;
+									}
+
+									// Knockback enemy
+									mob[i].vX += player.getKnockBackPower() * xDir;
+									mob[i].vY += player.getKnockBackPower() * yDir;*/
+								}
+
+				                // Subtract mob health
+				                mob[i].health -= player.getDamage();
+
+				                // Increase player score
+				                player.IncreaseScore(10);
+
+				                // Show damage text (it will print how much damage the player did to the mob)
+				    			std::stringstream tempss;
+				    			tempss << player.getDamage();
+				    			tex.spawn(text, mob[i].x+mob[i].w/2, mob[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
+							}
+							//----------------------------- Collision Detection based on player-attack hit-box and Mob hit-box -----------------------------//
+							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							//--------------------------------------------------------------------------------------------------------------------------------//
+						}
 					}
 				}
 			}
@@ -2422,7 +2673,7 @@ void PlayGame::checkCollisionParticleParticle() {
 	}
 }
 
-void PlayGame::checkBossDied() {
+void PlayGame::checkBossOrMobDied() {
 
 	for (int i = 0; i < bos.max; i++)
 	{
@@ -2434,7 +2685,22 @@ void PlayGame::checkBossDied() {
 				bos.count--;
 
 				// Update levelsCompleted
-		    	SaveLevelsCompleted();
+		    	//SaveLevelsCompleted();
+			}
+		}
+	}
+
+	for (int i = 0; i < mb.max; i++)
+	{
+		if (mob[i].alive)
+		{
+			// If boss health goes lower than 0, remove boss
+			if (mob[i].health <= 0) {
+				mob[i].alive = false;
+				mb.count--;
+
+				// Update levelsCompleted
+		    	//SaveLevelsCompleted();
 			}
 		}
 	}
@@ -2605,6 +2871,13 @@ PlayGame::Result PlayGame::mousePressed(SDL_Event event){
 
 						// Spawn bosss
 						bos.Spawn(boss, mex+camx, mey+camy, 256, 256, 0.0, randDouble(3.6, 4.4), 0);
+					}
+
+					// If bosss is our placement selection
+					if (place_type == 4) {
+
+						// Spawn Mob
+						mb.Spawn(mob, mex+camx, mey+camy, 20, 24, 0.0, randDouble(1.6, 1.4), 0);
 					}
 				}
 			}
@@ -2848,6 +3121,12 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				{
 					ite.RemoveAll(item);
 				}
+
+				// Currently selected: Mobs
+				else if (place_type == 4)
+				{
+					mb.RemoveAll(mob);
+				}
 			}
 			// Remove all tiles
 			else {
@@ -2862,6 +3141,9 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 
 				// Remove items
 				ite.RemoveAll(item);
+
+				// Remove mobs
+				mb.RemoveAll(mob);
 			}
 		}
 		break;
@@ -2942,6 +3224,9 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 
 				// Save Item data
 				aVeryLongString << ite.SaveData(item);
+
+				// Save Boss data
+				aVeryLongString << mb.SaveData(mob);
 
 				// Save Player spawn point
 				aVeryLongString << saveSpawnPoint();
@@ -3176,6 +3461,9 @@ void PlayGame::LoadLevel()
 
 		// Remove items
 		ite.RemoveAll(item);
+
+		// Remove mobs
+		mb.RemoveAll(mob);
 	}
 
 	// Set file path and name
@@ -3200,6 +3488,9 @@ void PlayGame::LoadLevel()
 
 		// Load Item data
 		ite.LoadData(item, fileTileDataL);
+
+		// Load Mob data
+		mb.LoadData(mob, fileTileDataL);
 
 		// Load Player spawn point
 		fileTileDataL >>  this->spawnX >> this->spawnY;

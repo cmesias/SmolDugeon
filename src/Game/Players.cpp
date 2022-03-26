@@ -95,7 +95,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	this->mana					= this->maxMana;
 	this->manaRegenSpeed		= 8.75;
 	this->manaGainOnParry		= 5.25;
-	this->damage				= 75;
+	this->damage				= 40;
 	this->damageMultipler		= 1;
 	this->castDamage			= 25;
 	this->knockBackPower		= 1.58;

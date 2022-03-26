@@ -18,6 +18,7 @@
 #include "Game/Tiles.h"
 #include "Game/Tilec.h"
 #include "Game/Item.h"
+#include "Game/Mob.h"
 #include "Helper.h"
 #include "Options.h"
 
@@ -35,8 +36,9 @@ public:	// globals
 	bool debug;
 	/* 0: Textured tiles
 	 * 1: Collision Tiles
-	 * 2: Boss objects
-	 * 3: Item objects
+	 * 2: Boss
+	 * 3: Item
+	 * 4: Mobs
 	 *
 	 */
 	int place_type;
@@ -173,6 +175,10 @@ public:	// Other classes
 	Boss bos;
 	Boss boss[100];
 
+	// Mob
+	Mob mb;
+	Mob mob[100];
+
 	// Items (mostly swords)
 	Item ite;
 	Item item[100];
@@ -256,6 +262,14 @@ public:	// Functions mixed with other classes
 	// Check collision between Particle & Boss
 	void checkCollisionParticleBoss();
 
+	//------------------ Hurts Mobs
+	// Check collision between Particle & Mobs
+	void checkCollisionParticleMob();
+
+	//------------------ Hurts Mobs
+	// Check collision between Player attacks & Mobs
+	void checkPlayerAttacksCollisionMob();
+
 	// Check collision between Boss & Tile
 	void checkBossTileCollision();
 
@@ -284,7 +298,7 @@ public:	// Functions mixed with other classes
 	void checkCollisionParticleParticle();
 
 	//---------- Boss deafeated? Update levelsCompleted.mp
-	void checkBossDied();
+	void checkBossOrMobDied();
 
 
 public:	// Controls
