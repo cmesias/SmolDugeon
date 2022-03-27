@@ -92,7 +92,9 @@ int main(int argc, char *argv[]) {
  * TODO [ ] (3-25-2022) - Integrate Enemies.cpp into PlayGame.cpp to spawn different types of monsters
  * TODO [ ] (3-25-2022) - Add coins variable to -> Player.cpp
  * TODO [ ] (3-25-2022) - When Mobs die, have them drop coins -> Mob.cpp
- * TODO [ ] (3-25-2022) - When Mobs die, have them drop coins -> Mob.cpp
+ * TODO [ ] (3-27-2022) - When picking up an item from an area, permanently remove that item from that area
+ * TODO [x] (3-27-2022) - No inventory slot, just one slot per run
+ * TODO [x] (3-27-2022) - Crashes when returning to menu or exiting game
  *
  *
  * //---------- Item.cpp

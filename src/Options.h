@@ -29,6 +29,9 @@ public:
 
 public:	// Exclusive for this game
 
+	// Mouse cursor
+	LTexture gCursor;
+
 	// Textures
 	LTexture gParticles;
 	SDL_Rect cParticles = {32, 0, 8, 8};
@@ -394,21 +397,8 @@ public:	// functions
 	// Render
 	void RenderII(LWindow &gWindow, SDL_Renderer *gRenderer);
 
-	// Render Text
-	void RenderTextII(SDL_Renderer *gRenderer);
-
 private:
-	void updateJoystick(SDL_Renderer *gRenderer, LWindow &gWindow, SDL_Event *e);
 
-	bool A;									// XBOX a button
-	bool LAnalogTrigger;					// this will let us use the joystick as a trigger rather than an axis
-	bool RAnalogTrigger;					// this will let us use the joystick as a trigger rather than an axis
-	const int JOYSTICK_DEAD_ZONE = 8000;
-	const int LTRIGGER_DEAD_ZONE = 25000;
-	const int RTRIGGER_DEAD_ZONE = 25000;
-	int joyStickID;
-	double LAngle;
-	double RAngle;
 	bool confirmKey;
 	// Used in type: 2
 	// 0: If we are in the Audio, Video, back, Apply Audio, Apply Video indexX

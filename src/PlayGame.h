@@ -9,7 +9,6 @@
 #define PLAYGAME_H_
 
 #include "Game/Boss.h"
-#include "Game/Enemies.h"
 #include "Game/Maps.h"
 #include "Game/Players.h"
 #include "Game/Spawners.h"
@@ -154,14 +153,12 @@ public:	// Other classes
 	Map map;
 	Particle part;
 	Spawner spaw;
-	Enemy enem;
 	//Pause pau;
 	//Pause::Result pauseResult;
 	Players player;
 
 	// Class instance, multiple
 	Particle particles[800];
-	Enemy enemy[8];
 	Spawner spawner[200];
 	//Mixed mix;
 	//Controls cont;
@@ -210,6 +207,7 @@ public:	// Player variables
 	// Player spawn point
 	float spawnX = 0, spawnY = 0;
 	std::string saveSpawnPoint();
+	std::string saveMapSize();
 	void loadSpawnPoint();
 public:
     // camera
@@ -252,15 +250,22 @@ public:	// Core functions
 
 public:	// Functions mixed with other classes
 
-	// Check collision between Particle & Enemy
-	void checkCollisionParticleEnemy(Particle particle[], Particle &part, Enemy enemy[], Players &player);
-
 	// Check collision between Particle & Tile
 	void checkCollisionParticleTile();
 
 	//------------------ Hurts Boss
 	// Check collision between Particle & Boss
 	void checkCollisionParticleBoss();
+
+	//------------------ Items
+
+	// Check collision between Player & Item
+	void checkCollisionPlayerItem();
+
+	//------------------ Items
+
+
+	//------------------ Mobs
 
 	//------------------ Hurts Mobs
 	// Check collision between Mobs & Particle
@@ -277,6 +282,8 @@ public:	// Functions mixed with other classes
 	// Checks collision with Tiles, while at the same
 	// time creates a path to go towards the Player while avoiding Tiles
 	void checkCollisionTileMob();
+
+	//------------------ Mobs
 
 	// Check collision between Boss & Tile
 	void checkBossTileCollision();
@@ -307,7 +314,6 @@ public:	// Functions mixed with other classes
 
 	//---------- Boss deafeated? Update levelsCompleted.mp
 	void checkBossOrMobDied();
-
 
 public:	// Controls
 	// Editor controls

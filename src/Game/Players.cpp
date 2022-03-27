@@ -29,51 +29,52 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	x 					= spawnX;
 	y 					= spawnY;
 	name				= newName;
-	vX 					= 0.0;
-	vY 					= 0.0;
-	delayT 				= 0;
-	health				= 100;
-	delay 				= false;
-	initialshot 		= false;
-	deathScreen 		= false;
-	alive 				= true;
-	returned			= false;
-	indexSaved 			= -1;
-	invurnerableFrame	= 1;
-	invurnerableTick	= 0;
-	invurnerableT		= 300;
-	invurnerable		= true;
 
-	trigger 			= false;
-	moving				= false;
-	moveleft 			= false;
-	moveright 			= false;
-	moveup 				= false;
-	movedown			= false;
-	facing				= "right";
-	flipW				= SDL_FLIP_NONE;
-	walkTimer 			= 0;
-	walkTimerVFX 		= 0;
 	sprite_index 		= 0;
-	stunned 			= false;
-	stunTimer 			= 0;
 	playSlash 			= false;
 	clash 				= false;
-	attack 				= false;
-	spawnAttack 		= false;
-	manaRegenTimer		= 0;
 
 	if (!respawn){
 		score 			= 0;
 		hearts 			= 3;
 	}
 
+	// Screen prompts
+	deathScreen 		= false;
+	alive 				= true;
+
 	// Always reset these
 
-	// Attack ability
+	// Walking
+	facing				= "right";
+	flipW				= SDL_FLIP_NONE;
+	moving				= false;
+	moveleft 			= false;
+	moveright 			= false;
+	moveup 				= false;
+	movedown			= false;
+	walkTimer 			= 0;
+	walkTimerVFX 		= 0;
+	vX 					= 0.0;
+	vY 					= 0.0;
+
+	// Invulnerability ability
+	invurnerableFrame	= 1;
+	invurnerableTick	= 0;
+	invurnerableT		= 300;
+	invurnerable		= true;
+
+	// Shoot Attack
+	shootTimer 			= 0;
+	shootDelay 			= false;
+	initialshot 		= false;
+	trigger 			= false;
+
+	// Attack
 	this->attackTimer 		= 0;
 	this->attackFrame 		= 0;
 	this->attack 			= false;
+	this->spawnAttack 		= false;
 	this->attackType		= -1;
 
 	// Parry ability
@@ -83,49 +84,63 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	this->parryCDMax		= 60*2.6;
 
 	// Dash ability
-	this->dash 			= false;
-	this->dashSpeed 	= 10;
-	this->dashLength 	= 5;
-	this->dashCounter 	= 0;
-	this->dashCoolCounter = 0;
+	this->dash 				= false;
+	this->dashSpeed 		= 10;
+	this->dashLength 		= 5;
+	this->dashCounter 		= 0;
+	this->dashCoolCounter 	= 0;
+
+	// Stunned ability
+	this->stunned 			= false;
+	this->stunTimer 		= 0;
+
+	// Official player control keys
+	this->pressedEquipKey 	= false;
 
 	// TODO (3-9-2022) [ ] - Save these player stats in a file. This will be the players save data.
 	this->AttackSpeed 			= 6.87;
 	this->maxMana				= 100;
 	this->mana					= this->maxMana;
+	this->manaRegenTimer		= 0;
 	this->manaRegenSpeed		= 8.75;
 	this->manaGainOnParry		= 5.25;
-	this->damage				= 40;
+	this->damage				= 10;
 	this->damageMultipler		= 1;
-	this->castDamage			= 80;
+	this->castDamage			= 40;
 	this->knockBackPower		= 1.58;
-
-	// Joystick controls
-	{
-		controls 			= 0;
-		A 					= false;
-		B 					= false;
-		X 					= false;
-		Y 					= false;
-		D_UP 				= false;
-		D_DOWN 				= false;
-		D_LEFT 				= false;
-		D_RIGHT 			= false;
-		LB 					= false;
-		RB 					= false;
-		BACK 				= false;
-		START 				= false;
-		L3 					= false;
-		R3 					= false;
-		LAngle 				= 0.0;
-		RAngle 				= 0.0;
-		zAxisLeft 			= 0.0;
-		zAxisRight 			= 0.0;
-		leftclick 			= false;
-		rightclick 			= false;
-		test 				= false;
-	}
 }
+
+void Players::RespawnPlayer() {
+	this->ActivateInvurnerability();
+	this->StopMovement();
+	this->StopSlashAttack();
+	this->StopDashing();
+	this->ResetDashing();
+	this->health				= this->healthMax;
+	this->moveleft 				= false;
+	this->moveright 			= false;
+	this->moveup 				= false;
+	this->movedown				= false;
+	this->walkTimer 			= 0;
+	this->walkTimerVFX 			= 0;
+}
+
+void Players::ResetLivesAndPlayer() {
+
+	// Name
+	std::string newName;
+	newName="AAA";
+
+	// Set default sword: fists
+	this->EquipSword(-1, 10);
+
+	// Reset score and lives, and turn player alive
+	this->score 				= 0;
+	this->hearts 				= 3;
+	this->alive 				= true;
+}
+
+
 
 // Check collision between 2 objects
 bool Players::checkCollision(int x, int y, int w, int h, int x2, int y2, int w2, int h2){
@@ -140,9 +155,6 @@ bool Players::checkCollision(int x, int y, int w, int h, int x2, int y2, int w2,
 
 // Load asteroid resources
 void Players::Load(SDL_Renderer* gRenderer){
-
-	// open joystick i
-    joy = SDL_JoystickOpen(1);
 
     // load textures
 	gPlayer.loadFromFile(gRenderer, "resource/gfx/player/player.png");
@@ -185,8 +197,6 @@ void Players::Load(SDL_Renderer* gRenderer){
 
 // Free asteroid resources
 void Players::Free(){
-	// Free joystick
-    SDL_JoystickClose(joy);
 
     // Free textures
 	gPlayer.free();
@@ -216,25 +226,7 @@ void Players::Free(){
 void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, int mx, int my){
 
 	// Determine controls
-	if (controls==0){
-		trigger = initialshot;
-	}else if(controls==1){
-		trigger = A;
-	}else if(controls==2){
-		trigger = initialshot;
-	}
-
-	// Get shoot trigger
-	if (controls==0){
-		trigger = initialshot;
-	}else if(controls==1){
-		trigger = A;
-		A = false;
-	}else if(controls==2){
-		trigger = initialshot;
-		initialshot = false;
-	}
-
+	trigger = initialshot;
 
 	// Get player angle based on mouse coordinates
 	angle = atan2(my - y-h/2,mx - x-w/2);
@@ -249,30 +241,15 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 	radianCos = floor(cos(radians)*10+0.5)/10;
 	radianSin = floor(sin(radians)*10+0.5)/10;
 
-	/*int newmx = mx-particleW/2;
-	int newmy = my-particleH/2;
-	float distance = sqrt((newmx - barrelX) * (newmx - barrelX)+
-						  (newmy - barrelY) * (newmy - barrelY));
-	if (distance <= 1) {
-		distance = 1;
-	}
-	float newAngle = atan2(newmy - barrelY,newmx - barrelX);
-	newAngle = newAngle * (180 / 3.1416);
-	//Set player angle max limits
-	if (newAngle < 0) {
-		newAngle = 360 - (-newAngle);
-	}*/
-
 	// Shoot particle
 	if (trigger)
 	{
 		// If we have enough mana
-		if (this->mana >= 5) {
-			if (!delay)
+		if (this->mana >= 5)
+		{
+			if (!shootDelay)
 			{
-				delay = true;
-
-				// recoil of gun
+				shootDelay = true;
 
 				// play audio
 				/*Mix_PlayChannel(1, sCastSFX, 0);
@@ -285,61 +262,46 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 				else if (facing == "right") {
 					offSetX = 0;
 				}
+				float spawnX = x+w/2-offSetX;
+				float spawnY = y+w/2;
 
-				// spawn particle
-				p_dummy.spawnParticleAngle(particle, 0,
-						x+w/2-offSetX,
-						y+w/2,
-						particleW, particleH,
-					   angle, 21,
-					   this->castDamage, this->castDamage, 0,
-					   {255, 255,0}, 1,
-					   1, 1,
-					   255, 0,
-					   100, 2,
-					   false, 0);
+				// Spawn Slash Attack particle
+				p_dummy.spawnSlashAttackProjectile(particle, spawnX, spawnY,
+						this->particleW, this->particleH, this->castDamage);
 
 				// Subtract mana
 				this->mana -= 2;*/
 			}
 		}
 
-		// We dont have enough mana, just spew out Particles from the Player instead
+		// If no more mana
 		else {
-			// Spawn particle effect
-			for (double i=0.0; i< 90.0; i+= rand() % 10 + 20){
-				int rands = rand() % 11 + 3;
-				float newX = x2;
-				float newY = y2;
-				p_dummy.spawnParticleAngle(particle, 2,
-									newX-rands/2,
-									newY-rands/2,
-								   rands, rands,
-								   angle -45 + i, randDouble(2.1, 5.1),
-								   0.0, 0, 0,
-								   {244, 144, 0, 255}, 1,
-								   1, 1,
-								   rand() % 100 + 150, rand() % 2 + 5,
-								   rand() % 50 + 90, 0,
-								   true, randDouble(0.1, 0.7),
-								   100, 10);
-			}
+
+			// Spawn no more mana VFX
+			//p_dummy.spawnNoMoreManaVFX(particle, x2, y2);
 		}
 	}
 
 	// Shoot delay
-	if (delay) {
-		delayT += AttackSpeed;
-		if (delayT > 60) {
-			delay = false;
-			delayT = 0;
+	if (shootDelay) {
+
+		// Start timer
+		shootTimer += AttackSpeed;
+
+		// After 1 second
+		if (shootTimer > 60) {
+
+			// Stop delay
+			shootDelay = false;
+
+			// Reset shoot timer
+			shootTimer = 0;
 		}
 	}
 }
 
 // Update Player
 void Players::Update(Map &map,
-					Enemy enemy[], Enemy &e_dummy,
 					Particle particle[], Particle &p_dummy,
 					Tile &tl, Tile tile[],
 					Tilec &tlc, Tilec tilec[],
@@ -355,39 +317,9 @@ void Players::Update(Map &map,
 	x2 = x+w/2;
 	y2 = y+h/2;
 
-	// Reset upon leaving pause menu
-	if (returned){
-		returned 		= false;
-		leftclick 	= false;
-		initialshot 	= false;
-		A				= false;
-		RB			= false;
-	}
-
 	// Player alive
 	if (alive)
 	{
-		/////////////////////////////////////////////////////////////////////////////////////////////////////
-		//----------------------------------- Player Move -------------------------------------------------//
-		//-------------------------------------------------------------------------------------------------//
-		bool trigger = false;
-
-		// Get Angle
-		if (this->controls==0){
-			//
-		}else if(this->controls==1){
-			this->angle = this->LAngle;
-			trigger = this->RB;
-		}else if(this->controls==2){
-			//
-		}
-
-		// Player angle by rotation
-		if (this->rotateLeft){
-			//angle -= 5;
-		}else if (this->rotateRight){
-			//angle += 5;
-		}
 
 		////////////////////////////////////////////////////////////////////////////////////
 		//--------------------------------------------------------------------------------//
@@ -719,15 +651,10 @@ void Players::Update(Map &map,
 							// Attack-object's width and height
 							int tempHeight = 64;
 							int tempWidth = 38;
-							if (facing == "right") {
-
-								// Set attack object's x pos to the right of player's body
+							if (facing == "right")
 								width = this->w;
-							}else{
-
-								// Set attack object's x pos to the left of player's body
+							else
 								width = -tempWidth;
-							}
 
 							// Spawn attack object (it will appear in the world for 1 frame then remove itself)
 							obj.spawn(object, this->x+width,
@@ -891,10 +818,6 @@ void Players::Update(Map &map,
 		//--------------------------------------------------------------------------------//
 		//-------------------------------- Stop Movement ---------------------------------//
 
-	    // Location of sword when down-stabbing
-		this->swordX = this->x;
-		this->swordY = this->y+35;
-
 		// Player not moving X
 		if (!moveleft && !moveright && !dash) {
 	        vX = vX - vX * 0.6;
@@ -915,78 +838,55 @@ void Players::Update(Map &map,
 		////////////////////////////////////////////////////////////////////////////////////
 
 		// Player shoot
-		fire(particle, p_dummy, sCast, mex+camx, mey+camy);
+		this->fire(particle, p_dummy, this->sCast, mex+camx, mey+camy);
 
 		// Player shield
-		if (invurnerable){
-			invurnerableT-=1;
-			invurnerableTick += 20;
-			if (invurnerableTick>60){
-				invurnerableTick = 0;
-				invurnerableFrame += 1;
+		if (this->invurnerable){
+			this->invurnerableT-=1;
+			this->invurnerableTick += 20;
+			if (this->invurnerableTick>60){
+				this->invurnerableTick = 0;
+				this->invurnerableFrame += 1;
 			}
-			if (invurnerableFrame>7){
-				invurnerableFrame = 1;
-				invurnerableTick = 0;
+			if (this->invurnerableFrame>7){
+				this->invurnerableFrame = 1;
+				this->invurnerableTick = 0;
 			}
-			if (invurnerableT<=0){
-				invurnerableT= 300;
-				invurnerable = false;
+			if (this->invurnerableT<=0){
+				this->invurnerableT= 300;
+				this->invurnerable = false;
 			}
 		}
 
 		// Check high score MAX
-		if (score > 999999999){
-			score = 999999999;
+		if (this->score > 999999999){
+			this->score = 999999999;
 		}
 
-		// Player death
-		if (health <=0)
+		// Player death, lose hearts
+		if (this->health <=0)
 		{
-			// Save high score
-			SaveHighScore(LevelWeLoaded);
-
-			//Spawn explosion after asteroid death
-			// spawn blood particle effect
-			for (double i=0.0; i< 360.0; i+=rand() % 10 + 10){
-				int rands = rand() % 9 + 2;
-				float newX = x+w/2;
-				float newY = y+h/2;
-				p_dummy.spawnParticleAngle(particle, 2,
-									newX-rands/2,
-									newY-rands/2,
-								   rands, rands,
-								   i, randDouble(2.1, 5.1),
-								   0.0, 0, 0,
-								   {255, 0, 0, 255}, 1,
-								   1, 1,
-								   rand() % 100 + 150, rand() % 2 + 5,
-								   rand() % 50 + 90, 0,
-								   true, 0.11,
-								   rand() % 9 + 2, 1);
-			}
+			// Spawn blood VFX
+			p_dummy.spawnBloodVFX(particle, this->x, this->y, this->w, this->h, {255,0,0});
 
 			// Take away hearts
-			hearts-= 1;
+			this->hearts-= 1;
 
 			// Reset Player
-			Init(spawnX, spawnY, name, true);
+			this->RespawnPlayer();
 
 			// Player ran out of hearts, que Death Screen
-			if (hearts<=0){
+			if (this->hearts<=0){
 
-				// Reset some accumulated stuff
-				e_dummy.ENEMY_SPAWN = 1;
-				e_dummy.mileScore	= 0;
-				e_dummy.SPAWN_ENEMY	= false;
+				// Bring player back to life
+				this->alive 			= false;
 
-				// Set variables
-				invurnerableT 	= 300;
-				invurnerable 	= true;
-				alive 			= false;
-				deathScreen 	= true;
+				// Show deathscreen
+				this->deathScreen 	= true;
 
-				// SAVE HIGH SCORE
+				// Save high score
+				SaveHighScore(LevelWeLoaded);
+
 			}
 		}
 
@@ -1072,11 +972,10 @@ void Players::Update(Map &map,
 				{
 					// Restores players base stats and health
 					leftclick			= false;
-					RestorePlayer(spawnX, spawnY);
-					RestartLevel = true;
 
-					// Clear Asteroids & Enemies
-					e_dummy.clear(enemy);
+					// Reset Player
+					ResetLivesAndPlayer();
+					RestartLevel = true;
 				}
 
 				// Option: No, go to Main Menu
@@ -1111,13 +1010,11 @@ void Players::Update(Map &map,
 				// Option: Play
 				if (checkCollision(mex, mey, 1, 1, continueButton[0].x, continueButton[0].y, continueButton[0].w, continueButton[0].h))
 				{
-					// Restores players base stats and health
 					leftclick			= false;
-					RestorePlayer(spawnX, spawnY);
-					RestartLevel = true;
 
-					// Clear Asteroids & Enemies
-					e_dummy.clear(enemy);
+					// Reset Player
+					ResetLivesAndPlayer();
+					RestartLevel = true;
 				}
 
 				// Option: Reset high scores
@@ -1157,8 +1054,12 @@ void Players::Render(int mx, int my, int camx, int camy, LWindow gWindow, SDL_Re
 					gPlayer.render(gRenderer, x-camx, y+yOffset-camy, 75, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
 
 					// Render player sword
-					gSwords.render(gRenderer, x+xOffSetSwordSlashingRight-camx, y+yOffSetSwordSlashing-camy,
-							swordW, swordH, &rSwords[swordInHand_Index], 90, NULL, flipW);
+					if (swordInHand_Index == -1) {
+
+					} else {
+						gSwords.render(gRenderer, x+xOffSetSwordSlashingRight-camx, y+yOffSetSwordSlashing-camy,
+								swordW, swordH, &rSwords[swordInHand_Index], 90, NULL, flipW);
+					}
 				}
 
 				// Looking Left
@@ -1166,8 +1067,12 @@ void Players::Render(int mx, int my, int camx, int camy, LWindow gWindow, SDL_Re
 					gPlayer.render(gRenderer, x+xOffSetSlashingLeft-camx, y+yOffset-camy, 75, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
 
 					// Render player sword
-					gSwords.render(gRenderer, x+xOffSetSwordSlashingLeft-camx, y+yOffSetSwordSlashing-camy,
-							swordW, swordH, &rSwords[swordInHand_Index], -90, NULL, flipW);
+					if (swordInHand_Index == -1) {
+
+					} else {
+						gSwords.render(gRenderer, x+xOffSetSwordSlashingLeft-camx, y+yOffSetSwordSlashing-camy,
+								swordW, swordH, &rSwords[swordInHand_Index], -90, NULL, flipW);
+					}
 				}
 			}
 
@@ -1187,13 +1092,22 @@ void Players::Render(int mx, int my, int camx, int camy, LWindow gWindow, SDL_Re
 				// Looking Right
 				if (facing == "right") {
 					// Render player sword
-					gSwords.render(gRenderer, x+xOffSetWalkingRight+xOffSetSwordWalkAndDash-camx, y+yOffSetSword-camy, swordW, swordH, &rSwords[swordInHand_Index], 0.0, NULL, flipW);
+					if (swordInHand_Index == -1) {
+
+					} else {
+						gSwords.render(gRenderer, x+xOffSetWalkingRight+xOffSetSwordWalkAndDash-camx, y+yOffSetSword-camy, swordW, swordH,
+								&rSwords[swordInHand_Index], 0.0, NULL, flipW);
+					}
 				}
 
 				// Looking Left
 				else {
 					// Render player sword
-					gSwords.render(gRenderer, x-xOffSetSwordWalkAndDash/2-camx, y+yOffSetSword-camy, swordW, swordH, &rSwords[swordInHand_Index], 0.0, NULL, flipW);
+					if (swordInHand_Index == -1) {
+
+					} else {
+						gSwords.render(gRenderer, x-xOffSetSwordWalkAndDash/2-camx, y+yOffSetSword-camy, swordW, swordH, &rSwords[swordInHand_Index], 0.0, NULL, flipW);
+					}
 				}
 			}
 		}
@@ -1269,38 +1183,6 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 				//						 continueButton[2].y+continueButton[2].h/2-gText.getHeight()/2,
 				//						 gText.getWidth(), gText.getHeight());
 			}
-
-			// Render High Score text
-			/*for (int i=0; i<10; i++){
-				std::stringstream tempString(highList[i].c_str());
-				std::string line;
-				while (getline(tempString, line)) {
-					std::stringstream iss(line);
-					std::string temps[2];
-					iss >> temps[0] >> temps[1];
-
-					// Show Player where they are ranked
-					if (indexSaved==i){
-						gText.loadFromRenderedText(gRenderer, temps[0].c_str(), {244,144,20}, gFont20);
-						gText.setAlpha(255-i*10);
-						gText.render(gRenderer, continueButton[0].x+position,
-								continueButton[0].y+continueButton[0].h+20+i*14,
-								gText.getWidth(), gText.getHeight());
-					}else{
-						gText.loadFromRenderedText(gRenderer, temps[0].c_str(), color, gFont20);
-						gText.setAlpha(255-i*10);
-						gText.render(gRenderer, continueButton[0].x+position,
-								continueButton[0].y+continueButton[0].h+20+i*14,
-								gText.getWidth(), gText.getHeight());
-					}
-
-					gText.loadFromRenderedText(gRenderer, temps[1].c_str(), color, gFont20);
-					gText.setAlpha(255-i*10);
-					gText.render(gRenderer, position2,
-							continueButton[1].y+continueButton[1].h+20+i*14,
-							gText.getWidth(), gText.getHeight());
-				}
-			}*/
 		}
 
 
@@ -1435,6 +1317,16 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
 	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*2, gText.getWidth(), gText.getHeight());
 
+	tempsi.str( std::string() );
+	tempsi << "Damage +" << this->damage;
+	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*13, gText.getWidth(), gText.getHeight());
+
+	tempsi.str( std::string() );
+	tempsi << "Cast Damage +" << this->castDamage;
+	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*14, gText.getWidth(), gText.getHeight());
+
 	//tempsi.str( std::string() );
 	//tempsi << "dmg x " << this->damageMultipler;
 	//gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255,255,255}, gFont13);
@@ -1520,20 +1412,19 @@ void Players::OnKeyDown(SDL_Keycode sym )
 	switch (sym)
 	{
 	case SDLK_a:
-		this->controls = 0;
 		this->moveleft = true;
 		break;
 	case SDLK_d:
-		this->controls = 0;
 		this->moveright = true;
 		break;
 	case SDLK_w:
-		this->controls = 0;
 		this->moveup = true;
 		break;
 	case SDLK_s:
-		this->controls = 0;
 		this->movedown = true;
+		break;
+	case SDLK_e:
+		this->pressedEquipKey = true;
 		break;
 	case SDLK_h:
 		//debug = ( !debug );
@@ -1592,6 +1483,9 @@ void Players::OnKeyUp(SDL_Keycode sym )
 	case SDLK_s:
 		this->movedown = false;
 		break;
+	case SDLK_e:
+		this->pressedEquipKey = false;
+		break;
 	case SDLK_j:
 
 		break;
@@ -1608,14 +1502,12 @@ void Players::OnKeyUp(SDL_Keycode sym )
 void Players::mouseClickState(SDL_Event &e){
 	if (e.type == SDL_MOUSEBUTTONDOWN) {
 		if (e.button.button == SDL_BUTTON_LEFT) {
-			this->controls = 0;
 			this->leftclick = true;
 
 			// Attack
 			SlashAttack();
 		}
 		if (e.button.button == SDL_BUTTON_RIGHT) {
-			this->controls = 0;
 			this->rightclick = true;
 		}
 	}else if (e.type == SDL_MOUSEBUTTONUP) {
@@ -1627,111 +1519,6 @@ void Players::mouseClickState(SDL_Event &e){
 		}
 		if (e.button.button == SDL_BUTTON_RIGHT) {
 			this->rightclick = false;
-		}
-	}
-}
-
-// Update XBOX 360 controls
-void Players::updateJoystick( SDL_Event &e){
-
-	/* Xbox 360 Controls */
-
-	// Get Left Analog Angle
-	if (((SDL_JoystickGetAxis(this->joy, 0) < -JOYSTICK_DEAD_ZONE) || (SDL_JoystickGetAxis(this->joy, 0) > JOYSTICK_DEAD_ZONE)) ||
-		((SDL_JoystickGetAxis(this->joy, 1) < -JOYSTICK_DEAD_ZONE) || (SDL_JoystickGetAxis(this->joy, 1) > JOYSTICK_DEAD_ZONE))){
-		this->LAngle = atan2(SDL_JoystickGetAxis(this->joy, 1), SDL_JoystickGetAxis(this->joy, 0)) * ( 180.0 / M_PI );
-	}
-
-	// Xbox 360 Controls
-	if (e.type == SDL_JOYBUTTONDOWN && e.jbutton.state == SDL_PRESSED && e.jbutton.which == 0){
-		switch(e.jbutton.button){
-		case 0:
-			this->D_UP = true;
-			break;
-		case 1:
-			this->D_DOWN = true;
-			break;
-		case 2:
-			this->D_LEFT = true;
-			break;
-		case 3:
-			this->D_RIGHT = true;
-			break;
-		case 4:
-			this->START = true;
-			break;
-		case 5:
-			this->BACK = true;
-			break;
-		case 6:
-			this->L3 = true;
-			break;
-		case 7:
-			this->R3 = true;
-			break;
-		case 8:
-			this->LB = true;
-			break;
-		case 9:
-			this->RB = true;
-			break;
-		case 10:
-			this->A = true;
-			break;
-		case 11:
-			this->B = true;
-			break;
-		case 12:
-			this->X = true;
-			break;
-		case 13:
-			this->Y = true;
-			break;
-		}
-	}else if (e.type == SDL_JOYBUTTONUP && e.jbutton.state == SDL_RELEASED && e.jbutton.which == 0){
-		switch(e.jbutton.button){
-		case 0:
-			this->D_UP = false;
-			break;
-		case 1:
-			this->D_DOWN = false;
-			break;
-		case 2:
-			this->D_LEFT = false;
-			break;
-		case 3:
-			this->D_RIGHT = false;
-			break;
-		case 4:
-			this->START = false;
-			break;
-		case 5:
-			this->BACK = false;
-			break;
-		case 6:
-			this->L3 = false;
-			break;
-		case 7:
-			this->R3 = false;
-			break;
-		case 8:
-			this->LB = false;
-			break;
-		case 9:
-			this->RB = false;
-			break;
-		case 10:
-			this->A = false;
-			break;
-		case 11:
-			this->B = false;
-			break;
-		case 12:
-			this->X = false;
-			break;
-		case 13:
-			this->Y = false;
-			break;
 		}
 	}
 }
@@ -1827,15 +1614,6 @@ void Players::ActivateDash() {
 
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// MUTATOR FUNCTIONS ///////////////////////////////
-
-void Players::RestorePlayer(float spawnX, float spawnY) {
-	// Reset Player
-	std::string newName;
-	newName="AAA";
-	Init(spawnX, spawnY, newName, false);
-	///////////input.getInput(gameLoop, quit, newName, gWindow, gRenderer);
-
-}
 
 float Players::moveX(float value) {
 	return this->x += value;
@@ -1935,6 +1713,12 @@ void Players::ResetDashing()
 	this->dashCoolCounter = 0;
 }
 
+void Players::EquipSword(int swordInHand_Index, float swordDamage)
+{
+	this->swordInHand_Index = swordInHand_Index;
+	this->damage = swordDamage;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// GETTER FUNCTIONS ////////////////////////////////
 
@@ -2022,6 +1806,10 @@ float Players::getDashStatus() {
 
 float Players::getScore() {
 	return this->score;
+}
+
+float Players::getEquipState() {
+	return this->pressedEquipKey;
 }
 
 void Players::ResetHighScore(int LevelWeLoaded){

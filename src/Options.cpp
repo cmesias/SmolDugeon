@@ -150,8 +150,6 @@ void Options::applyMasterAudioCFG() {
 //Get's input from user and returns it
 void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 {
-	// Mouse cursor
-	LTexture gCursor;
 	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
 
 	SDL_Event e;
@@ -185,9 +183,6 @@ void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 	confirmMouse[1]		= false;
 	confirm				= false;
 	confirmKey			= false;
-	A					= false;
-	LAnalogTrigger		= false;
-	RAnalogTrigger		= false;
 	focusedOther		= false;
 	//timer				= revertSettingsTimer;
 	timer				= revertSettingsTimer;
@@ -292,8 +287,6 @@ void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 			if (e.type == SDL_MOUSEMOTION) {
 				key = 1;
 			}
-			// Get title index from keyboard or xbox controller
-			updateJoystick(gRenderer, gWindow, &e);
 		}
 
 		// Get mouse coordinates
@@ -1088,7 +1081,13 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 			tempss << title[i].name;
 
 			// Set index if selection if over a title item
-			if (((index == i && confirmKey) || (index == i && A)) && indexX == 0) {
+			if (
+
+					(    (index == i && confirmKey) || (index == i && confirmKey)) &&
+					indexX == 0
+
+
+					) {
 				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {0,200,0}, gFont);
 			}else if (index == i && indexX == 0) {
 				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {244,144,20}, gFont);
@@ -1298,7 +1297,7 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		for (int i=0; i<2; i++) {
 			SDL_Rect temprV {applyButton[i].x, applyButton[i].y, applyButton[i].w, applyButton[i].h};
 			// Hover
-			if ( ((applyMouse[i] || (indexOther-7) == i) && A) && indexX == 1 ) {
+			if ( ((applyMouse[i] || (indexOther-7) == i) && confirmKey) && indexX == 1 ) {
 				SDL_SetRenderDrawColor(gRenderer, 0, 200, 0, 155);
 			}
 			// Hover
@@ -1497,349 +1496,6 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	}
 
-}
-
-void Options::RenderTextII(SDL_Renderer *gRenderer) {
-
-}
-
-void Options::updateJoystick(SDL_Renderer *gRenderer, LWindow &gWindow, SDL_Event *e) {
-	/*////////////////// Xbox 360 Controls /////////////
-	if (e->type == SDL_CONTROLLERAXISMOTION) {
-		//controls = 1;
-	}
-	// Xbox 360 Controls
-	// Left Analog
-	if ( ((SDL_JoystickGetAxis(joy, 0) < -8000) || (SDL_JoystickGetAxis(joy, 0) > 8000)) ||
-		 ((SDL_JoystickGetAxis(joy, 1) < -8000) || (SDL_JoystickGetAxis(joy, 1) > 8000)) ){
-		LAngle = atan2(SDL_JoystickGetAxis(joy, 1), SDL_JoystickGetAxis(joy, 0)) * ( 180.0 / M_PI );
-	}
-	// Right Analog
-	if ( ((SDL_JoystickGetAxis(joy, 3) < -8000) || (SDL_JoystickGetAxis(joy, 3) > 8000)) ||
-		 ((SDL_JoystickGetAxis(joy, 4) < -8000) || (SDL_JoystickGetAxis(joy, 4) > 8000)) ){
-		RAngle = atan2(SDL_JoystickGetAxis(joy, 4), SDL_JoystickGetAxis(joy, 3)) * ( 180.0 / M_PI );
-	}
-	if (LAngle < 0) { LAngle = 360 - (-LAngle); }
-	if (RAngle < 0) { RAngle = 360 - (-RAngle); }
-
-	//// Left Analog/////
-	// Move left, x-axis
-	if (SDL_JoystickGetAxis(joy, 0) < -JOYSTICK_DEAD_ZONE){
-		if (!RAnalogTrigger) {
-			RAnalogTrigger = true;
-			if (type == 2) {
-				if (!focusedOther) {
-					if (indexX > 0) {
-						indexX -= 1;
-					}
-				}
-				minusValues();
-			}
-		}
-	}
-	// Move right, x-axis
-	else if (SDL_JoystickGetAxis(joy, 0) > JOYSTICK_DEAD_ZONE){
-		if (!RAnalogTrigger) {
-			RAnalogTrigger = true;
-			if (type == 2) {
-				if (!focusedOther) {
-					if (indexX < maxIndexX) {
-						indexX += 1;
-					}
-				}
-				addValues();
-			}
-		}
-	}else{
-		RAnalogTrigger = false;
-	}
-	// joy range between -500 and 500, no moving
-	if (SDL_JoystickGetAxis(joy, 0)/30 >= -500 && SDL_JoystickGetAxis(joy, 0)/30 <= 500){
-		//
-	}
-
-	// Move up, y-axis
-	if (SDL_JoystickGetAxis(joy, 1) < -JOYSTICK_DEAD_ZONE){
-		if (!LAnalogTrigger) {
-			LAnalogTrigger = true;
-			if (indexX == 0) {
-				if (index > 0) {
-					index -= 1;
-				}
-			}
-			else if (indexX == 1 && !focusedOther) {
-				if (indexOther > 0) {
-					indexOther -= 1;
-				}
-			}
-		}
-	}
-	// Move down, y-axis
-	else if (SDL_JoystickGetAxis(joy, 1) > JOYSTICK_DEAD_ZONE){
-		if (!LAnalogTrigger) {
-			LAnalogTrigger = true;
-			if (indexX == 0) {
-				int typeShown;
-				if (type==0) {
-					typeShown=4;
-				}else if (type==2) {
-					typeShown=2;
-				}
-				if (index < typeShown) {
-					index += 1;
-				}
-			}
-			else if (indexX == 1 && !focusedOther) {
-				if (indexOther < maxIndexOther) {
-					indexOther += 1;
-				}
-			}
-		}
-	}else{
-		LAnalogTrigger = false;
-	}
-	// joy range between -500 and 500, no moving
-	if (SDL_JoystickGetAxis(joy, 1)/30 >= -500 && SDL_JoystickGetAxis(joy, 1)/30 <= 500){
-		//
-	}
-
-	//// Right Analog/////
-	// Face left, x-axis
-	if (SDL_JoystickGetAxis(joy, 3)/30 < -500){
-	//	moveLeft = true;
-	}
-	// Face right, x-axis
-	if (SDL_JoystickGetAxis(joy, 3)/30 > 500){
-	//	moveRight = true;
-	}
-	// Face up, y-axis
-	if (SDL_JoystickGetAxis(joy, 4)/30 < -500){
-	//	moveUp = true;
-	}
-	// Face down, y-axis
-	if (SDL_JoystickGetAxis(joy, 4)/30 > 500){
-	//	moveDown = true;
-	}
-
-	//// Triggers Analog/////
-	// Left Trigger
-	if (SDL_JoystickGetAxis(joy, 2) > -LTRIGGER_DEAD_ZONE){
-		//
-	}
-	// Right Trigger
-	if (SDL_JoystickGetAxis(joy, 5) > -RTRIGGER_DEAD_ZONE){
-		//
-	}
-	//// DPAD Triggers ////
-	if (SDL_JoystickGetHat(joy, 0) == SDL_HAT_UP) {
-		key = 0;
-		if (indexX == 0) {
-			if (index > 0) {
-				index -= 1;
-			}
-		}
-		else if (indexX == 1 && !focusedOther) {
-			if (indexOther > 0) {
-				indexOther -= 1;
-			}
-		}
-	}
-	if (SDL_JoystickGetHat(joy, 0) == SDL_HAT_DOWN) {
-		key = 0;
-		if (indexX == 0) {
-			int typeShown;
-			if (type==0) {
-				typeShown=4;
-			}else if (type==2) {
-				typeShown=2;
-			}
-
-			// how far the index can go
-			if (index < typeShown) {
-				index += 1;
-			}
-		}
-		else if (indexX == 1 && !focusedOther) {
-			if (indexOther < maxIndexOther) {
-				indexOther += 1;
-			}
-		}
-	}
-	if (SDL_JoystickGetHat(joy, 0) == SDL_HAT_LEFT) {
-		key = 0;
-		if (type == 2) {
-			if (!focusedOther) {
-				if (indexX > 0) {
-					indexX -= 1;
-				}
-			}
-			minusValues();
-		}
-	}
-	if (SDL_JoystickGetHat(joy, 0) == SDL_HAT_RIGHT) {
-		key = 0;
-		if (type == 2) {
-			if (!focusedOther) {
-				if (indexX < maxIndexX) {
-					indexX += 1;
-				}
-			}
-			addValues();
-		}
-	}
-
-	if (SDL_JoystickGetHat(joy, 0) == SDL_HAT_LEFTUP) {
-		//
-	}
-	else if (SDL_JoystickGetHat(joy, 0) == SDL_HAT_RIGHTUP) {
-		//
-	}
-	else if (SDL_JoystickGetHat(joy, 0) == SDL_HAT_LEFTDOWN) {
-		//
-	}
-	else if (SDL_JoystickGetHat(joy, 0) == SDL_HAT_RIGHTDOWN) {
-		//
-	}
-
-	// Xbox 360 Controls
-	if (e->type == SDL_JOYBUTTONDOWN && e->jbutton.state == SDL_PRESSED && e->jbutton.which == 0){
-		key = 0;
-		switch(e->jbutton.button){
-		case SDL_CONTROLLER_BUTTON_DPAD_UP:
-			//
-			break;
-		case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-			//
-			break;
-		case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-			//
-			break;
-		case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-			//
-			break;
-		case SDL_CONTROLLER_BUTTON_A:
-			A = true;
-			if (indexOther < 7) {
-				if (indexX == 1) {
-					if (focusedOther) {
-						focusedOther = false;
-					}else{
-						focusedOther = true;
-					}
-				}
-			}
-			break;
-		case SDL_CONTROLLER_BUTTON_B:
-			focusedOther = false;
-			break;
-		case SDL_CONTROLLER_BUTTON_X:
-			//
-			break;
-		case SDL_CONTROLLER_BUTTON_Y:
-			//
-			break;
-		}
-	}else if (e->type == SDL_JOYBUTTONUP && e->jbutton.state == SDL_RELEASED && e->jbutton.which == 0){
-		switch(e->jbutton.button){
-		case SDL_CONTROLLER_BUTTON_DPAD_UP:
-			//
-			break;
-		case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-			//
-			break;
-		case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-			//
-			break;
-		case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-			//
-			break;
-		case SDL_CONTROLLER_BUTTON_A:
-			A = false;
-			if (indexX == 0) {
-				// PauseMenu
-				if (type==0)
-				{
-					if (index==0) {
-						pauseLoop 	= false;
-					}
-					// Enter Settings
-					else if (index==2) {
-						// Change type
-						type = 2;
-						// Change options
-						title[0].name = "AUDIO";
-						title[1].name = "VIDEO";
-						title[2].name = "BACK";
-						HIGHLIGHT_INDEX = -1;
-					}
-					// Exit To Main Menu
-					else if (index==3) {
-						optionsResult	= Back;
-						pauseLoop 		= false;
-						//gameLoop 		= false;
-						//selection 	= 0;
-					}
-					// Exit To Desktop
-					else if (index==4) {
-						optionsResult	= Exit;
-						pauseLoop 		= false;
-						//gameLoop 	= false;
-						//selection = -1;
-					}
-				}
-				// SubMenu
-				else if (type==2) {
-					// Press other buttons
-					if (index==0) {
-						HIGHLIGHT_INDEX = 0;
-					}else if (index==1) {
-						HIGHLIGHT_INDEX = 1;
-					}else if (index==2) {
-						// Change type
-						type = 0;
-
-						// Change options
-						title[0].name = "RESUME";
-						title[1].name = "TBA";
-						title[2].name = "SETTINGS";
-						title[3].name = "EXIT MAIN MENU";
-						title[4].name = "EXIT TO DESKTOP";
-						HIGHLIGHT_INDEX = -1;
-					}
-				}
-			}
-			else if (indexX == 1) {
-				if (type==2) {
-					// Press apply buttons
-					if (indexOther==7) {
-						actionApplyAudio();
-					}else if (indexOther==8) {
-						actionApplyVideo(gWindow);
-					}
-				}
-			}
-			else if (indexX == 2) {
-				if (type==2) {
-					actionKeep();
-				}
-			}
-			else if (indexX == 3) {
-				if (type==2) {
-					actionRevert(gWindow);
-				}
-			}
-			break;
-		case SDL_CONTROLLER_BUTTON_B:
-			//
-			break;
-		case SDL_CONTROLLER_BUTTON_X:
-			//
-			break;
-		case SDL_CONTROLLER_BUTTON_Y:
-			//
-			break;
-		}
-	}*/
 }
 
 void Options::minusValues() {

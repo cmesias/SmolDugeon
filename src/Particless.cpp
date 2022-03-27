@@ -219,7 +219,65 @@ void Particle::spawnParticleAngleFollow(Particle particle[], int type,
 	}
 }
 
-// spawn explosion
+void Particle::spawnBloodVFX(Particle particle[], float targetX, float targetY,
+												  float targetW, float targetH,
+												  SDL_Color color)
+{
+	for (double i=0.0; i< 360.0; i+=rand() % 10 + 10){
+		int rands = rand() % 9 + 2;
+		float newX = targetX+targetW/2;
+		float newY = targetY+targetH/2;
+		spawnParticleAngle(particle, 2,
+							newX-rands/2,
+							newY-rands/2,
+						   rands, rands,
+						   i, randDouble(2.1, 5.1),
+						   0.0, 0, 0,
+						   color, 1,
+						   1, 1,
+						   rand() % 100 + 150, rand() % 2 + 5,
+						   rand() % 50 + 90, 0,
+						   true, 0.11,
+						   rand() % 9 + 2, 1);
+	}
+}
+
+void Particle::spawnNoMoreManaVFX(Particle particle[], float centerX, float centerY)
+{
+	for (double i=0.0; i< 90.0; i+= rand() % 10 + 20){
+		int rands = rand() % 11 + 3;
+		float newX = centerX;
+		float newY = centerY;
+		spawnParticleAngle(particle, 2,
+							newX-rands/2,
+							newY-rands/2,
+						   rands, rands,
+						   angle -45 + i, randDouble(2.1, 5.1),
+						   0.0, 0, 0,
+						   {244, 144, 0, 255}, 1,
+						   1, 1,
+						   rand() % 100 + 150, rand() % 2 + 5,
+						   rand() % 50 + 90, 0,
+						   true, randDouble(0.1, 0.7),
+						   100, 10);
+	}
+}
+
+void Particle::spawnSlashAttackProjectile(Particle particle[], float spawnX, float spawnY,
+										  float spawnW, float spawnH, float damage)
+{
+	spawnParticleAngle(particle, 0,
+			spawnX, spawnY,
+			spawnW, spawnH,
+		   angle, 21,
+		   damage, damage, 0,
+		   {255, 255,0}, 1,
+		   1, 1,
+		   255, 0,
+		   100, 2,
+		   false, 0);
+}
+
 void Particle::spawnExplosion(Particle particle[], float x, float y, int size) {
 	// spawn blood particle effect
 	for (double j=0.0; j< 360.0; j+=rand() % 10 + 10){

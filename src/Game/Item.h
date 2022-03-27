@@ -8,10 +8,21 @@
 #ifndef ITEM_H_
 #define ITEM_H_
 
-#include "../Helper.h"
-#include <SDL2/SDL.h>
 
-class Item: public Helper  {
+#include "TextNFont.h"
+#include "../LWindow.h"
+#include "../LTexture.h"
+#include "../Helper.h"
+
+#include <fstream>
+#include <sstream>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+
+class Item: public Helper, public TextNFont  {
 
 public:	// Parent object Variables
 	static const int ITEMS_UNIQUE = 25;
@@ -29,6 +40,7 @@ public:	// Parent object Variables
 	 * 24: 		Heart
 	 */
 	int id;			// id of instances
+	float damage;
 
 public:	// Object Variables
 	float x, y;
@@ -40,6 +52,7 @@ public:	// Object Variables
 	bool mouseBox;
 	bool onScreen;
 	bool alive;
+	bool promptSelf;
 
 public:	// Resources
 	LTexture gSwords;
@@ -112,6 +125,8 @@ public:	// Core functions
 	void RenderBehindPlayer(SDL_Renderer *gRenderer, Item item[], int camx, int camy);
 
 	void RenderOnTopOfPlayer(SDL_Renderer *gRenderer, Item item[], int camx, int camy);
+
+	void RenderUI(SDL_Renderer *gRenderer, Item item[], int camx, int camy);
 
 	// Render debug
 	void RenderDebug(SDL_Renderer *gRenderer, Item item[], int camx, int camy);

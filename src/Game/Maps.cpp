@@ -26,3 +26,19 @@ void Map::render(SDL_Renderer* gRenderer, int camx, int camy){
 	SDL_RenderDrawRect(gRenderer, &tempRect);
 }
 
+int Map::getWidth(){
+	return this->w;
+}
+
+int Map::getHeight(){
+	return this->h;
+}
+
+void Map::IncreaseWidth(int width){
+	this->w += width;
+}
+
+void Map::IncreaseHeight(int height){
+	this->h += height;
+}
+

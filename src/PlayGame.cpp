@@ -62,7 +62,6 @@ void PlayGame::Init() {
 	bos.Init(boss);
 	mb.Init(mob);
 	part.init(particles);
-	enem.init(enemy);
 	spaw.init(spawner);
 	player.Init(map.x+map.w/2-player.w/2, map.y+map.h/2-player.h/2, "Player1", false);
 	tex.init(text);
@@ -160,7 +159,6 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	bos.Load(gRenderer);
 	mb.Load(gRenderer);
 	part.load(gRenderer);
-	enem.load(gRenderer);
 	spaw.load(gRenderer);
 	player.Load(gRenderer);
 	tl.load(gRenderer);
@@ -211,7 +209,6 @@ void PlayGame::Free() {
 	mb.Free();
 	player.Free();
 	part.free();
-	enem.free();
 	spaw.free();
 	tb.free();
 	tl.free();
@@ -391,9 +388,6 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 				if (!editor) {
 					// Player Mouse Click state
 					player.mouseClickState(event);
-
-					// Update Xbox 360 controls
-					player.updateJoystick(event);
 				}
 
 				// Global mouse presses
@@ -778,9 +772,6 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		// Update Player Particle & Asteroid collision check
 		//checkCollisionParticleAsteroid(particles, part, asteroid, player);
 
-		// Update Player Particle & Enemy collision check
-		//checkCollisionParticleEnemy(particles, part, enemy, player);
-
 		// Collision, particle & zombie
 		/*checkCollisionParticleZombie();
 
@@ -809,6 +800,9 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		// Update Mob
 		mb.Update(mob, obj, object, particles, part, map, mex+camx, mey+camy, camx, camy, player.alive);
 
+		// Collision check Player & Item
+		checkCollisionPlayerItem();
+
 		// Mobs.cpp
 		{
 			checkCollisionParticleMob();
@@ -823,7 +817,6 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 
 		// Update Player
 		player.Update(map,
-					  enemy, enem,
 					  particles, part,
 					  tl, tile,
 					  tlc, tilec,
@@ -998,9 +991,6 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 	// Render Colonies that spawn Asteroids
 	spaw.render(spawner, camx, camy, gRenderer);
 
-	// Render Enemies
-	enem.render(enemy, camx, camy, gRenderer);
-
 	// Render different layers
 	{
 
@@ -1089,6 +1079,9 @@ void PlayGame::RenderUI(SDL_Renderer *gRenderer, LWindow &gWindow)
 	// Render Mob Health
 	mb.RenderUI(gRenderer, mob, camx, camy);
 
+	// Render item texts
+	ite.RenderUI(gRenderer, item, camx, camy);
+
 	// Render Player Health
 	player.RenderUI(gRenderer, camx, camy, this->LevelToLoad);
 }
@@ -1119,6 +1112,21 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 
 		// Render Item text
 		ite.RenderDebug(gRenderer, item, camx, camy);
+
+		// Render item text
+		for (int i = 0; i < ite.max; i++)
+		{
+			if (item[i].alive)
+			{
+				// Render text
+				std::stringstream tempss;
+				tempss << "id: " << item[i].id << ", d: " << item[i].damage;
+				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont13);
+				gText.setAlpha(255);
+				gText.render(gRenderer, item[i].x-camx, item[i].y-gText.getHeight()-camy, gText.getWidth(), gText.getHeight());
+
+			}
+		}
 
 		// Render object text
 		for (int i = 0; i < obj.max; i++)
@@ -1175,8 +1183,9 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 
 		// Render hand debug info
 		std::stringstream tempss;
-		tempss << "previousLevel: " 		<< previousLevel 		<< ", LevelToLoad: " 	<< this->LevelToLoad;
-		tempss << "ite.count: " 				<< ite.count << "ite.id: " << ite.id
+		tempss << "mapW: " 		<< map.w 		<< ", mapH: " 	<< map.h;
+		tempss << ", previousLevel: " 		<< previousLevel 		<< ", LevelToLoad: " 	<< this->LevelToLoad;
+		tempss << ", ite.count: " 				<< ite.count << "ite.id: " << ite.id
 			   << ", ite.multiW: " 			<< ite.multiW 			<< ", ite.multiH: " 				<< ite.multiH;
 		tempss << ", lastX: " 				<< lastKnownPositionX 	<< ", lastY: " 			<< lastKnownPositionY;
 		tempss << ", Tiles: " 				<< tl.tileCount 		<< ", Tilecs: " 		<< tlc.count 			<< ", Mob: " << mb.count;
@@ -1275,33 +1284,6 @@ void PlayGame::RenderText(SDL_Renderer *gRenderer, LWindow &gWindow)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////// Global Functions ////////////////////////////////////////////////////////
 //-------------------------------------------------------------------------------------------------------------------------------//
-
-void PlayGame::checkCollisionParticleEnemy(Particle particle[], Particle &part, Enemy enemy[], Players &player) {
-	// Enemy
-	for (int j = 0; j < 8; j++) {
-		if (enemy[j].alive){
-			// Particle
-			for (int i = 0; i < part.max; i++) {
-				if (particle[i].alive) {
-					if (particle[i].type == 0){
-						if (particle[i].x + particle[i].w > enemy[j].x && particle[i].x < enemy[j].x + enemy[j].w
-								&& particle[i].y + particle[i].h > enemy[j].y
-								&& particle[i].y < enemy[j].y + enemy[j].h) {
-							// remove particle
-							//particle[i].time = 0;
-							//particle[i].alive = false;
-							//part.count--;
-
-							// reduce enemy health
-							enemy[j].damaged = true;
-							enemy[j].health -= particle[i].damage;
-						}
-					}
-				}
-			}	// end Particle
-		}
-	}	// end Enemy
-}
 
 void PlayGame::checkCollisionParticleTile()
 {
@@ -1461,6 +1443,37 @@ void PlayGame::checkCollisionParticleBoss()
 	}
 }
 
+void PlayGame::checkCollisionPlayerItem() {
+	// If player is alive
+	if (player.alive) {
+		for (int i = 0; i < ite.max; i++) {
+			if (item[i].alive) {
+				if (checkCollision(item[i].x, item[i].y, item[i].w, item[i].h,
+						           player.getX(), player.getY(), player.getW(), player.getH())) {
+
+					item[i].promptSelf = true;
+
+					// If player is pressing equip
+					if (player.getEquipState()) {
+						// reduce enemy health
+						player.EquipSword(item[i].id, item[i].damage);
+
+						// Remove item
+						item[i].alive = false;
+						ite.count--;
+
+						// play sound effect
+						Mix_PlayChannel(-1, sCastHitBoss, 0);
+					}
+				} else {
+					item[i].promptSelf = false;
+					//player.ActivatePromptEquip(false);
+				}
+			}
+		}
+	}
+}
+
 void PlayGame::checkCollisionParticleMob()
 {
 	for (int j = 0; j < part.max; j++)
@@ -1564,13 +1577,13 @@ void PlayGame::checkCollisionTileMob()
 
 			// Update collision with Tiles
 			// Player Velocity X Axis
+			mob[i].x += mob[i].vX;
 
 			// Move only in x-axis
 			if (mob[i].targetDistanceX >= mob[i].targetDistanceY) {
 				if (mob[i].alert) {
 					// If Monster has vision of target
 					//if (mob[i].hasVision) {
-						mob[i].x += mob[i].vX;
 						//mob[i].x += mob[i].velX;
 					//}
 				}
@@ -1617,11 +1630,11 @@ void PlayGame::checkCollisionTileMob()
 
 			// Move only in y-axis
 			else{
+				mob[i].y += mob[i].vY;
 				// Player Velocity Y Axis
 				if (mob[i].alert) {
 					// If Monster has vision of target
 					//if (mob[i].hasVision) {
-						mob[i].y += mob[i].vY;
 					//}
 				}
 				//mob[i].y += mob[i].velY;
@@ -1770,6 +1783,8 @@ void PlayGame::checkPlayerAttacksCollisionMob() {
 									mob[i].vX += player.getKnockBackPower() * xDir;
 									mob[i].vY += player.getKnockBackPower() * yDir;*/
 								}
+								// Flash Bosses sprite
+								mob[i].flash = true;
 
 				                // Subtract mob health
 				                mob[i].health -= player.getDamage();
@@ -2061,6 +2076,7 @@ void PlayGame::checkPlayerAttacksCollisionBoss() {
 								// If attack-type: Slash
 								if (player.attackType == 0)
 								{
+
 									// Play hit sound effect: Slash attack
 					                Mix_PlayChannel(-1, sSlashHitBoss, 0);
 								}
@@ -2302,8 +2318,8 @@ void PlayGame::checkPlayerAttacksBossParticleCollision() {
 								tex.spawn(text, particles[i].x+particles[i].w/2, particles[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
 
 								// Remove Object
-								object[j].alive = false;
-								obj.count--;
+								//object[j].alive = false;
+								//obj.count--;
 
 								// If attack-type: Slash
 								if (player.attackType == 0)
@@ -2989,7 +3005,6 @@ void PlayGame::SaveLevelsCompleted() {
 	}
 }
 
-// Save player spawn point
 std::string PlayGame::saveSpawnPoint(){
 	/*std::ofstream fileSpawnSave;
 	fileSpawnSave.open( "data/maps/spawn.mp" );
@@ -3004,7 +3019,13 @@ std::string PlayGame::saveSpawnPoint(){
 	return tempss.str().c_str();
 }
 
-// Load player spawn point
+std::string PlayGame::saveMapSize(){
+
+	std::stringstream tempss;
+	tempss << map.getWidth() << " " << map.getHeight();
+	return tempss.str().c_str();
+}
+
 void PlayGame::loadSpawnPoint(){
 
 	// Set file path and name
@@ -3349,51 +3370,67 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 		}
 		break;
 	case SDLK_LEFTBRACKET:						// Tile, subtract parry in x-axis
-		if (place_type == 0) {
-			if (tl.multiW > 1) {
-				tl.multiW -= 1;
-			}
-		}else if (place_type == 1) {
-			if (tlc.multiW > 1) {
-				tlc.multiW -= 1;
-			}
-		}else if (place_type == 3) {
-			if (ite.multiW > 1) {
-				ite.multiW -= 1;
+		if (shift) {
+			map.IncreaseWidth(-tb.tileSizeInWorldW*2);
+		} else {
+			if (place_type == 0) {
+				if (tl.multiW > 1) {
+					tl.multiW -= 1;
+				}
+			}else if (place_type == 1) {
+				if (tlc.multiW > 1) {
+					tlc.multiW -= 1;
+				}
+			}else if (place_type == 3) {
+				if (ite.multiW > 1) {
+					ite.multiW -= 1;
+				}
 			}
 		}
 		break;
 	case SDLK_RIGHTBRACKET:						// Tile, add parry in x-axis
-		if (place_type == 0) {
-			tl.multiW += 1;
-		}else if (place_type == 1) {
-			tlc.multiW += 1;
-		}else if (place_type == 3) {
-			ite.multiW += 1;
+		if (shift) {
+			map.IncreaseWidth(tb.tileSizeInWorldW*2);
+		} else {
+			if (place_type == 0) {
+				tl.multiW += 1;
+			}else if (place_type == 1) {
+				tlc.multiW += 1;
+			}else if (place_type == 3) {
+				ite.multiW += 1;
+			}
 		}
 		break;
 	case SDLK_MINUS:							// Tile, subtract parry in y-axis
-		if (place_type == 0) {
-			if (tl.multiH> 1) {
-				tl.multiH -= 1;
-			}
-		}else if (place_type == 1) {
-			if (tlc.multiH> 1) {
-				tlc.multiH -= 1;
-			}
-		}else if (place_type == 3) {
-			if (ite.multiH> 1) {
-				ite.multiH -= 1;
+		if (shift) {
+			map.IncreaseHeight(-tb.tileSizeInWorldW*2);
+		} else {
+			if (place_type == 0) {
+				if (tl.multiH> 1) {
+					tl.multiH -= 1;
+				}
+			}else if (place_type == 1) {
+				if (tlc.multiH> 1) {
+					tlc.multiH -= 1;
+				}
+			}else if (place_type == 3) {
+				if (ite.multiH> 1) {
+					ite.multiH -= 1;
+				}
 			}
 		}
 		break;
 	case SDLK_EQUALS:							// Tile, add parry in y-axis
-		if (place_type == 0) {
-			tl.multiH += 1;
-		}else if (place_type == 1) {
-			tlc.multiH += 1;
-		}else if (place_type == 3) {
-			ite.multiH += 1;
+		if (shift) {
+			map.IncreaseHeight(tb.tileSizeInWorldW*2);
+		} else {
+			if (place_type == 0) {
+				tl.multiH += 1;
+			}else if (place_type == 1) {
+				tlc.multiH += 1;
+			}else if (place_type == 3) {
+				ite.multiH += 1;
+			}
 		}
 		break;
 	case SDLK_9: {								// Load Room
@@ -3430,7 +3467,10 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				aVeryLongString << mb.SaveData(mob);
 
 				// Save Player spawn point
-				aVeryLongString << saveSpawnPoint();
+				aVeryLongString << saveSpawnPoint() << std::endl;
+
+				// Save Size of Map.cpp
+				aVeryLongString << saveMapSize();
 
 				std::ofstream fileParrys2;
 				std::stringstream tempNameParryNum2;
@@ -3695,8 +3735,11 @@ void PlayGame::LoadLevel()
 
 		// Load Player spawn point
 		fileTileDataL >>  this->spawnX >> this->spawnY;
-		//player.x		= this->spawnX;
-		//player.y		= this->spawnY;
+
+		// Load map size
+		fileTileDataL >>  map.w >> map.h;
+		player.x		= this->spawnX;
+		player.y		= this->spawnY;
 
 		// Break out of file
 		break;

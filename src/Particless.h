@@ -73,6 +73,8 @@ public:	// basic functions
 	void free();
 
 public:	// functions
+
+	// Goes in one direction
 	void spawnParticleAngle(Particle particle[], int type,
 			float spawnX, float spawnY,
 			int spawnW, int spawnH,
@@ -99,6 +101,17 @@ public:	// functions
 			double splatDistance = 1, double splatSpeed = 0.0,
 			bool follow=false, float *xFollow=NULL, float *yFollow=NULL);
 
+	// Spawn blood VFX
+	void spawnBloodVFX(Particle particle[], float targetX, float targetY,
+					   	   	   	   	   	    float targetW, float targetH,
+											SDL_Color color);
+
+	// Spawn no more mana VFX
+	void spawnNoMoreManaVFX(Particle particle[], float centerX, float centerY);
+
+	// Spawn Slash Attack particle
+	void spawnSlashAttackProjectile(Particle particle[], float spawnX, float spawnY,
+			  float spawnW, float spawnH, float damage);
 
 	void spawnExplosion(Particle particle[], float x, float y, int size);
 

@@ -23,11 +23,18 @@ public:
 	//const int h = 1152;
 	//const int w = 2500;
 	//const int h = 3500;
-	const int w = 64*23;
-	const int h = 64*17;
-
+	int w = 512;
+	int h = 512;
 	// Render map
 	void render(SDL_Renderer* gRenderer, int camx, int camy);
+
+	void IncreaseWidth(int width);
+
+	void IncreaseHeight(int height);
+
+	int getWidth();
+
+	int getHeight();
 };
 
 #endif /* LOCAL_MAPS_H_ */

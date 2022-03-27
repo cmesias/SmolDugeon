@@ -13,7 +13,6 @@
 #include "../LWindow.h"
 #include "../LTexture.h"
 #include "../Particless.h"
-#include "Enemies.h"
 #include "../Helper.h"
 #include "Maps.h"
 #include "Tiles.h"
@@ -31,7 +30,11 @@ public:
 	void OnKeyDown(SDL_Keycode sym );
 	void OnKeyUp(SDL_Keycode sym );
 	void mouseClickState(SDL_Event &e);
-	void updateJoystick(SDL_Event &e);
+
+	// Mouse stuff
+	bool leftclick;
+	bool rightclick;
+	bool test;
 
 public:	// resources
 	// Local resources
@@ -94,12 +97,7 @@ public:	// variables
 	int w = 24, h = 48;					// object size in collision pixels
 	float x = 0,
 		  y = 0;
-	float x2, y2;						// player circle center
-	float swordX;						// x pos Location of sword when down-stab attack
-	float swordY;						// y pos Location of sword when down-stab attack
-	int radius = w/2;					// player radius
-	int panTimer 		= 0;
-	int shoottimer 		= 0;
+	float x2, y2;						// player center
 	float angle 		= 0.0,
 		   radians 		= 0.0,
 		   radianCos 	= 0.0,
@@ -112,13 +110,11 @@ public:	// variables
 	bool moveleft 		= false,
 		 moveright 		= false,
 		 moveup 		= false,
-		 movedown		= false,
-		 rotateLeft 	= false,
-		 rotateRight 	= false;
+		 movedown		= false;
+	bool moving = false;
 	bool shift 			= false;
 	bool deathScreen	= false;
 	bool alive;
-	bool returned		= false;
 
 	/*
 	 * Parrying small blue Bullet from Boss:		score += 1;
@@ -130,14 +126,6 @@ public:	// variables
 	 */
 	unsigned int score	= 0;
 	unsigned int highscore = 0;
-
-	// Fire-rate
-	double particleW 	= 48;
-	double particleH 	= 48;
-	float delayT 		= 0;
-	bool delay 			= false;
-	bool initialshot 	= false;
-	bool trigger 		= false;
 
 	// Lives
 	int hearts 			= 3;
@@ -154,9 +142,6 @@ public:	// variables
 	int position	= 0;
 	int position2	= 0;
 	int dir 		= 1;
-	int indexSaved 	= -1;
-
-	bool moving = false;
 
 public: // attack variables
 	std::string facing;
@@ -178,8 +163,17 @@ public:	// functions
 	// Functions
 
 	void Load(SDL_Renderer* gRenderer);
+
 	void Free();
+
 	void Init(float spawnX, float spawnY, std::string newName, bool respawn);
+
+	// Called when player loses all their health
+	void RespawnPlayer();
+
+	// Called when player loses all their lives
+	void ResetLivesAndPlayer();
+
 	bool checkCollision(int x, int y, int w, int h, int x2, int y2, int w2, int h2);
 
 	// Get audio files
@@ -189,7 +183,6 @@ public:	// functions
 	void fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, int mx, int my);
 
 	void Update(Map &map,
-				Enemy enemy[], Enemy &e_dummy,
 				Particle particle[], Particle &p_dummy,
 				Tile &tl, Tile tile[],
 				Tilec &tlc, Tilec tilec[],
@@ -220,7 +213,14 @@ private:	// Private variables
 private:	// Private variables
 			// Save these player stats in a file. This will be the players save data.
 
+	// Fire-rate
+	double particleW 	= 48;
+	double particleH 	= 48;
+	bool shootDelay 	= false;
+	bool initialshot 	= false;
+	bool trigger 		= false;
 	float AttackSpeed;		// Attack speed
+	float shootTimer;		// Attack speed
 
 	float maxMana;			// Max mana
 	float mana;				// Mana
@@ -233,7 +233,6 @@ private:	// Private variables
 	float castDamage;		// Cast damage
 
 	float knockBackPower;	// Knock back power
-
 
 	// Parry state
 	bool parry;
@@ -255,6 +254,9 @@ private:	// Private variables
 	int invurnerableT;
 	bool invurnerable;
 
+private:	// Official player control keys
+
+	bool pressedEquipKey;
 
 private:	// Variables used in Textures
 
@@ -267,10 +269,9 @@ private:	// Variables used in Textures
 	 * 1: Rusty sword
 	 * 2: Iron sword
 	 */
-	int swordInHand_Index = 0;
+	int swordInHand_Index = -1;
 	int swordW = 20;
 	int swordH = 42;
-
 
 	//--------------- Sword offsets ---------------
 	// X offset Sword Slashing Left
@@ -304,9 +305,6 @@ public:	// Functions to do stuff?
 	void ActivateDash();
 
 public:	// Mutator functions
-
-	// Restore Player for the Level
-	void RestorePlayer(float spawnX, float spawnY);
 
 	// Move x pos
 	float moveX(float value);
@@ -346,6 +344,9 @@ public:	// Mutator functions
 
 	// Reset dashing
 	void ResetDashing();
+
+	// Equip a sword
+	void EquipSword(int swordInHand_Index, float damage);
 
 public:	// Accessor functions
 
@@ -403,6 +404,9 @@ public:	// Accessor functions
 	// Get score
 	float getScore();
 
+	// Get equip key state
+	float getEquipState();
+
 public:
 
 	// Reset High Scores
@@ -413,32 +417,6 @@ public:
 
 	// Save current highs-core for current Level
 	void SaveHighScore(int LevelToLoad);
-
-public:	// Controls
-	// Player controls
-	int controls;		// [0] Keyboard, [1] Xbox 360 Controller
-	SDL_Joystick *joy;
-	bool A;
-	bool B;
-	bool X;
-	bool Y;
-	bool D_UP;
-	bool D_DOWN;
-	bool D_LEFT;
-	bool D_RIGHT;
-	bool LB;
-	bool RB;
-	bool BACK;
-	bool START;
-	bool L3;
-	bool R3;
-	double LAngle;
-	double RAngle;
-	double zAxisLeft;
-	double zAxisRight;
-	bool leftclick;
-	bool rightclick;
-	bool test;
 
 };
 

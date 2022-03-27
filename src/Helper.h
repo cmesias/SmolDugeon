@@ -32,20 +32,31 @@ public:
     bool cap 					= true;
 	int frame 					= 0;
     const int FRAMES_PER_SECOND = 60;
+    static const int UniqueTileBarTiles = 512;
+
+
+    //int screenWidth = 1920;
+    //int screenHeight = 1080;
+    const int screenWidth = 1280;
+    const int screenHeight = 720;
+
+
+
+
+
+
+
     //int screenWidth = 1920;
     //int screenHeight = 1080;
     //const int screenWidth = 1280;
     //const int screenHeight = 720;
 
-    static const int UniqueTileBarTiles = 512;
     //const int screenWidth = 1008;
     // const int screenHeight = 624;
 	//const int screenWidth = 2304;
 	//const int screenHeight = 1296;
 	//const int screenWidth = 2880;
     //const int screenHeight = 1620;
-    const int screenWidth = 1280;
-    const int screenHeight = 720;
      //const int screenWidth = 640;
     //const int screenHeight = 360;
     //const int screenWidth = 480;

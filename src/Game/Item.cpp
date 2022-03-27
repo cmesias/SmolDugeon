@@ -5,16 +5,6 @@
  *      Author: Carl
  */
 
-#include "../LWindow.h"
-#include "../LTexture.h"
-
-#include <fstream>
-#include <sstream>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 
 #include "Item.h"
 
@@ -25,6 +15,8 @@ void Item::Init(Item item[]){
 		item[i].hoverDir 		= 1;
 		item[i].alive 			= false;
 		item[i].PlayerBehindItem = false;
+		item[i].promptSelf = false;
+		item[i].damage 			= 0;
 	}
 }
 
@@ -58,10 +50,16 @@ void Item::Load(SDL_Renderer* gRenderer){
 
 	// Heart
 	rSwords[24] = {60,50,10,10};		// Heart (Used in UI, not in inventory or maybe it should? TODO)
+
+	// Other fonts
+	LoadFonts();
 }
 
 void Item::Free(){
 	gSwords.free();
+
+	// Other classes
+	FreeFonts();
 }
 
 void Item::Copy(Item item[]) {
@@ -110,6 +108,15 @@ void Item::Spawn(Item item[], float x, float y) {
 	Remove(item, 0);
 	for (int i = 0; i < max; i++) {
 		if (!item[i].alive) {
+
+			if (this->id == 0) {
+				item[i].damage 			= 20;
+			} else if (this->id == 1) {
+				item[i].damage 			= 35;
+			} else if (this->id == 2) {
+				item[i].damage 			= 50;
+			}
+
 			item[i].x 				= x;
 			item[i].y 				= y;
 			item[i].w 				= getItemSizeW();
@@ -119,8 +126,9 @@ void Item::Spawn(Item item[], float x, float y) {
 			item[i].id 				= this->id;
 			item[i].collision 		= false;
 			item[i].mouse 			= false;
-			item[i].mouseBox 			= false;
-			item[i].onScreen 			= false;
+			item[i].promptSelf 		= false;
+			item[i].mouseBox 		= false;
+			item[i].onScreen 		= false;
 			item[i].alive 			= true;
 			count++;
 			break;
@@ -325,6 +333,21 @@ void Item::RenderOnTopOfPlayer(SDL_Renderer *gRenderer, Item item[], int camx, i
 	}
 }
 
+void Item::RenderUI(SDL_Renderer *gRenderer, Item item[], int camx, int camy) {
+	for (int i = 0; i < max; i++) {
+		if (item[i].alive) {
+			if (item[i].promptSelf) {
+				std::stringstream tempsi;
+				tempsi << "E";
+				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+				gText.render(gRenderer, item[i].x+item[i].w/2-gText.getWidth()/2-camx,
+									    item[i].y-gText.getWidth()*2-camy,
+										gText.getWidth(), gText.getHeight());
+			}
+		}
+	}
+}
+
 void Item::RenderDebug(SDL_Renderer* gRenderer, Item item[], int camx, int camy) {
 	for (int i = 0; i < max; i++) {
 		if (item[i].alive) {
@@ -400,6 +423,14 @@ void Item::LoadData(Item item[], std::fstream &fileTileDataL)
 			item[j].h 		>>
 			item[j].id 		>>
 			item[j].alive;
+
+			if (item[j].id == 0) {
+				item[j].damage 			= 20;
+			} else if (item[j].id == 1) {
+				item[j].damage 			= 35;
+			} else if (item[j].id == 2) {
+				item[j].damage 			= 50;
+			}
 
 			//std::cout << "Item j: " << j << ", x: " << item[j].x << ", y: " << item[j].y << std::endl;
 		}

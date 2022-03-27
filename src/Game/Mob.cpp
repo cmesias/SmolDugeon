@@ -294,8 +294,13 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 					// Change x velocity to go towards player
 					//mob[i].vX = 1.5 * (mob[i].bmx - mob[i].bmx2) / mob[i].distance;
 					//mob[i].vY = 1.5 * (mob[i].bmy - mob[i].bmy2) / mob[i].distance;
-					mob[i].vX = 1.5 * (mob[i].bmx - mob[i].bmx2) / mob[i].targetDistanceX;
-					mob[i].vY = 1.5 * (mob[i].bmy - mob[i].bmy2) / mob[i].targetDistanceY;
+
+					if (mob[i].vX > -1.2 && mob[i].vX < 1.5) {
+						mob[i].vX += 0.3 * (mob[i].bmx - mob[i].bmx2) / mob[i].targetDistanceX;
+					}
+					if (mob[i].vY > -1.5 && mob[i].vY < 1.5) {
+						mob[i].vY += 0.3 * (mob[i].bmy - mob[i].bmy2) / mob[i].targetDistanceY;
+					}
 
 					// Move Mob towards player
 					//mob[i].x += mob[i].vX;
