@@ -30,6 +30,11 @@ public:
 	bool hasVision;			// has vision of target
 	bool onScreen;
 
+private:
+
+	float sightRange;	// Range the Mob will see the player and follow them
+	float atkRange;		// Range the Mob will attack
+
 public:	// States
 
 	bool alert;			// If true, slime sees the player (within 100 pixels)
@@ -44,6 +49,26 @@ public: // animations
 	double animSpeed;
 	double animTimer;
 	int animFrame;
+
+public:	// Setter functions
+
+	void setSightRange(float value) {
+		sightRange = value;
+	}
+
+	void setAtkRange(float value) {
+		atkRange = value;
+	}
+
+public:	// Getter functions
+
+	float getSightRange() {
+		return sightRange;
+	}
+
+	float getAtkRange() {
+		return atkRange;
+	}
 };
 
 #endif /* GAME_MONSTER_H_ */

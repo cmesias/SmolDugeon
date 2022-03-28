@@ -53,6 +53,8 @@ public:	// Core Functions
 
 	void UpdateEditor(Mob mob[], int mex, int mey, int camx, int camy);
 
+	void Move(Mob mob[], std::string direction);
+
 	void RenderShadow(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy);
 
 	void RenderBack(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTexture gText, int camx, int camy);
@@ -71,6 +73,12 @@ public:	// Functions that work with other classes
 	void GetDistanceOfPlayer(Mob mob[], float targetX, float targetY,
 				float targetW, float targetH,
 				float *xFollow, float *yFollow);
+
+public:	// Setter functions
+
+	void setStatsBasedOnType(Mob mob[], int i);
+
+public:	// Getter functions
 
 public:	// Animations
 

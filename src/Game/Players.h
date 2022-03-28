@@ -44,7 +44,7 @@ public:	// resources
 	LTexture gSwords;
 
 	/* Sword types
-	 * 0  - 10: Swords
+	 * 0  - 10: Fist & Swords
 	 * 11 - 12: Rapier and Hammer
 	 * 13 - 18: Better Swords
 	 * 19 - 22: Broken Swords
@@ -127,11 +127,6 @@ public:	// variables
 	unsigned int score	= 0;
 	unsigned int highscore = 0;
 
-	// Lives
-	int hearts 			= 3;
-	int health			= 100;
-	const int healthMax	= 100;
-
 	double tempc, temps;
 	SDL_Rect continueButton[3];
 
@@ -166,7 +161,7 @@ public:	// functions
 
 	void Free();
 
-	void Init(float spawnX, float spawnY, std::string newName, bool respawn);
+	void Init(float spawnX, float spawnY, std::string newName);
 
 	// Called when player loses all their health
 	void RespawnPlayer();
@@ -211,7 +206,13 @@ private:	// Private variables
 	double walkTimerVFX;
 
 private:	// Private variables
-			// Save these player stats in a file. This will be the players save data.
+
+private:	// Abilities
+
+	// Health
+	//int hearts 			= 3;
+	//int health			= 100;
+	//const int healthMax	= 100;
 
 	// Fire-rate
 	double particleW 	= 48;
@@ -219,23 +220,24 @@ private:	// Private variables
 	bool shootDelay 	= false;
 	bool initialshot 	= false;
 	bool trigger 		= false;
-	float AttackSpeed;		// Attack speed
+	//float AttackSpeed;	// Attack speed
 	float shootTimer;		// Attack speed
 
-	float maxMana;			// Max mana
-	float mana;				// Mana
-	float manaRegenSpeed;	// Mana
+	//float damage;			// Sword damage
+	//float castDamage;		// Cast damage
+	//float damageMultipler;	// Parrying will increase damage multiplier
+
+	//float maxMana;		// Max mana
+	//float mana;			// Mana
+	//float manaRegenSpeed;	// Mana
 	float manaRegenTimer;	// 1 second timer for mana regen;
 	float manaGainOnParry;	// Gain mana if you parry successfully
-
-	float damage;			// Sword damage
-	float damageMultipler;	// Parrying will increase damage multiplier
-	float castDamage;		// Cast damage
 
 	float knockBackPower;	// Knock back power
 
 	// Parry state
 	bool parry;
+	//float parryLength;	// Parry length: 15 default
 	float parryTimer;		// Parry timer
 	float parryCDTimer;		// Parry cooldown timer tracker
 	float parryCDMax;		// Parry cooldown, default: 60*3
@@ -254,6 +256,27 @@ private:	// Private variables
 	int invurnerableT;
 	bool invurnerable;
 
+private:	// Save these player stats in a file. This will be the players save data.
+
+	// Health
+	int hearts;				// Default: 3
+	int health;				// Default: 100
+	int healthMax;			// Default: 100
+
+	// Damage
+	float damage;			// Sword damage
+	float castDamage;		// Cast damage
+	float damageMultipler;	// Parrying will increase damage multiplier
+	float AttackSpeed;		// Attack speed
+
+	// Mana
+	float mana;				// Mana
+	float maxMana;			// Max mana
+	float manaRegenSpeed;	// Mana
+
+	// Parry
+	float parryLength;		// Parry length: 15 default
+
 private:	// Official player control keys
 
 	bool pressedEquipKey;
@@ -265,15 +288,21 @@ private:	// Variables used in Textures
 	int shadowW = 44;
 
 	/* Sword Types (TODO [ ] (3-25-2022) - save this in player data)
-	 * 0: Wooden sword
-	 * 1: Rusty sword
-	 * 2: Iron sword
+	 * 0: Fist
+	 * 1: Wooden sword
+	 * 2: Rusty sword
+	 * 3: Iron sword
 	 */
-	int swordInHand_Index = -1;
+	int swordInHand_Index = 0;
 	int swordW = 20;
 	int swordH = 42;
 
 	//--------------- Sword offsets ---------------
+	// X offset Sword Slashing Left
+	// X offset Sword Slashing Left
+	const float xOffSetFistPunchLeft = -15;
+	const float xOffSetFistPunchRight = 15;
+
 	// X offset Sword Slashing Left
 	const float xOffSetSwordSlashingLeft = -24;
 
@@ -405,7 +434,10 @@ public:	// Accessor functions
 	float getScore();
 
 	// Get equip key state
-	float getEquipState();
+	bool getEquipState();
+
+	// Get item index in hand
+	int getItemEqipped(int checkThisIndex);
 
 public:
 

@@ -24,32 +24,33 @@ void Item::Load(SDL_Renderer* gRenderer){
 	gSwords.loadFromFile(gRenderer, "resource/gfx/author_0x72/0x72_16x16DungeonTileset_swords.png");
 
 	// Clip swords texture
+	{
+		for (int i=0; i<11; i++) {
+			rSwords[i] = {i*10,0,10,21};
+		}
+		rSwords[11] = {110,0,7,17};
+		rSwords[12] = {117,0,10,21};
 
-	for (int i=0; i<11; i++) {
-		rSwords[i] = {i*10,0,10,21};
+		// Second row of swords
+		rSwords[13] = {0,30,10,25};
+		rSwords[14] = {11,30,8,27};
+		rSwords[15] = {20,30,10,29};
+		rSwords[16] = {32,30,6,27};
+		rSwords[17] = {40,30,10,24};
+		rSwords[18] = {50,30,10,24};
+
+		// Broken swords
+		rSwords[19] = {60,30,6,9};
+		rSwords[20] = {70,30,6,12};
+		rSwords[21] = {80,30,6,12};
+		rSwords[22] = {90,30,6,12};
+
+		// Bomb
+		rSwords[23] = {100,30,14,13};
+
+		// Heart
+		rSwords[24] = {60,50,10,10};		// Heart (Used in UI, not in inventory or maybe it should? TODO)
 	}
-	rSwords[11] = {110,0,7,17};
-	rSwords[12] = {117,0,10,21};
-
-	// Second row of swords
-	rSwords[13] = {0,30,10,25};
-	rSwords[14] = {11,30,8,27};
-	rSwords[15] = {20,30,10,29};
-	rSwords[16] = {32,30,6,27};
-	rSwords[17] = {40,30,10,24};
-	rSwords[18] = {50,30,10,24};
-
-	// Broken swords
-	rSwords[19] = {60,30,6,9};
-	rSwords[20] = {70,30,6,12};
-	rSwords[21] = {80,30,6,12};
-	rSwords[22] = {90,30,6,12};
-
-	// Bomb
-	rSwords[23] = {100,30,14,13};
-
-	// Heart
-	rSwords[24] = {60,50,10,10};		// Heart (Used in UI, not in inventory or maybe it should? TODO)
 
 	// Other fonts
 	LoadFonts();

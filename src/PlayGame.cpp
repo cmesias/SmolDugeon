@@ -63,7 +63,7 @@ void PlayGame::Init() {
 	mb.Init(mob);
 	part.init(particles);
 	spaw.init(spawner);
-	player.Init(map.x+map.w/2-player.w/2, map.y+map.h/2-player.h/2, "Player1", false);
+	player.Init(map.x+map.w/2-player.w/2, map.y+map.h/2-player.h/2, "Player1");
 	tex.init(text);
 	tl.initTile(tile);
 	tlc.Init(tilec);
@@ -1819,50 +1819,53 @@ void PlayGame::checkMobPlayerVision() {
 
 			bool hasVision = true;
 
+			// If distance from player is less than Mob sight distance
 			for (int j=0; j<tl.max; j++) {
-				if (tile[j].alive && tile[j].collisionTile) {
-					// a: top left
-					// b: top right
-					// c: bottom left
-					// d: bottom right
-					Point a, b, c, d;
-					// top left
-					a.x = tile[j].x;
-					a.y = tile[j].y;
-					// top right
-					b.x = tile[j].x+tile[j].w;
-					b.y = tile[j].y;
-					// bottom left
-					c.x = tile[j].x;
-					c.y = tile[j].y+tile[j].h;
-					// bottom right
-					d.x = tile[j].x+tile[j].w;
-					d.y = tile[j].y+tile[j].h;
+				if (tile[j].alive) {
+					if (tile[j].collisionTile) {
+						// a: top left
+						// b: top right
+						// c: bottom left
+						// d: bottom right
+						Point a, b, c, d;
+						// top left
+						a.x = tile[j].x;
+						a.y = tile[j].y;
+						// top right
+						b.x = tile[j].x+tile[j].w;
+						b.y = tile[j].y;
+						// bottom left
+						c.x = tile[j].x;
+						c.y = tile[j].y+tile[j].h;
+						// bottom right
+						d.x = tile[j].x+tile[j].w;
+						d.y = tile[j].y+tile[j].h;
 
-					// top side line
-					/*SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
-					SDL_RenderDrawLine(gRenderer, a.x-camx, a.y-camy, b.x-camx, b.y-camy);
+						// top side line
+						/*SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
+						SDL_RenderDrawLine(gRenderer, a.x-camx, a.y-camy, b.x-camx, b.y-camy);
 
-					// right side line
-					SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
-					SDL_RenderDrawLine(gRenderer, b.x-camx, b.y-camy, d.x-camx, d.y-camy);
+						// right side line
+						SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
+						SDL_RenderDrawLine(gRenderer, b.x-camx, b.y-camy, d.x-camx, d.y-camy);
 
-					// bottom side line
-					SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
-					SDL_RenderDrawLine(gRenderer, d.x-camx, d.y-camy, c.x-camx, c.y-camy);
+						// bottom side line
+						SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
+						SDL_RenderDrawLine(gRenderer, d.x-camx, d.y-camy, c.x-camx, c.y-camy);
 
-					// left side line
-					SDL_SetRenderDrawColor(gRenderer, 255, 0, 255, 255);
-					SDL_RenderDrawLine(gRenderer, a.x-camx, a.y-camy, c.x-camx, c.y-camy);*/
+						// left side line
+						SDL_SetRenderDrawColor(gRenderer, 255, 0, 255, 255);
+						SDL_RenderDrawLine(gRenderer, a.x-camx, a.y-camy, c.x-camx, c.y-camy);*/
 
-					if (doIntersect(p1, q1, a, b)) {
-						hasVision = false;
-					}else if (doIntersect(p1, q1, b, d)) {
-						hasVision = false;
-					}else if (doIntersect(p1, q1, d, c)) {
-						hasVision = false;
-					}else if (doIntersect(p1, q1, c, a)) {
-						hasVision = false;
+						if (doIntersect(p1, q1, a, b)) {
+							hasVision = false;
+						}else if (doIntersect(p1, q1, b, d)) {
+							hasVision = false;
+						}else if (doIntersect(p1, q1, d, c)) {
+							hasVision = false;
+						}else if (doIntersect(p1, q1, c, a)) {
+							hasVision = false;
+						}
 					}
 				}
 			}
@@ -2308,25 +2311,52 @@ void PlayGame::checkPlayerAttacksBossParticleCollision() {
 							// Circle Collision
 							if (distance < object[j].h/2 + particles[i].w/2)
 							{
+								// Deflect projectile if we have fists on
+								if (player.getItemEqipped(0)) {
 
-								// Reduce health of Enemey Particle
-								particles[i].health -= player.getDamage();;
+									// Change Enemy bullet into a Player bullet!
+									particles[i].type = -1;
 
-								// Show damage text (it will print how much damage the player did to the boss)
-								std::stringstream tempss;
-								tempss << player.getDamage();
-								tex.spawn(text, particles[i].x+particles[i].w/2, particles[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
+									// Knock back enemy bullet particles
+									{
+										float distanceW = sqrt((bmx - bmx2) * (bmx - bmx2));
+										float distanceH = sqrt((bmy - bmy2) * (bmy - bmy2));
+										//float tempVX 	= 5 * (bmx - bmx2) / distanceW;
+										//float tempVY 	= 5 * (bmy - bmy2) / distanceH;
 
-								// Remove Object
-								//object[j].alive = false;
-								//obj.count--;
+										// Apply player's cast damage to the projectile we're deflecting back
+										particles[i].dmgToParticles = player.getCastDamage();
 
-								// If attack-type: Slash
-								if (player.attackType == 0)
-								{
-									// Play hit sound effect: Slash attack
-					                Mix_PlayChannel(-1, sSlashHitBoss, 0);
+										// Reverse particles velocity vX and vY
+										particles[i].vX += particles[i].vX * -4;
+										particles[i].vY += particles[i].vY * -4;
+									}
+
 								}
+								// Destroy projectile
+								else {
+
+									// Reduce health of Enemey Particle
+									particles[i].health -= player.getDamage();;
+
+									// Show damage text (it will print how much damage the player did to the boss)
+									std::stringstream tempss;
+									tempss << player.getDamage();
+									tex.spawn(text, particles[i].x+particles[i].w/2, particles[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
+
+									// Remove Object
+									//object[j].alive = false;
+									//obj.count--;
+
+									// If attack-type: Slash
+									if (player.attackType == 0)
+									{
+										// Play hit sound effect: Slash attack
+						                Mix_PlayChannel(-1, sSlashHitBoss, 0);
+									}
+								}
+								// Play hit sound effect: Slash attack
+				                Mix_PlayChannel(-1, sSlashHitBoss, 0);
 							}
 							//----------------------------- Collision Detection based on player-attack hit-box and particles hit-box ------------------------------//
 							//--------------------------------------------------------------------------------------------------------------------------------//
@@ -2489,7 +2519,7 @@ void PlayGame::checkBossAttacksCollisionPlayer() {
 						player.vY = -4;
 
 						// Subtract player health
-						player.health -= 20;
+						player.IncreaseHealth(-20);
 
 						// spawn blood particle effect
 						//for (double i=0.0; i< 360.0; i+=rand() % 10 + 25){
@@ -2793,7 +2823,7 @@ void PlayGame::checkCollisionParticlePlayer() {
 							Mix_PlayChannel(-1, sSlashHitBoss, 0);
 
 							// Subtract player health
-							player.health -= particles[i].damage;
+							player.IncreaseHealth(-particles[i].damage);
 
 			                // Show damage text (it will print how much damage the player did to the boss)
 			    			std::stringstream tempss;
@@ -2827,7 +2857,8 @@ void PlayGame::checkCollisionParticleParticle() {
 				for (int j = 0; j < part.max; j++)
 				{
 					// Make sure we are not comparing the same particle
-					if (i != j) {
+					if (i != j)
+					{
 						if (particles[j].alive)
 						{
 							if (particles[j].type == 1)
@@ -2841,7 +2872,6 @@ void PlayGame::checkCollisionParticleParticle() {
 								float bmy2 = particles[i].y + particles[i].h/2;
 								float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
 													  (bmy - bmy2) * (bmy - bmy2));
-
 
 								// Circle Collision
 								if (distance < particles[j].w/2 + particles[i].w/2)
@@ -3184,6 +3214,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 		if (shift) {
 			tl.MoveTiles(tile, "up");
 			tlc.MoveTilecs(tilec, "up");
+			mb.Move(mob, "up");
 			spawnY -= 64;
 		} else {
 			//
@@ -3193,6 +3224,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 		if (shift) {
 			tl.MoveTiles(tile, "down");
 			tlc.MoveTilecs(tilec, "down");
+			mb.Move(mob, "down");
 			spawnY += 64;
 		} else {
 			//
@@ -3202,6 +3234,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 		if (shift) {
 			tl.MoveTiles(tile, "left");
 			tlc.MoveTilecs(tilec, "left");
+			mb.Move(mob, "left");
 			spawnX -= 64;
 		} else {
 			//
@@ -3211,6 +3244,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 		if (shift) {
 			tl.MoveTiles(tile, "right");
 			tlc.MoveTilecs(tilec, "right");
+			mb.Move(mob, "right");
 			spawnX += 64;
 		} else {
 			//
@@ -3442,6 +3476,9 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 			std::stringstream tempss;
 			tempss << "Loading Data...";
 			tex.spawn(text, 0, 0, 0.0, 0.0, 255, tempss.str().c_str(), 0);
+
+			player.x = spawnX;
+			player.y = spawnY;
 
 			break;
 		}
@@ -3738,13 +3775,14 @@ void PlayGame::LoadLevel()
 
 		// Load map size
 		fileTileDataL >>  map.w >> map.h;
-		player.x		= this->spawnX;
-		player.y		= this->spawnY;
 
 		// Break out of file
 		break;
 	}
 	fileTileDataL.close();
+
+	player.x		= this->spawnX;
+	player.y		= this->spawnY;
 
 	// Left -> Right
 	if (previousLevel < LevelToLoad) {
@@ -3758,6 +3796,42 @@ void PlayGame::LoadLevel()
 		player.x		= 1200;
 		player.y		= lastKnownPositionY;
 	}
+
+	// Spawn for 2 -> 3
+	if (previousLevel == 2) {
+		if (LevelToLoad == 3) {
+			player.x		= 512;
+			player.y		= 768;
+		}
+	}
+
+	// Spawn for 3 -> 2
+	if (previousLevel == 3) {
+		if (LevelToLoad == 2) {
+			player.x		= 1216;
+			player.y		= 320;
+		}
+	}
+
+	// Spawn for 3 -> 4
+	if (previousLevel == 3) {
+		if (LevelToLoad == 4) {
+			player.x		= 672;
+			player.y		= 1728;
+		}
+	}
+
+	// Spawn for 4 -> 3
+	if (previousLevel == 4) {
+		if (LevelToLoad == 3) {
+			player.x		= 992;
+			player.y		= 448 + 1;
+		}
+	}
+
+	// Center camera right way so it doesnt look like its panning to that location
+	camx  = player.x+player.w/2-screenWidth/2;
+	camy  = player.y+player.h/2-screenHeight/2;
 
 	// Spawn on left side of level
 	//player.x		= 272;

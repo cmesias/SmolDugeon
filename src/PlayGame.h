@@ -296,7 +296,7 @@ public:	// Functions mixed with other classes
 	void checkPlayerAttacksTileCollision();
 
 	//------------------ Hurts Boss
-	// Check collision between Player attacks & Boss Particle
+	// Check collision between Player attacks & Boss/Mob Particle
 	void checkPlayerAttacksBossParticleCollision();
 
 	// Check collision between Boss attacks & Player
@@ -306,7 +306,7 @@ public:	// Functions mixed with other classes
 	void checkCollisionBossPlayer();
 
 	//---------- Hurts Player
-	// Check collision between Particle & Player
+	// Check collision between Boos/Mob Particle & Player
 	void checkCollisionParticlePlayer();
 
 	// Check collision between Player Particle & Boss Particle

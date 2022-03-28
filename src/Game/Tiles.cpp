@@ -314,6 +314,19 @@ void Tile::checkCollisionXY(Tile tile[],
 		float &vX, float &vY) {
 
 	{
+		/*
+		 *
+		 *
+		 *
+		 * TODO [ ] - do ccheck for collision if player presses "E" key on chest, open chest and throw out sword
+		 *
+		 *
+		 *
+		 *
+		 *
+		 *
+		 */
+
 		// Update collision with Tiles
 		//tl.checkCollision(tile, x, y, w, h, y, vY);
 

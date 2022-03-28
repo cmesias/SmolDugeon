@@ -25,50 +25,46 @@
 #include "Players.h"
 
 // Reset game
-void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn){
-	x 					= spawnX;
-	y 					= spawnY;
-	name				= newName;
+void Players::Init(float spawnX, float spawnY, std::string newName){
+	this->x 				= spawnX;
+	this->y 				= spawnY;
+	this->name				= newName;
 
-	sprite_index 		= 0;
-	playSlash 			= false;
-	clash 				= false;
-
-	if (!respawn){
-		score 			= 0;
-		hearts 			= 3;
-	}
+	this->sprite_index 		= 0;
+	this->playSlash 		= false;
+	this->clash 			= false;
+	this->score 			= 0;
 
 	// Screen prompts
-	deathScreen 		= false;
-	alive 				= true;
+	this->deathScreen 		= false;
+	this->alive 				= true;
 
 	// Always reset these
 
 	// Walking
-	facing				= "right";
-	flipW				= SDL_FLIP_NONE;
-	moving				= false;
-	moveleft 			= false;
-	moveright 			= false;
-	moveup 				= false;
-	movedown			= false;
-	walkTimer 			= 0;
-	walkTimerVFX 		= 0;
-	vX 					= 0.0;
-	vY 					= 0.0;
+	this->facing			= "right";
+	this->flipW				= SDL_FLIP_NONE;
+	this->moving			= false;
+	this->moveleft 			= false;
+	this->moveright 		= false;
+	this->moveup 			= false;
+	this->movedown			= false;
+	this->walkTimer 		= 0;
+	this->walkTimerVFX 		= 0;
+	this->vX 				= 0.0;
+	this->vY 				= 0.0;
 
 	// Invulnerability ability
-	invurnerableFrame	= 1;
-	invurnerableTick	= 0;
-	invurnerableT		= 300;
-	invurnerable		= true;
+	this->invurnerableFrame	= 1;
+	this->invurnerableTick	= 0;
+	this->invurnerableT		= 300;
+	this->invurnerable		= true;
 
 	// Shoot Attack
-	shootTimer 			= 0;
-	shootDelay 			= false;
-	initialshot 		= false;
-	trigger 			= false;
+	this->shootTimer 		= 0;
+	this->shootDelay 		= false;
+	this->initialshot 		= false;
+	this->trigger 			= false;
 
 	// Attack
 	this->attackTimer 		= 0;
@@ -98,15 +94,29 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	this->pressedEquipKey 	= false;
 
 	// TODO (3-9-2022) [ ] - Save these player stats in a file. This will be the players save data.
+
+	// Health
+	this->hearts 				= 3;
+	this->health				= 100;
+	this->healthMax				= 100;
+
+	// Damage
+	this->damage				= 10;
+	this->castDamage			= 40;
+	this->damageMultipler		= 1;
 	this->AttackSpeed 			= 6.87;
+
+	// Mana
 	this->maxMana				= 100;
 	this->mana					= this->maxMana;
 	this->manaRegenTimer		= 0;
 	this->manaRegenSpeed		= 8.75;
 	this->manaGainOnParry		= 5.25;
-	this->damage				= 10;
-	this->damageMultipler		= 1;
-	this->castDamage			= 40;
+
+	// Parry
+	this->parryLength			= 15;
+
+	// Other stats
 	this->knockBackPower		= 1.58;
 }
 
@@ -117,10 +127,6 @@ void Players::RespawnPlayer() {
 	this->StopDashing();
 	this->ResetDashing();
 	this->health				= this->healthMax;
-	this->moveleft 				= false;
-	this->moveright 			= false;
-	this->moveup 				= false;
-	this->movedown				= false;
 	this->walkTimer 			= 0;
 	this->walkTimerVFX 			= 0;
 }
@@ -132,7 +138,7 @@ void Players::ResetLivesAndPlayer() {
 	newName="AAA";
 
 	// Set default sword: fists
-	this->EquipSword(-1, 10);
+	this->EquipSword(0, 10);
 
 	// Reset score and lives, and turn player alive
 	this->score 				= 0;
@@ -175,13 +181,36 @@ void Players::Load(SDL_Renderer* gRenderer){
 	rPlayer[8] = {48,96,48,48};			// Dash frame 0:	9
 	rPlayer[9] = {96,96,48,48};			// Dash frame 1:	9
 
-	// Clip swords texture
-	rSwords[0] = {0,0,10,21};			// Wooden sword
-	rSwords[1] = {10,0,10,21};			// Rusty sword
-	rSwords[2] = {20,0,10,21};			// Iron sword
-	rSwords[24] = {60,50,10,10};		// Heart (Used in UI, not in inventory or maybe it should? TODO)
-
 	for (int i=0; i<7; i++){setClips(rShield[i], i*48, 0, 48, 48);}
+
+	// Clip swords texture
+	{
+		for (int i=0; i<11; i++) {
+			rSwords[i] = {i*10,0,10,21};
+		}
+		rSwords[11] = {110,0,7,17};
+		rSwords[12] = {117,0,10,21};
+
+		// Second row of swords
+		rSwords[13] = {0,30,10,25};
+		rSwords[14] = {11,30,8,27};
+		rSwords[15] = {20,30,10,29};
+		rSwords[16] = {32,30,6,27};
+		rSwords[17] = {40,30,10,24};
+		rSwords[18] = {50,30,10,24};
+
+		// Broken swords
+		rSwords[19] = {60,30,6,9};
+		rSwords[20] = {70,30,6,12};
+		rSwords[21] = {80,30,6,12};
+		rSwords[22] = {90,30,6,12};
+
+		// Bomb
+		rSwords[23] = {100,30,14,13};
+
+		// Heart
+		rSwords[24] = {60,50,10,10};		// Heart (Used in UI, not in inventory or maybe it should? TODO)
+	}
 
 	// Load audio
 	sCast 			= Mix_LoadWAV("sounds/bfxr/snd_cast.wav");
@@ -647,20 +676,21 @@ void Players::Update(Map &map,
 							spawnAttack = false;
 
 							// If facing right
-							int width;
+							int xOffsetTemp;
+
 							// Attack-object's width and height
 							int tempHeight = 64;
-							int tempWidth = 38;
+							int tempWidth = getW() + 32 + swordW;
+
+							// Player facing direction
 							if (facing == "right")
-								width = this->w;
+								xOffsetTemp = getLeftSide();
 							else
-								width = -tempWidth;
+								xOffsetTemp = getRightSide()-tempWidth;
 
 							// Spawn attack object (it will appear in the world for 1 frame then remove itself)
-							obj.spawn(object, this->x+width,
-									this->y-16,
-											  tempWidth, tempHeight,
-											  0);
+							obj.spawn(object, xOffsetTemp, this->y-16,
+											  tempWidth, tempHeight, 0);
 						}
 						// Play slash sound effect
 						if (playSlash) {
@@ -752,7 +782,7 @@ void Players::Update(Map &map,
 				this->parryTimer++;
 
 				// Parry for 15 frames
-				if (this->parryTimer > 15){
+				if (this->parryTimer > this->parryLength){
 					this->parryTimer = 0;
 					this->parry = false;
 					//this->StopParrying();
@@ -1057,8 +1087,16 @@ void Players::Render(int mx, int my, int camx, int camy, LWindow gWindow, SDL_Re
 					if (swordInHand_Index == -1) {
 
 					} else {
-						gSwords.render(gRenderer, x+xOffSetSwordSlashingRight-camx, y+yOffSetSwordSlashing-camy,
-								swordW, swordH, &rSwords[swordInHand_Index], 90, NULL, flipW);
+						// Don't rotate if holding fists
+						if (swordInHand_Index ==0) {
+							gSwords.render(gRenderer, x+xOffSetSwordSlashingRight+xOffSetFistPunchRight-camx, y-camy,
+									swordW, swordH, &rSwords[swordInHand_Index], 0, NULL, flipW);
+						}
+						// Rotate swords
+						else {
+							gSwords.render(gRenderer, x+xOffSetSwordSlashingRight-camx, y+yOffSetSwordSlashing-camy,
+									swordW, swordH, &rSwords[swordInHand_Index], 90, NULL, flipW);
+						}
 					}
 				}
 
@@ -1070,8 +1108,16 @@ void Players::Render(int mx, int my, int camx, int camy, LWindow gWindow, SDL_Re
 					if (swordInHand_Index == -1) {
 
 					} else {
-						gSwords.render(gRenderer, x+xOffSetSwordSlashingLeft-camx, y+yOffSetSwordSlashing-camy,
-								swordW, swordH, &rSwords[swordInHand_Index], -90, NULL, flipW);
+						// Don't rotate if holding fists
+						if (swordInHand_Index ==0) {
+							gSwords.render(gRenderer, x+xOffSetSwordSlashingLeft+xOffSetFistPunchLeft-camx, y-camy,
+									swordW, swordH, &rSwords[swordInHand_Index], 0, NULL, flipW);
+						}
+						// Rotate swords
+						else {
+							gSwords.render(gRenderer, x+xOffSetSwordSlashingLeft-camx, y+yOffSetSwordSlashing-camy,
+									swordW, swordH, &rSwords[swordInHand_Index], -90, NULL, flipW);
+						}
 					}
 				}
 			}
@@ -1808,8 +1854,16 @@ float Players::getScore() {
 	return this->score;
 }
 
-float Players::getEquipState() {
+bool Players::getEquipState() {
 	return this->pressedEquipKey;
+}
+
+int Players::getItemEqipped(int checkThisIndex) {
+	if (checkThisIndex == swordInHand_Index) {
+		return true;
+	} else{
+		return false;
+	}
 }
 
 void Players::ResetHighScore(int LevelWeLoaded){

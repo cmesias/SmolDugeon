@@ -38,6 +38,7 @@ void Mob::Init(Mob mob[]) {
 		mob[i].onScreen 			= false;
 		mob[i].alert 				= false;
 		mob[i].renderInFront 		= false;
+		mob[i].hasVision 			= false;
 		mob[i].type 				= 0;
 		mob[i].jumpstate			= "falling";
 		mob[i].jumps				= 1;
@@ -127,17 +128,8 @@ void Mob::Spawn(Mob mob[], float x, float y, float w, float h, float angle, floa
 			mob[i].alive 			= true;
 			mob[i].mouse 			= false;
 			mob[i].flash 			= false;
+			mob[i].hasVision 			= false;
 
-			// Spawning normal mob, set default parameters
-			if (type == 0) {
-				mob[i].health 		= 100;
-				mob[i].maxHealth 	= 100;
-				mob[i].healthDecay 	= 100;
-			} else {
-				mob[i].health 		= 200;
-				mob[i].maxHealth 	= 200;
-				mob[i].healthDecay 	= 200;
-			}
 			mob[i].vX 			= dir;
 			mob[i].vY 			= sin( (3.14159265/180)*(angle) );
 			mob[i].angle 			= 0.0;
@@ -169,6 +161,10 @@ void Mob::Spawn(Mob mob[], float x, float y, float w, float h, float angle, floa
 			mob[i].distance 			= 1;
 			mob[i].collision 			= false;
 			mob[i].onScreen 			= false;
+
+			// Spawning normal mob, set default parameters
+			setStatsBasedOnType(mob, i);
+
 			count++;
 			break;
 		}
@@ -274,76 +270,65 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 			// Walking around
 			else if (mob[i].animState == 0)
 			{
-				// If player is within 7 Tiles from the mob, mob will follow player
-				if (mob[i].distance < 32*7 && !mob[i].chargingAttack)
-				{
-					// If player alive, have Mob follow player
-					if (playerAlive) {
+				// If mob has vision of player (no obstacles in line of sight)
+				if (mob[i].hasVision) {
+
+					// If within sight range, set to alert
+					if (mob[i].distance < mob[i].getSightRange()) {
+						mob[i].alert = true;
+					} else {
+						mob[i].alert = false;
 					}
-
-					// Mob is on alert !
-					mob[i].alert = true;
-				} //else
-				//{
-					// Mob is NOT on alert
-					///mob[i].alert = false;
-				//}
-
-				// Once Mob is alerted, it will follow the player forever
-				if (mob[i].alert) {
-					// Change x velocity to go towards player
-					//mob[i].vX = 1.5 * (mob[i].bmx - mob[i].bmx2) / mob[i].distance;
-					//mob[i].vY = 1.5 * (mob[i].bmy - mob[i].bmy2) / mob[i].distance;
-
-					if (mob[i].vX > -1.2 && mob[i].vX < 1.5) {
-						mob[i].vX += 0.3 * (mob[i].bmx - mob[i].bmx2) / mob[i].targetDistanceX;
-					}
-					if (mob[i].vY > -1.5 && mob[i].vY < 1.5) {
-						mob[i].vY += 0.3 * (mob[i].bmy - mob[i].bmy2) / mob[i].targetDistanceY;
-					}
-
-					// Move Mob towards player
-					//mob[i].x += mob[i].vX;
-					//mob[i].y += mob[i].vY;
+				} else {
+					mob[i].alert = false;
 				}
 
-				// If player is within 2 Tiles, start charging animation
-				if (mob[i].distance < 32*2 && !mob[i].chargingAttack)
+				// If alert
+				if (mob[i].alert) {
+
+					// Walk towards player
+					mob[i].vX = 1.5 * (mob[i].bmx - mob[i].bmx2) / mob[i].distance;
+					mob[i].vY = 1.5 * (mob[i].bmy - mob[i].bmy2) / mob[i].distance;
+				}
+
+				// If distance less than attack range
+				if (mob[i].distance < mob[i].getAtkRange())
 				{
-					// Start charge-attack animation
-					mob[i].chargingAttack = true;
+					// If not attacking
+					if (!mob[i].chargingAttack)
+					{
+						// Start charge-attack animation
+						mob[i].chargingAttack = true;
 
-					// Choose random attack for Mob before starting Shooting animations
-					mob[i].randomAttack = rand() % 2;
+						// Choose random attack for Mob before starting Shooting animations
+						mob[i].randomAttack = rand() % 2;
 
-					// Change animation state
-					int randNum = rand() % 2 + 2;
+						// Change animation state
+						int randNum = rand() % 2 + 2;
 
+						// Depending on what type of mob we have, they will only
+						// have a select few attacks that they have access to
 
-					// Depending on what type of mob we have, they will only
-					// have a select few attacks that they have access to
+						// Normal mob:
+						// Access to Attack 0: Basic Projectile Attack
+						if (mob[i].type == 0) {
+							mob[i].animState = 1;
 
-					// Normal mob:
-					/*
-					 * Access to Attack 0: Basic Projectile Attack
-					 */
-					if (mob[i].type == 0) {
-						mob[i].animState = 1;
+							// Stop moving mob
+							mob[i].vX = 0.0;
+							mob[i].vY = 0.0;
+						}
 
-						// Stop moving mob
-						mob[i].vX = 0.0;
-						mob[i].vY = 0.0;
+						// Crazy mob:
+						// Access to Attack 1: Circular Attack
+						// Access to Attack 2: Barrage Attack
+						else if (mob[i].type == 1) {
+							mob[i].animState = randNum;	// random number from 2-3
+						}
+
+						// Set mob to NOT alert mode
+						mob[i].alert = false;
 					}
-
-					// Crazy mob:
-					/*
-					 * Access to Attack 1: Circular Attack
-					 * Access to Attack 2: Barrage Attack
-					 */
-					else if (mob[i].type == 1) {
-						mob[i].animState = randNum;	// random number from 2-3
-					}
-
 				}
 			}
 
@@ -355,7 +340,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 				{
 					// Spawn bullet
 					int rands  = 24;
-					float speed  = 2.5;
+					float speed  = 6;
 					float tempX = mob[i].x + mob[i].w/2 - rands/2;
 					float tempY = mob[i].y + mob[i].h/2 - rands/2;
 
@@ -638,6 +623,26 @@ void Mob::UpdateEditor(Mob mob[], int mex, int mey, int camx, int camy) {
 	// Other classes:
 }
 
+void Mob::Move(Mob mob[], std::string direction){
+	for (int i = 0; i < max; i++) {
+		if (mob[i].alive){
+			if (direction == "left") {
+				mob[i].x -= 64;
+			}
+			else if (direction == "right") {
+				mob[i].x += 64;
+			}
+			else if (direction == "up") {
+				mob[i].y -= 64;
+			}
+			else if (direction == "down") {
+				mob[i].y += 64;
+			}
+
+		}
+	}
+}
+
 void Mob::RenderShadow(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy) {
 	for (int i = 0; i < max; i++) {
 		if (mob[i].alive) {
@@ -665,20 +670,17 @@ void Mob::RenderBack(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTextu
 				// Walking around or idle
 				else if (mob[i].animState == 0) {
 
-					// If mob is on alert (sees player)
-					if (mob[i].alert)
-					{
-						// Set color red
-						gTexture.setColor(200, 0, 0);
-					} else {
-						// Set color normal
-						gTexture.setColor(255, 255, 255);
-					}
 				}
 
 				// Moving towards player animation
 				else if (mob[i].animState == 1) {
 
+					// If mob is chargingAttack
+					if (mob[i].chargingAttack)
+					{
+						// Set color red
+						gTexture.setColor(200, 0, 0);
+					}
 				}
 
 				// Charging-attack animation
@@ -718,20 +720,17 @@ void Mob::RenderFront(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 				// Walking around or idle
 				else if (mob[i].animState == 0) {
 
-					// If mob is on alert (sees player)
-					if (mob[i].alert)
+				}
+
+				// Mob attack: 0 - basic attack
+				else if (mob[i].animState == 1) {
+
+					// If mob is chargingAttack
+					if (mob[i].chargingAttack)
 					{
 						// Set color red
 						gTexture.setColor(200, 0, 0);
-					} else {
-						// Set color normal
-						gTexture.setColor(255, 255, 255);
 					}
-				}
-
-				// Moving towards player animation
-				else if (mob[i].animState == 1) {
-
 				}
 
 				// Charging-attack animation
@@ -832,9 +831,21 @@ void Mob::RenderDebug(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 			// If mob has vision of player
 			if (mob[i].hasVision) {
 				// Render Green box
-				SDL_Rect tempr = {mob[i].x - camx, mob[i].y - camy, mob[i].w, mob[i].h};
-				SDL_SetRenderDrawColor(gRenderer, 0, 200, 200, 255);
-				SDL_RenderDrawRect(gRenderer, &tempr);
+				SDL_Rect tempr = {mob[i].x + mob[i].w/2-8/2-10 - camx, mob[i].y-45 - camy, 8, 30};
+				SDL_SetRenderDrawColor(gRenderer, 110, 110, 110, 255);
+				SDL_RenderFillRect(gRenderer, &tempr);
+			}
+
+			// If mob is alert of player
+			if (mob[i].alert) {
+				// Render Green box
+				SDL_Rect tempr = {mob[i].x + mob[i].w/2-8/2 - camx, mob[i].y-45 - camy, 8, 30};
+				SDL_SetRenderDrawColor(gRenderer, 255, 0, 200, 255);
+				SDL_RenderFillRect(gRenderer, &tempr);
+
+				// Render vision to player
+				SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+				SDL_RenderDrawLine(gRenderer, mob[i].bmx-camx, mob[i].bmy-camy, mob[i].bmx2-camx, mob[i].bmy2-camy);
 			}
 
 
@@ -947,6 +958,26 @@ void Mob::GetDistanceOfPlayer(Mob mob[], float targetX, float targetY, float tar
 	}
 }
 
+void Mob::setStatsBasedOnType(Mob mob[], int i) {
+	// Set defeault parameters depending on what mobs were spawning
+	if (mob[i].type == 0) {
+		mob[i].health 		= 100;
+		mob[i].maxHealth 	= 100;
+		mob[i].healthDecay 	= 100;
+		mob[i].setSightRange(64*10);
+		mob[i].setAtkRange(64*2);
+	} else {
+		mob[i].health 		= 200;
+		mob[i].maxHealth 	= 200;
+		mob[i].healthDecay 	= 200;
+		mob[i].setSightRange(64*10);
+		mob[i].setAtkRange(64*2);
+	}
+
+	// Other defaults on spawn
+	mob[i].hasVision 			= false;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////// LOAD-SAVE ///////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -988,6 +1019,12 @@ void Mob::LoadData(Mob mob[], std::fstream &fileTileDataL)
 
 			// When we load mobs, spawn them 1 pixel from the ground so that we dont have glitches or problems
 			mob[h].y-=2;
+
+			// Defaults
+			{
+				// Set defeault parameters depending on what mobs were spawning
+				setStatsBasedOnType(mob, h);
+			}
 		}
 		//break;
 	}

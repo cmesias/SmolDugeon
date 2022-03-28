@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
  * TODO [ ] (3-25-2022) - When Mobs die, have them drop coins -> Mob.cpp
  * TODO [ ] (3-27-2022) - When picking up an item from an area, permanently remove that item from that area
  * TODO [x] (3-27-2022) - No inventory slot, just one slot per run
- * TODO [x] (3-27-2022) - Crashes when returning to menu or exiting game
+ * TODO [x] (3-27-2022) - Crashes when returning to menu or exiting game, fixed some how?
  *
  *
  * //---------- Item.cpp
