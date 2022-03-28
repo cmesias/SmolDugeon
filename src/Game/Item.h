@@ -25,7 +25,7 @@
 class Item: public Helper, public TextNFont  {
 
 public:	// Parent object Variables
-	static const int ITEMS_UNIQUE = 25;
+	static const int ITEMS_UNIQUE = 28;
 	int multiW = 1;
 	int multiH = 1;
 	const int max = 100;		// max number of instances
@@ -38,6 +38,9 @@ public:	// Parent object Variables
 	 * 19 - 22: Broken Swords
 	 * 23: 		Bomb
 	 * 24: 		Heart
+	 * 25: 		Coin
+	 * 26: 		Silver key
+	 * 27: 		Gold key
 	 */
 	int id;			// id of instances
 	float damage;
@@ -80,8 +83,11 @@ public:	// Resources
 	 *
 	 * 23: Bomb							14 x 13
 	 * 24: Heart 						10 x 10
+	 * 25: Coin 						10 x 10
+	 * 26: Silver key 					5 x 10
+	 * 27: Gold key 					5 x 10
 	 */
-	SDL_Rect rSwords[25];
+	SDL_Rect rSwords[28];
 
 public:	// Variables
 	float hoverAmount;
@@ -132,6 +138,8 @@ public:	// Core functions
 	void RenderDebug(SDL_Renderer *gRenderer, Item item[], int camx, int camy);
 
 	void RenderHand(SDL_Renderer *gRenderer, Item item[], int newMx, int newMy, int mex, int mey);
+
+	void setStatsBasedOnType(Item tile[], int);
 
 public:	// Getter functions for Editor
 

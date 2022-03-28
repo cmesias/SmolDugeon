@@ -50,8 +50,11 @@ public:	// resources
 	 * 19 - 22: Broken Swords
 	 * 23: 		Bomb
 	 * 24: 		Heart
+	 * 25: 		Coin
+	 * 26: 		Silver key
+	 * 27: 		Gold key
 	 */
-	SDL_Rect rSwords[25];
+	SDL_Rect rSwords[28];
 
 	// Audio
 	Mix_Chunk *sCast 			= NULL;
@@ -107,14 +110,17 @@ public:	// variables
 	const float velMax 	= 4;
 	const float velSpeed= 2;
 	bool camlocked 		= true;
+	bool shift 			= false;
+	bool deathScreen	= false;
+	bool alive;
+
+	// Movement
+	std::string facing;
 	bool moveleft 		= false,
 		 moveright 		= false,
 		 moveup 		= false,
 		 movedown		= false;
 	bool moving = false;
-	bool shift 			= false;
-	bool deathScreen	= false;
-	bool alive;
 
 	/*
 	 * Parrying small blue Bullet from Boss:		score += 1;
@@ -138,8 +144,8 @@ public:	// variables
 	int position2	= 0;
 	int dir 		= 1;
 
-public: // attack variables
-	std::string facing;
+public: // Attack variables
+
 	SDL_RendererFlip flipW;
 	int attackTimer;
 	int attackTimerSpe = 1;	// default: 1 or 3 for fast attacks
@@ -151,6 +157,7 @@ public: // attack variables
 	bool playSlash;
 	bool clash;
 	bool spawnAttack;
+
     //float *tempXX;
     //float *tempYY;
 
@@ -258,16 +265,25 @@ private:	// Abilities
 
 private:	// Save these player stats in a file. This will be the players save data.
 
+	// Inventory
+	int silverKeys;						// Keys
+	int goldKeys;						// Keys
+	int coins;							// Coins
+	const int silverKeysMax = 9999;		// Keys,  	Default: 9999
+	const int goldKeysMax = 9999;		// Keys,  	Default: 9999
+	const int coinsMax = 9999;			// Coins,  	Default: 9999
+
 	// Health
-	int hearts;				// Default: 3
-	int health;				// Default: 100
-	int healthMax;			// Default: 100
+	int hearts;							// Default: 3
+	const int heartsMax = 99;			// Default: 99
+	float health;						// Default: 100
+	float healthMax;					// Default: 100
 
 	// Damage
 	float damage;			// Sword damage
 	float castDamage;		// Cast damage
 	float damageMultipler;	// Parrying will increase damage multiplier
-	float AttackSpeed;		// Attack speed
+	float castAtkSpe;		// Cast atk speed
 
 	// Mana
 	float mana;				// Mana
@@ -292,6 +308,10 @@ private:	// Variables used in Textures
 	 * 1: Wooden sword
 	 * 2: Rusty sword
 	 * 3: Iron sword
+	 * 24: Heart
+	 * 25: Coin
+	 * 26: Silver key
+	 * 27: Gold key
 	 */
 	int swordInHand_Index = 0;
 	int swordW = 20;
@@ -353,10 +373,22 @@ public:	// Mutator functions
 	// Extend parry duration, and Gain mana back
 	void ExtendParryDuration();
 
-	// Health
+	// Increase Silver Keys
+	void IncreaseSilverKeys(int value = 1);
+
+	// Increase Gold Keys
+	void IncreaseGoldKeys(int value = 1);
+
+	// Increase Coins
+	void IncreaseCoins(int value = 1);
+
+	// Increase Hearts
+	void IncreaseHearts(int value = 1);
+
+	// Increase Health
 	void IncreaseHealth(float value);
 
-	// Score
+	// Increase Score
 	void IncreaseScore(float value);
 
 	// Shorten parry cool down

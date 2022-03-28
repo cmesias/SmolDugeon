@@ -1448,26 +1448,92 @@ void PlayGame::checkCollisionPlayerItem() {
 	if (player.alive) {
 		for (int i = 0; i < ite.max; i++) {
 			if (item[i].alive) {
+
+				// Collision happening
 				if (checkCollision(item[i].x, item[i].y, item[i].w, item[i].h,
-						           player.getX(), player.getY(), player.getW(), player.getH())) {
+								   player.getX(), player.getY(), player.getW(), player.getH())) {
 
-					item[i].promptSelf = true;
+					// Fists and Swords only
+					if (item[i].id < 24) {
 
-					// If player is pressing equip
-					if (player.getEquipState()) {
-						// reduce enemy health
-						player.EquipSword(item[i].id, item[i].damage);
+						// Prompt self, this will render an "E" above the Item to equip it
+						item[i].promptSelf = true;
+
+						// If player is pressing equip
+						if (player.getEquipState()) {
+							// reduce enemy health
+							player.EquipSword(item[i].id, item[i].damage);
+
+							// Remove item
+							item[i].alive = false;
+							ite.count--;
+
+							// play sound effect
+							Mix_PlayChannel(-1, sCastHitBoss, 0);
+						}
+					}
+
+					// Hearts
+					else if (item[i].id == 24) {
 
 						// Remove item
 						item[i].alive = false;
 						ite.count--;
 
+						// Increase player hearts
+						player.IncreaseHearts();
+
+						// play sound effect
+						Mix_PlayChannel(-1, sCastHitBoss, 0);
+
+					}
+
+					// Coins
+					else if (item[i].id == 25) {
+
+						// Remove item
+						item[i].alive = false;
+						ite.count--;
+
+						// Increase player Coins
+						player.IncreaseCoins();
+
 						// play sound effect
 						Mix_PlayChannel(-1, sCastHitBoss, 0);
 					}
-				} else {
+
+					// Silver keys
+					else if (item[i].id == 26) {
+
+						// Remove item
+						item[i].alive = false;
+						ite.count--;
+
+						// Increase player Silver keys
+						player.IncreaseSilverKeys();
+
+						// play sound effect
+						Mix_PlayChannel(-1, sCastHitBoss, 0);
+					}
+
+					// Gold keys
+					else if (item[i].id == 27) {
+
+						// Remove item
+						item[i].alive = false;
+						ite.count--;
+
+						// Increase player Gold keys
+						player.IncreaseGoldKeys();
+
+						// play sound effect
+						Mix_PlayChannel(-1, sCastHitBoss, 0);
+					}
+				}
+
+				// No collision
+				else {
 					item[i].promptSelf = false;
-					//player.ActivatePromptEquip(false);
 				}
 			}
 		}

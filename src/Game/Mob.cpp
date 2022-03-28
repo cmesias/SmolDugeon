@@ -50,7 +50,8 @@ void Mob::Init(Mob mob[]) {
 		mob[i].walkSpeed			= 1;
 		mob[i].walkFrame			= 0;
 		mob[i].animState			= -1;
-		mob[i].randomAttack		= 0;
+		mob[i].randomAttack			= 0;
+		mob[i].sprite_index 		= 0;
 		mob[i].coolDownTimer		= this->coolDownTimeStart;
 		mob[i].coolDownTimeStart	= this->coolDownTimeStart;
 
@@ -64,15 +65,19 @@ void Mob::Init(Mob mob[]) {
 }
 
 void Mob::Load(SDL_Renderer *gRenderer) {
-	gTexture.loadFromFile(gRenderer, "resource/gfx/mob.png");
-	gTextureFlashed.loadFromFile(gRenderer, "resource/gfx/mob_flash.png");
+	gMob.loadFromFile(gRenderer, "resource/gfx/mob.png");
+	gMobFlashed.loadFromFile(gRenderer, "resource/gfx/mob_flash.png");
 	gMobShadow.loadFromFile(gRenderer, "resource/gfx/shadow.png");
 	sCast 			= Mix_LoadWAV("sounds/bfxr/snd_cast.wav");
+
+	// Mob clips
+	rClip[0] = {0, 0, 10, 12};
+	rClip[1] = {10, 0, 10, 12};
 }
 
 void Mob::Free() {
-	gTexture.free();
-	gTextureFlashed.free();
+	gMob.free();
+	gMobFlashed.free();
 	gMobShadow.free();
 	Mix_FreeChunk(sCast);
 	sCast 			= NULL;
@@ -250,6 +255,9 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 			// Cooldown animation
 			if (mob[i].animState == -1)
 			{
+				// Set sprite index
+				mob[i].sprite_index = 0;
+
 				// If cool down timer greater than 0
 				if (mob[i].coolDownTimer > 0) {
 
@@ -270,6 +278,9 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 			// Walking around
 			else if (mob[i].animState == 0)
 			{
+				// Set sprite index
+				mob[i].sprite_index = 0;
+
 				// If mob has vision of player (no obstacles in line of sight)
 				if (mob[i].hasVision) {
 
@@ -344,7 +355,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 					float tempX = mob[i].x + mob[i].w/2 - rands/2;
 					float tempY = mob[i].y + mob[i].h/2 - rands/2;
 
-					if (mob[i].chargeTime == 15) {
+					if (mob[i].chargeTime == 16) {
 						//p_dummy.spawnParticleAngleFollow(particle, 1,
 								p_dummy.spawnParticleAngle(particle, 1,
 										   tempX,
@@ -364,11 +375,19 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 						Mix_PlayChannel(-1, sCast, 0);
 					}
 
+
+					// Set sprite index
+					if (mob[i].chargeTime > 15) {
+						mob[i].sprite_index = 1;
+					} else {
+						mob[i].sprite_index = 0;
+					}
+
 					// If count down has not reached 0 seconds
 					if (mob[i].chargeTime > 0) {
 
 						// Start counting down charge-attack animation
-						mob[i].chargeTime--;
+						mob[i].chargeTime -= 2;
 					}
 
 					// Countdown reached 0 seconds.
@@ -664,7 +683,7 @@ void Mob::RenderBack(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTextu
 				// Walking around or idle
 				if (mob[i].animState == -1)
 				{
-					gTexture.setColor(255, 255, 255);
+					gMob.setColor(255, 255, 255);
 				}
 
 				// Walking around or idle
@@ -678,26 +697,30 @@ void Mob::RenderBack(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTextu
 					// If mob is chargingAttack
 					if (mob[i].chargingAttack)
 					{
+						//gMob.setColor(200, 0, 0);
+					}
+
+					if (mob[i].chargeTime > 15) {
 						// Set color red
-						gTexture.setColor(200, 0, 0);
+						gMob.setColor(200, 0, 0);
 					}
 				}
 
 				// Charging-attack animation
 				else if (mob[i].animState == 2) {
-					gTexture.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
+					gMob.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
 				}
 
 				// Render mob
 				if (mob[i].flash) {
-					gTextureFlashed.setAlpha(255);
-					gTextureFlashed.render(gRenderer, mob[i].x - camx, mob[i].y - camy,
+					gMobFlashed.setAlpha(255);
+					gMobFlashed.render(gRenderer, mob[i].x - camx, mob[i].y - camy,
 												mob[i].w, mob[i].h, NULL,
 												0.0, NULL, mob[i].flip);
 				} else {
-					gTexture.setAlpha(255);
-					gTexture.render(gRenderer, mob[i].x - camx, mob[i].y - camy,
-												mob[i].w, mob[i].h, NULL,
+					gMob.setAlpha(255);
+					gMob.render(gRenderer, mob[i].x - camx, mob[i].y - camy,
+												mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
 												0.0, NULL, mob[i].flip);
 				}
 
@@ -714,7 +737,7 @@ void Mob::RenderFront(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 				// Walking around or idle
 				if (mob[i].animState == -1)
 				{
-					gTexture.setColor(255, 255, 255);
+					gMob.setColor(255, 255, 255);
 				}
 
 				// Walking around or idle
@@ -728,26 +751,30 @@ void Mob::RenderFront(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 					// If mob is chargingAttack
 					if (mob[i].chargingAttack)
 					{
+						//gMob.setColor(200, 0, 0);
+					}
+
+					if (mob[i].chargeTime > 15) {
 						// Set color red
-						gTexture.setColor(200, 0, 0);
+						gMob.setColor(200, 0, 0);
 					}
 				}
 
 				// Charging-attack animation
 				else if (mob[i].animState == 2) {
-					gTexture.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
+					gMob.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
 				}
 
 				// Render mob
 				if (mob[i].flash) {
-					gTextureFlashed.setAlpha(255);
-					gTextureFlashed.render(gRenderer, mob[i].x - camx, mob[i].y - camy,
+					gMobFlashed.setAlpha(255);
+					gMobFlashed.render(gRenderer, mob[i].x - camx, mob[i].y - camy,
 												mob[i].w, mob[i].h, NULL,
 												0.0, NULL, mob[i].flip);
 				} else {
-					gTexture.setAlpha(255);
-					gTexture.render(gRenderer, mob[i].x - camx, mob[i].y - camy,
-												mob[i].w, mob[i].h, NULL,
+					gMob.setAlpha(255);
+					gMob.render(gRenderer, mob[i].x - camx, mob[i].y - camy,
+												mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
 												0.0, NULL, mob[i].flip);
 				}
 			}
@@ -866,8 +893,8 @@ void Mob::RenderDebug(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 
 void Mob::RenderHand(SDL_Renderer *gRenderer, Mob mob[], int newMx, int newMy, int mex, int mey, int camx, int camy){
 	// Render mob in hand
-	gTexture.setAlpha(110);
-	gTexture.render(gRenderer, newMx, newMy, pixelSizeW, pixelSizeH, NULL);
+	gMob.setAlpha(110);
+	gMob.render(gRenderer, newMx, newMy, pixelSizeW, pixelSizeH, NULL);
 
 	// Render mouse coordinates snapped to grid
 	SDL_Rect tempr = {newMx, newMy, pixelSizeW, pixelSizeH};
@@ -976,6 +1003,7 @@ void Mob::setStatsBasedOnType(Mob mob[], int i) {
 
 	// Other defaults on spawn
 	mob[i].hasVision 			= false;
+	mob[i].sprite_index = 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

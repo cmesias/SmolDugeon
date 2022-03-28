@@ -86,6 +86,10 @@ void Tile::placeTile(Tile tile[], float x, float y,
 			tile[i].player = false;
 			tile[i].side = "right";
 			tile[i].alive 	= true;
+
+			// Set default parameters
+			setStatsBasedOnType(tile, i);
+
 			tileCount++;
 			break;
 		}
@@ -337,30 +341,23 @@ void Tile::checkCollisionXY(Tile tile[],
 		// Get rect of Player
 		SDL_Rect rectA;
 		rectA.x = x;
-		rectA.y = y + (h/2)- 10;
+		rectA.y = y;
 		rectA.w = w;
-		rectA.h = h/2 + 20;
+		rectA.h = h;
 
 		// Set moveback to false
 		bool moveBack;
 		moveBack = false;
 
-		// Check specific Tiles
+		// For loop Tiles
 		for (int i = 0; i < max; i++) {
 			if (tile[i].alive){
 
 				// Check only collision-enabled Tiles
 				if (tile[i].collisionTile) {
 
-					// Get rect of Tiles
-					SDL_Rect rectB;
-					rectB.x = tile[i].x;
-					rectB.y = tile[i].y;
-					rectB.w = tile[i].w;
-					rectB.h = tile[i].h;
-
 					// If Player colliding with Tile
-					if  ( checkCollisionRect( rectA, rectB )) {
+					if  ( checkCollisionRect( rectA, tile[i].rectB )) {
 						/*// If Player has more than 0 keys, then unlock door, otherwise continue collision check
 						if (keys > 0 && useKey) {
 							useKey = false;
@@ -384,21 +381,20 @@ void Tile::checkCollisionXY(Tile tile[],
 		}
 
 		// Player Velocity Y Axis
-		y += vY;;
+		y += vY;
 		rectA.x = x;
-		rectA.y = y + (h/2) - 10;
+		rectA.y = y;
 		rectA.w = w;
-		rectA.h = h/2 + 20;
+		rectA.h = h;
+
+		// Set moveBack always to false
 		moveBack = false;
+
+		// For loop Tiles
 		for (int i = 0; i < max; i++) {
 			if (tile[i].alive){
 				if (tile[i].collisionTile) {
-					SDL_Rect rectB;
-					rectB.x = tile[i].x;
-					rectB.y = tile[i].y;
-					rectB.w = tile[i].w;
-					rectB.h = tile[i].h;
-					if  ( checkCollisionRect( rectA, rectB )) {
+					if  ( checkCollisionRect( rectA, tile[i].rectB )) {
 						// If Player has more than 0 keys, then unlock door, otherwise continue collision check
 						/*if (keys > 0 && useKey) {
 							useKey = false;
@@ -605,6 +601,7 @@ void Tile::renderTileDebug(SDL_Renderer *gRenderer, Tile tile[], int newMx, int 
 	for (int i = 0; i < max; i++) {
 		if (tile[i].alive){
 			if (tile[i].layer == layer) {
+
 				// If its a collision tile, render filled blue square on top left inside the Tile
 				if (tile[i].collisionTile) {
 					SDL_Rect tempr = {tile[i].x - camx, tile[i].y - camy, 4, 8};
@@ -665,6 +662,70 @@ void Tile::RenderHand(SDL_Renderer *gRenderer, Tile tile[], int newMx, int newMy
 	}
 }
 
+void Tile::setStatsBasedOnType(Tile tile[], int i) {
+
+	// Every other Tile
+	{
+		tile[i].rectB.x = tile[i].x;
+		tile[i].rectB.y = tile[i].y;
+		tile[i].rectB.w = tile[i].w;
+		tile[i].rectB.h = tile[i].h;
+	}
+
+	// Specific Tiles
+	{
+		// Wall tiles
+		if (tile[i].id == 32) {
+			tile[i].rectB.x = tile[i].x;
+			tile[i].rectB.y = tile[i].y+(8*4);
+			tile[i].rectB.w = tile[i].w;
+			tile[i].rectB.h = tile[i].h/2;
+		}
+		if (tile[i].id == 33) {
+			tile[i].rectB.x = tile[i].x;
+			tile[i].rectB.y = tile[i].y+(8*4);
+			tile[i].rectB.w = tile[i].w;
+			tile[i].rectB.h = tile[i].h/2;
+		}
+		if (tile[i].id == 34) {
+			tile[i].rectB.x = tile[i].x;
+			tile[i].rectB.y = tile[i].y+(8*4);
+			tile[i].rectB.w = tile[i].w;
+			tile[i].rectB.h = tile[i].h/2;
+		}
+
+		// Top of yellow box tile
+		if (tile[i].id == 197) {
+			tile[i].rectB.x = tile[i].x;
+			tile[i].rectB.y = tile[i].y+(11*4);
+			tile[i].rectB.w = tile[i].w;
+			tile[i].rectB.h = 2.5*4;
+		}
+
+		// Bottom of yellow box tile
+		if (tile[i].id == 229) {
+			tile[i].rectB.x = tile[i].x;
+			tile[i].rectB.y = tile[i].y;
+			tile[i].rectB.w = tile[i].w;
+			tile[i].rectB.h = 8*4;
+		}
+
+		// Chest tile
+		if (tile[i].id == 366) {
+			tile[i].rectB.x = tile[i].x;
+			tile[i].rectB.y = tile[i].y+(8*4);
+			tile[i].rectB.w = tile[i].w;
+			tile[i].rectB.h = 4*4;
+		}
+		if (tile[i].id == 367) {
+			tile[i].rectB.x = tile[i].x;
+			tile[i].rectB.y = tile[i].y+(8*4);
+			tile[i].rectB.w = tile[i].w;
+			tile[i].rectB.h = 4*4;
+		}
+	}
+}
+
 void Tile::MoveTiles(Tile tile[], std::string direction){
 	for (int i = 0; i < max; i++) {
 		if (tile[i].alive){
@@ -710,9 +771,17 @@ void Tile::LoadData(Tile tile[], std::fstream &fileToReturn)
 							  tile[i].mouse 		>>
 							  tile[i].screen 		>>
 							  tile[i].alive;
-
-			//std::cout << "Tile i: " << i << ", x: " << tile[i].x << ", y: " << tile[i].y << std::endl;
 		}
+
+		// Set collision rects for specific Tiles
+		for (int i = 0; i < this->tileCount; i++) {
+			if (tile[i].alive) {
+
+				// Set default parameters
+				setStatsBasedOnType(tile, i);
+			}
+		}
+
 		//break;
 	}
 }

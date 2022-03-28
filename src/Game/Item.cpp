@@ -50,6 +50,15 @@ void Item::Load(SDL_Renderer* gRenderer){
 
 		// Heart
 		rSwords[24] = {60,50,10,10};		// Heart (Used in UI, not in inventory or maybe it should? TODO)
+
+		// Coin
+		rSwords[25] = {70,50,10,10};
+
+		// Silver key
+		rSwords[26] = {80,45,7,15};
+
+		// Golden key
+		rSwords[27] = {87,45,7,15};
 	}
 
 	// Other fonts
@@ -109,19 +118,10 @@ void Item::Spawn(Item item[], float x, float y) {
 	Remove(item, 0);
 	for (int i = 0; i < max; i++) {
 		if (!item[i].alive) {
-
-			if (this->id == 0) {
-				item[i].damage 			= 20;
-			} else if (this->id == 1) {
-				item[i].damage 			= 35;
-			} else if (this->id == 2) {
-				item[i].damage 			= 50;
-			}
-
-			item[i].x 				= x;
-			item[i].y 				= y;
 			item[i].w 				= getItemSizeW();
 			item[i].h 				= getItemSizeH();
+			item[i].x 				= x;
+			item[i].y 				= y;
 			item[i].vX 				= 0.0;
 			item[i].vY 				= 0.0;
 			item[i].id 				= this->id;
@@ -131,6 +131,7 @@ void Item::Spawn(Item item[], float x, float y) {
 			item[i].mouseBox 		= false;
 			item[i].onScreen 		= false;
 			item[i].alive 			= true;
+			setStatsBasedOnType(item, i);
 			count++;
 			break;
 		}
@@ -385,6 +386,34 @@ void Item::RenderHand(SDL_Renderer *gRenderer, Item item[], int newMx, int newMy
 	}
 }
 
+void Item::setStatsBasedOnType(Item item[], int i) {
+
+	// TODO do damage for all swords
+	if (item[i].id == 0) {
+		item[i].damage 			= 10;
+	} else if (item[i].id == 1) {
+		item[i].damage 			= 20;
+	} else if (item[i].id == 2) {
+		item[i].damage 			= 35;
+	} else if (item[i].id >= 3 && item[i].id <= 23) {
+		item[i].damage 			= 50;
+	} else {
+		item[i].damage 			= 0;
+	}
+
+	// Set size for Swords when loaded
+	if (item[i].id >= 0 && item[i].id <= 10) {
+		item[i].w = 10*2;
+		item[i].h = 21*2;
+	}
+
+	// Set size for Keys when loaded
+	if (item[i].id == 26 || item[i].id == 27) {
+		item[i].w = 7*2;
+		item[i].h = 15*2;
+	}
+}
+
 int Item::getItemSizeW() {
 	return this->rSwords[this->id].w*2;
 }
@@ -415,27 +444,28 @@ void Item::LoadData(Item item[], std::fstream &fileTileDataL)
 	//std::cout << this->count << std::endl;
 
 	// Load rest of Tilec data
-	for (int j = 0; j < this->count; j++) {
-		if (!item[j].alive) {
+	for (int i = 0; i < this->count; i++) {
+		if (!item[i].alive) {
 			fileTileDataL >>
-			item[j].x 		>>
-			item[j].y 		>>
-			item[j].w 		>>
-			item[j].h 		>>
-			item[j].id 		>>
-			item[j].alive;
-
-			if (item[j].id == 0) {
-				item[j].damage 			= 20;
-			} else if (item[j].id == 1) {
-				item[j].damage 			= 35;
-			} else if (item[j].id == 2) {
-				item[j].damage 			= 50;
-			}
+			item[i].x 		>>
+			item[i].y 		>>
+			item[i].w 		>>
+			item[i].h 		>>
+			item[i].id 		>>
+			item[i].alive;
 
 			//std::cout << "Item j: " << j << ", x: " << item[j].x << ", y: " << item[j].y << std::endl;
 		}
 		//break;
+	}
+
+	// Set collision rects for specific Tiles
+	for (int i = 0; i < this->count; i++) {
+		if (item[i].alive) {
+
+			// Set default parameters
+			setStatsBasedOnType(item, i);
+		}
 	}
 }
 //--------------------------------------------- Load Item Data ------------------------------------------------//

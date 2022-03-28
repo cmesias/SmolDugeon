@@ -95,6 +95,11 @@ void Players::Init(float spawnX, float spawnY, std::string newName){
 
 	// TODO (3-9-2022) [ ] - Save these player stats in a file. This will be the players save data.
 
+	// Inventory
+	this->silverKeys			= 0;
+	this->goldKeys				= 0;
+	this->coins					= 0;
+
 	// Health
 	this->hearts 				= 3;
 	this->health				= 100;
@@ -104,7 +109,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName){
 	this->damage				= 10;
 	this->castDamage			= 40;
 	this->damageMultipler		= 1;
-	this->AttackSpeed 			= 6.87;
+	this->castAtkSpe 			= 6.87;
 
 	// Mana
 	this->maxMana				= 100;
@@ -210,6 +215,15 @@ void Players::Load(SDL_Renderer* gRenderer){
 
 		// Heart
 		rSwords[24] = {60,50,10,10};		// Heart (Used in UI, not in inventory or maybe it should? TODO)
+
+		// Coin
+		rSwords[25] = {70,50,10,10};
+
+		// Silver key
+		rSwords[26] = {80,45,7,15};
+
+		// Golden key
+		rSwords[27] = {87,45,7,15};
 	}
 
 	// Load audio
@@ -315,7 +329,7 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 	if (shootDelay) {
 
 		// Start timer
-		shootTimer += AttackSpeed;
+		shootTimer += castAtkSpe;
 
 		// After 1 second
 		if (shootTimer > 60) {
@@ -653,8 +667,13 @@ void Players::Update(Map &map,
 					// Stop player movement
 					StopMovement();
 
-					// Increase attack timer/frames
-					this->attackTimer += this->attackTimerSpe;
+					// If using hands, very fast attack speed
+					if (swordInHand_Index == 0) {
+						this->attackTimer += 3;
+					} else {
+						// Increase attack timer/frames
+						this->attackTimer += this->attackTimerSpe;
+					}
 
 					// If attack timer below 15 frames
 					if (this->attackTimer < 15)
@@ -679,7 +698,7 @@ void Players::Update(Map &map,
 							int xOffsetTemp;
 
 							// Attack-object's width and height
-							int tempHeight = 64;
+							int tempHeight = 16;
 							int tempWidth = getW() + 32 + swordW;
 
 							// Player facing direction
@@ -689,7 +708,7 @@ void Players::Update(Map &map,
 								xOffsetTemp = getRightSide()-tempWidth;
 
 							// Spawn attack object (it will appear in the world for 1 frame then remove itself)
-							obj.spawn(object, xOffsetTemp, this->y-16,
+							obj.spawn(object, xOffsetTemp, this->y+16,
 											  tempWidth, tempHeight, 0);
 						}
 						// Play slash sound effect
@@ -1344,24 +1363,83 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 		int marginW = 12;
 		int tempX = screenWidth - ((1+i)*32) - marginW;
 		gSwords.render(gRenderer, tempX, 12, 32, 32,
-								  &rSwords[24], 0, NULL, flipW);
+								  &rSwords[24], 0, NULL);
 	}
 
-	// Highscore text
+	// Used by all 3 below
+	int marginW = 12;
+	int marginH = 32 + 4;
+	int tempX = screenWidth - marginW;
+	int tempY;
 	std::stringstream tempsi;
+
+	// Coins
+	{
+		// Render number of Coins
+		tempY = 12 + marginH;
+		for (int i=0; i<coins+1; i++){
+			gSwords.render(gRenderer, tempX - 64 - 16, 12+marginH, 32, 32,
+									  &rSwords[25], 0, NULL);
+		}
+
+		// Render number of Coins text
+		tempsi.str( std::string() );
+		tempsi  << " x " << this->coins;
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.render(gRenderer, tempX-gText.getWidth(), tempY, gText.getWidth(), gText.getHeight());
+	}
+
+	// Silver keys
+	{
+		tempY = 12+marginH*2;
+
+		// Render number of Silver keys
+		for (int i=0; i<silverKeys+1; i++){
+			gSwords.render(gRenderer, tempX - 64, 12+marginH*2, 16, 32,
+									  &rSwords[26], 0, NULL);
+		}
+
+		// Render number of Silver keys text
+		tempsi.str( std::string() );
+		tempsi << " x " <<this->silverKeys;
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.render(gRenderer, tempX-gText.getWidth(), tempY, gText.getWidth(), gText.getHeight());
+
+
+	}
+
+	// Gold keys
+	{
+		// Render number of Gold keys
+		tempY = 12+marginH*3;
+		for (int i=0; i<goldKeys+1; i++){
+			gSwords.render(gRenderer, tempX - 64, 12+marginH*3, 16, 32,
+									  &rSwords[27], 0, NULL);
+		}
+
+		// Render number of Gold keys text
+		tempsi.str( std::string() );
+		tempsi  << " x " << this->goldKeys;
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.render(gRenderer, tempX-gText.getWidth(), tempY, gText.getWidth(), gText.getHeight());
+	}
+
+
+	// Highscore text
+	tempsi.str( std::string() );
 	tempsi << "Highscore: " << this->highscore;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {244, 144, 20}, gFont24);
-	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75, gText.getWidth(), gText.getHeight());
+	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*3, gText.getWidth(), gText.getHeight());
 
 	tempsi.str( std::string() );
 	tempsi << "Score: " << this->score;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*1, gText.getWidth(), gText.getHeight());
+	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*4, gText.getWidth(), gText.getHeight());
 
 	tempsi.str( std::string() );
 	tempsi << "Level: " << CurrentLevel;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*2, gText.getWidth(), gText.getHeight());
+	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*5, gText.getWidth(), gText.getHeight());
 
 	tempsi.str( std::string() );
 	tempsi << "Damage +" << this->damage;
@@ -1389,6 +1467,11 @@ void Players::RenderDebug(SDL_Renderer *gRenderer, int camX, int camY)
 	// Original box, untouched
 	SDL_Rect tempRect = {x-camX, y-camY, w, h};
 	SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+	SDL_RenderDrawRect(gRenderer, &tempRect);
+
+	// Original box, untouched
+	tempRect = {x-camX, y-camY, realw, realh};
+	SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
 	SDL_RenderDrawRect(gRenderer, &tempRect);
 
 	////////////////////////////////////////////////////////////
@@ -1708,6 +1791,34 @@ void Players::ExtendParryDuration()
 	//this->damageMultipler += 0.1;
 }
 
+void Players::IncreaseSilverKeys(int value) {
+	this->silverKeys += value;
+	if (this->silverKeys > this->silverKeysMax) {
+		this->silverKeys = this->silverKeysMax;
+	}
+}
+
+void Players::IncreaseGoldKeys(int value) {
+	this->goldKeys += value;
+	if (this->goldKeys > this->goldKeysMax) {
+		this->goldKeys = this->goldKeysMax;
+	}
+}
+
+void Players::IncreaseCoins(int value) {
+	this->coins += value;
+	if (this->coins > this->coins) {
+		this->coins = this->coinsMax;
+	}
+}
+
+void Players::IncreaseHearts(int value) {
+	this->hearts += value;
+	if (this->hearts > this->heartsMax) {
+		this->hearts = this->heartsMax;
+	}
+}
+
 void Players::IncreaseHealth(float value) {
 	this->health += value;
 	if (this->health > this->healthMax) {
@@ -1763,6 +1874,13 @@ void Players::EquipSword(int swordInHand_Index, float swordDamage)
 {
 	this->swordInHand_Index = swordInHand_Index;
 	this->damage = swordDamage;
+
+	// Set attack speed based on sword/item equipping
+	if (swordInHand_Index ==0) {
+		this->attackTimerSpe = 5;
+	} else {
+		this->attackTimerSpe = 1;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

@@ -33,6 +33,9 @@ public:
 	int w;
 	int h;
 
+	// Get rect of each specific Tile
+	SDL_Rect rectB;
+
 	/*
 	 * 0: Used to collide with the player to move into a new area/level
 	 *
@@ -117,6 +120,8 @@ public:	// core game functions
 
 	// Render Tile Debug in Hand
 	void RenderHand(SDL_Renderer *gRenderer, Tile tile[], int newMx, int newMy, int mex, int mey, int camx, int camy, SDL_Rect rTiles[]);
+
+	void setStatsBasedOnType(Tile tile[], int i);
 
 public:	// Tile manipulation
 

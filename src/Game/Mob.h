@@ -26,11 +26,20 @@ class Mob: public Monster, public Helper, public TextNFont {
 public:
 	int count;
 	const int max = 100;
-	LTexture gTexture;
-	LTexture gTextureFlashed;
+	LTexture gMob;
+	LTexture gMobFlashed;
 	LTexture gMobShadow;
 	Mix_Chunk *sCast 			= NULL;
 	SDL_RendererFlip flip;
+
+	SDL_Rect rClip[2];
+
+	/*
+	 * 0: Walk
+	 * 1: Attack
+	 *
+	 */
+	int sprite_index;
 
 public: // variables
 	double walkTimer;
@@ -124,7 +133,7 @@ public:	// Animations
 	int animState;
 	bool chargingAttack;
 	float chargeTime;					// After 3 seconds, attack
-	const float chargeTimeStart = 30;	// Change this to change the charge-attack animation start time
+	const float chargeTimeStart = 60;	// Change this to change the charge-attack animation start time
 
 	float constantFiringTimer;
 
