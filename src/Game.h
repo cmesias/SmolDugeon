@@ -16,8 +16,9 @@
 #include <SDL2/SDL_ttf.h>
 #include "Options.h"
 #include "Helper.h"
+#include "Game/TextNFont.h"
 
-class Game : public Options, public Helper {
+class Game : public Options, public Helper, public TextNFont {
 public:	// globals
 	LWindow gWindow;
 	SDL_Renderer *gRenderer;

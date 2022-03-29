@@ -35,6 +35,7 @@ public:
 	bool mouse;
 	bool mouseBox;
 	bool collision;
+	bool promptSelf;
 	bool alive;
 	std::string side;		// collision with player
 
@@ -57,6 +58,8 @@ public: // Editor functions
 	void MoveTilecs(Tilec tilec[], std::string direction);
 
 public: // Render functions
+
+	void RenderUI(SDL_Renderer *gRenderer, Tilec tilec[], int camx, int camy);
 
 	void Render(SDL_Renderer *gRenderer, Tilec tilec[], int layer, int camx, int camy);
 

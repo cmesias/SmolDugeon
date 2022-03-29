@@ -21,7 +21,11 @@
 
 #include "PlayGame.h"
 
+#include <iomanip>
+#include <memory>
+
 void PlayGame::Init() {
+
 	// Upon entry
 	place_type 			= 0;
     debug 				= true;
@@ -29,15 +33,11 @@ void PlayGame::Init() {
 	quit 				= false;
 	leftClick 			= false;
 	shift 				= false;
-	camx 				= 0;
-	camy 				= 0;
-	camlock				= false;
 	frame 				= 0;
     cap 				= true;
 	int i = 0;
 	lastKnownPositionX = 100;
 	lastKnownPositionY = 0;
-
 
 	// Tiles
 	{
@@ -52,12 +52,6 @@ void PlayGame::Init() {
 		}
 	}
 
-	// Initial camera center
-	//camx = map.x + map.w / 2 - screenWidth/2;
-	//camy = map.y + map.h / 2 - screenHeight/2;
-	camx = map.x;
-	camy = map.y + screenHeight/2 + 100;
-
 	// Initialize
 	bos.Init(boss);
 	mb.Init(mob);
@@ -71,6 +65,14 @@ void PlayGame::Init() {
 	tb.placeTileBar(tilebar);
 	obj.init(object);
 	ite.Init(item);
+
+	// Camera stuff
+	// Initial camera center
+	//camx = map.x + map.w / 2 - screenWidth/2;
+	//camy = map.y + map.h / 2 - screenHeight/2;
+	camx = map.x;
+	camy = map.y + screenHeight/2 + 100;
+	camlock		= false;
 }
 /*
 void PlayGame::saveCFG(std::string fileName){
@@ -133,11 +135,6 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	gShadow.loadFromFile(gRenderer, 	"resource/gfx/shadow.png");
 	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
 
-	// load fonts
-	gFont 	= TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 18);
-	gFont13 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 13);
-	gFont26 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 26);
-
 	// load audio
 	sAmbientMusic 		= Mix_LoadMUS("sounds/necrophageonNeonStarlight.mp3");
 	sRockBreak 			= Mix_LoadWAV("sounds/bfxr/rock_break.wav");
@@ -165,25 +162,19 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	tb.load(gRenderer);
 	tlc.Load();
 	ite.Load(gRenderer);
+
+	// Other classes Fonts
+	LoadFonts();
 }
 
 void PlayGame::Free() {
 	// free textures
 	gParticles.free();
-	gText.free();
 	gBG.free();
 	gBG2.free();
 	gCircle.free();
 	gShadow.free();
 	gCursor.free();
-
-	// free fonts
-	TTF_CloseFont(gFont);
-	TTF_CloseFont(gFont13);
-	TTF_CloseFont(gFont26);
-	gFont = NULL;
-	gFont13 = NULL;
-	gFont26 = NULL;
 
 	// free audio
 	Mix_FreeChunk(sRockBreak);
@@ -214,11 +205,19 @@ void PlayGame::Free() {
 	tl.free();
 	tlc.Free();
 	ite.Free();
+
+	// Other classes Fonts
+	FreeFonts();
 }
 
-/* 5-31-2017
- * Change asteroid spawns to zombies
- */
+void PlayGame::ShakeCamera()
+{
+	camshake = true;
+	rustleW = 5;
+	rustleSpe = 1;
+
+	rustleDirX = rand() % 3 + 1;
+}
 
 
 void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
@@ -903,19 +902,119 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		//camx = player.x + player.w / 2 - gWindow.getWidth()/2;
 		//camy = player.y + player.h / 2 - gWindow.getHeight()/2;
 		if (camlock) {
+
+			// Get center of player
 			float bmx, bmy;
 			bmx  = player.x+player.w/2-screenWidth/2;
 			bmy  = player.y+player.h/2-screenHeight/2;
-			float distance = sqrt((bmx - camx) * (bmx - camx)+
-								  (bmy - camy) * (bmy - camy));
+
+			// Get distnace from player
+			float distance = getDistance(bmx, bmy, camx, camy);
 
 			// Camera target
 			float vX, vY;
+
+			// If camera distance from player is > 1, go to the player!
 			if (distance >= 1){
 				vX 	= 2 * (10*distance/256) * (bmx - camx) / distance;
 				vY 	= 2 * (10*distance/256) * (bmy - camy) / distance;
+
 				camx += vX;
 				camy += vY;
+			}
+
+			// The reason we call camera bnounds before camera shaking is because the
+			// screen wont shake if called after handling screen shaking
+			// Camera bounds
+			if (!editor) {
+				if( camx < 0 ){
+					camx = 0;
+				}
+				if( camy < 0 ){
+					camy = 0;
+				}
+				if( camx+screenWidth > map.w ){
+					camx = map.w-screenWidth;
+				}
+				if( camy+screenHeight > map.h ){
+					camy = map.h-screenHeight ;
+				}
+			}
+
+			// Handle camera shake
+			if (camshake) {
+
+				// Shake going right
+				if (rustleDirX == 1) {
+
+					// Shake camera
+					camx += rustleW;
+
+					// Next direction to shake
+					rustleDirX = 2;
+
+					// Lower rustle of camera every frame
+					if (rustleW > 0) {
+						rustleW -= rustleSpe;
+					} else {
+						// Stop shaking
+						camshake = false;
+					}
+				}
+
+				// Shake going down
+				else if (rustleDirX == 2) {
+
+					// Shake camera
+					camy += rustleW;
+
+					// Next direction to shake
+					rustleDirX = 3;
+
+					// Lower rustle of camera every frame
+					if (rustleW > 0) {
+						rustleW -= rustleSpe;
+					} else {
+						// Stop shaking
+						camshake = false;
+					}
+				}
+
+				// Shake going left
+				else if (rustleDirX == 3) {
+
+					// Shake camera
+					camx -= rustleW;
+
+					// Next direction to shake
+					rustleDirX = 4;
+
+					// Lower rustle of camera every frame
+					if (rustleW > 0) {
+						rustleW -= rustleSpe;
+					} else {
+						// Stop shaking
+						camshake = false;
+					}
+				}
+
+				// Shake going up
+				else if (rustleDirX == 4) {
+
+					// Shake camera
+					camy -= rustleW;
+
+					// Next direction to shake
+					rustleDirX = 1;
+
+					// Lower rustle of camera every frame
+					if (rustleW > 0) {
+						rustleW -= rustleSpe;
+					} else {
+						// Stop shaking
+						camshake = false;
+					}
+				}
 			}
 		}else{
 			if (editor) {
@@ -931,22 +1030,6 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 				if (mey + 2 > screenHeight) {
 				//	camy += 10;
 				}
-			}
-		}
-
-		// Camera bounds
-		if (!editor) {
-			if( camx < 0 ){
-				camx = 0;
-			}
-			if( camy < 0 ){
-				camy = 0;
-			}
-			if( camx+screenWidth > map.w ){
-				camx = map.w-screenWidth;
-			}
-			if( camy+screenHeight > map.h ){
-				camy = map.h-screenHeight ;
 			}
 		}
 	}
@@ -983,6 +1066,20 @@ void PlayGame::RenderShadows(SDL_Renderer *gRenderer, LWindow &gWindow) {
 
 	// Render Mob Shadow on floor
 	mb.RenderShadow(gRenderer, mob, camx, camy);
+
+	// Render player shadow
+	int shadowSizeW = 24;
+	int shadowSizeH = 10;
+	if (player.facing == "right") {
+		gShadow.render(gRenderer, player.getX()+player.getW()/2-shadowSizeW/2-7 - camx,
+								  player.getY()+player.getH()-shadowSizeH/2-5 - camy,
+								  shadowSizeW, shadowSizeH);
+
+	} else {
+		gShadow.render(gRenderer, player.getX()+player.getW()/2-shadowSizeW/2+7 - camx,
+								  player.getY()+player.getH()-shadowSizeH/2-5 - camy,
+								  shadowSizeW, shadowSizeH);
+	}
 }
 
 // Render everything
@@ -1016,17 +1113,17 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 		// Render items
 		ite.RenderBehindPlayer(gRenderer, item, camx, camy);
 
-			// Render Boss
-			bos.RenderBack(gRenderer, boss, gFont13, gText, camx, camy);
-
-			// Render Mob
-			mb.RenderBack(gRenderer, mob, gFont13, gText, camx, camy);
-
 		// Render Tile in behind player sprite
 		tl.RenderBehindPlayer(gRenderer, tile, 1, camx, camy, &rTiles[0]);
 
 		// Render Tile in behind player sprite
 		tl.RenderBehindPlayer(gRenderer, tile, 2, camx, camy, &rTiles[0]);
+
+			// Render Boss
+			bos.RenderBack(gRenderer, boss, gFont13, gText, camx, camy);
+
+			// Render Mob
+			mb.RenderBack(gRenderer, mob, gFont13, gText, camx, camy);
 
 			// Render our player
 			player.Render(mex, mey, camx, camy, gWindow,
@@ -1072,6 +1169,9 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 // Render everything
 void PlayGame::RenderUI(SDL_Renderer *gRenderer, LWindow &gWindow)
 {
+
+	// Render "E" prompt on doors to new areas
+	tlc.RenderUI(gRenderer, tilec, camx, camy);
 
 	// Render Boss Health
 	bos.RenderUI(gRenderer, boss, camx, camy);
@@ -1187,7 +1287,7 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 		tempss << ", previousLevel: " 		<< previousLevel 		<< ", LevelToLoad: " 	<< this->LevelToLoad;
 		tempss << ", ite.count: " 				<< ite.count << "ite.id: " << ite.id
 			   << ", ite.multiW: " 			<< ite.multiW 			<< ", ite.multiH: " 				<< ite.multiH;
-		tempss << ", lastX: " 				<< lastKnownPositionX 	<< ", lastY: " 			<< lastKnownPositionY;
+		tempss << ",  shakeLength: " 				<<  "test" 	<< ", rustleW: " 			<< rustleW;
 		tempss << ", Tiles: " 				<< tl.tileCount 		<< ", Tilecs: " 		<< tlc.count 			<< ", Mob: " << mb.count;
 		tempss << ", place_type: " 			<< place_type 			<< ", tl.id: " 			<< tl.id 				<< ", tlc.id: " << tlc.id;
 		tempss << ", tl.collisionTile: " 	<< tl.collisionTile 	<< ", layer: " 			<< tl.layer;
@@ -1197,7 +1297,7 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 		tempss << ", tlc.multiW: " 	<< tlc.multiW << ", tlc.multiH: " << tlc.multiH << ", tlc.count: " << tlc.count;*/
 		gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont13, 250);
 		gText.setAlpha(255);
-		gText.render(gRenderer, 0+screenWidth-gText.getWidth(), 220, gText.getWidth(), gText.getHeight());
+		gText.render(gRenderer, 0+screenWidth-gText.getWidth(), 50, gText.getWidth(), gText.getHeight());
 	}
 
 	// Editor debug menu
@@ -1454,7 +1554,7 @@ void PlayGame::checkCollisionPlayerItem() {
 								   player.getX(), player.getY(), player.getW(), player.getH())) {
 
 					// Fists and Swords only
-					if (item[i].id < 24) {
+					if (item[i].id < 23) {
 
 						// Prompt self, this will render an "E" above the Item to equip it
 						item[i].promptSelf = true;
@@ -1471,6 +1571,21 @@ void PlayGame::checkCollisionPlayerItem() {
 							// play sound effect
 							Mix_PlayChannel(-1, sCastHitBoss, 0);
 						}
+					}
+
+					// Bombs
+					else if (item[i].id == 23) {
+
+						// Remove item
+						item[i].alive = false;
+						ite.count--;
+
+						// Increase player bombs
+						player.IncreaseBombs();
+
+						// play sound effect
+						Mix_PlayChannel(-1, sCastHitBoss, 0);
+
 					}
 
 					// Hearts
@@ -1534,6 +1649,47 @@ void PlayGame::checkCollisionPlayerItem() {
 				// No collision
 				else {
 					item[i].promptSelf = false;
+				}
+			}
+		}
+	}
+}
+
+void PlayGame::checkPlayerTilceCollision() {
+	for (int i = 0; i < tlc.max; i++) {
+		if (tilec[i].alive){
+			if (tilec[i].LevelToLoad >= 1)
+			{
+				// If player collides with a Tilec that can load levels
+				if (checkCollision(player.getX(), player.getY(), player.getW(), player.getH(),
+								   tilec[i].x, tilec[i].y, tilec[i].w, tilec[i].h))
+				{
+					// Prompt self, this will render an "E" above the Item to equip it
+					tilec[i].promptSelf = true;
+
+					// If player is pressing equip
+					if (player.getEquipState()) {
+						// Load next area
+						{
+							// Save last known position for loading if we come back
+							lastKnownPositionX = player.getX();
+							lastKnownPositionY = player.getY();
+
+							// Save our current level in our previousLevel variables
+							previousLevel = LevelToLoad;
+
+							// Set next level or stage to whatever the Tilec has stored
+							this->LevelToLoad = tilec[i].LevelToLoad;
+
+							// Load next level or stage
+							LoadLevel();
+
+							// play sound effect
+							Mix_PlayChannel(-1, sCastHitBoss, 0);
+						}
+					}
+				} else {
+					tilec[i].promptSelf = false;
 				}
 			}
 		}
@@ -1849,6 +2005,10 @@ void PlayGame::checkPlayerAttacksCollisionMob() {
 									mob[i].vX += player.getKnockBackPower() * xDir;
 									mob[i].vY += player.getKnockBackPower() * yDir;*/
 								}
+
+								// Shake camera
+								ShakeCamera();
+
 								// Flash Bosses sprite
 								mob[i].flash = true;
 
@@ -2885,6 +3045,9 @@ void PlayGame::checkCollisionParticlePlayer() {
 												   rand() % 15 + 2, 1);
 							}
 
+							// Shake camera
+							ShakeCamera();
+
 							// play sound effect
 							Mix_PlayChannel(-1, sSlashHitBoss, 0);
 
@@ -3195,7 +3358,7 @@ PlayGame::Result PlayGame::mousePressed(SDL_Event event){
 					if (place_type == 4) {
 
 						// Spawn Mob
-						mb.Spawn(mob, mex+camx, mey+camy, 20, 24, 0.0, randDouble(1.6, 1.4), 0);
+						mb.Spawn(mob, mex+camx, mey+camy, 14*2, 12*2, 0.0, randDouble(1.6, 1.4), 0);
 					}
 				}
 			}
@@ -3704,6 +3867,17 @@ bool PlayGame::checkCollisionRect( SDL_Rect a, SDL_Rect b )
     return true;
 }
 
+float PlayGame::getDistance( float targetX, float targetY, float selfX, float selfY ) {
+
+	float distance = 10;
+
+	distance = sqrt((targetX - selfX) * (targetX - selfX)+
+					(targetY - selfY) * (targetY - selfY));
+
+	return distance;
+}
+
+
 // Load saved configurations
 void PlayGame::LoadCFG() {
 
@@ -3755,34 +3929,6 @@ void PlayGame::LoadHighScore() {
 
 			// Apply that high score to current level for Render
 			player.ApplyHighScore(0);
-		}
-	}
-}
-
-void PlayGame::checkPlayerTilceCollision() {
-	for (int i = 0; i < tlc.max; i++) {
-		if (tilec[i].alive){
-			if (tilec[i].LevelToLoad >= 1)
-			{
-				// If player collides with a Tilec that can load levels
-				if (checkCollision(player.getX(), player.getY(), player.getW(), player.getH(),
-								   tilec[i].x, tilec[i].y, tilec[i].w, tilec[i].h))
-				{
-
-					// Save last known position for loading if we come back
-					lastKnownPositionX = player.getX();
-					lastKnownPositionY = player.getY();
-
-					// Save our current level in our previousLevel variables
-					previousLevel = LevelToLoad;
-
-					// Set next level or stage to whatever the Tilec has stored
-					this->LevelToLoad = tilec[i].LevelToLoad;
-
-					// Load next level or stage
-					LoadLevel();
-				}
-			}
 		}
 	}
 }

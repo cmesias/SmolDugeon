@@ -1252,7 +1252,7 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 
 
 		// Health
-		{
+		/*{
 			// Health bar
 			int uiX = screenWidth * 0.95 - 100 - 10;
 			int uiY = screenHeight * 0.96 - 20 - 20 - 48 - 6;
@@ -1355,107 +1355,123 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 			tempRect = {uiX, uiY, (barWidth*this->maxMana)/this->maxMana, 24};
 			SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
 			SDL_RenderDrawRect(gRenderer, &tempRect);
-		}
+		}*/
 	}
 
-	// Render number of hearts left
-	for (int i=0; i<hearts; i++){
-		int marginW = 12;
-		int tempX = screenWidth - ((1+i)*32) - marginW;
-		gSwords.render(gRenderer, tempX, 12, 32, 32,
-								  &rSwords[24], 0, NULL);
+	// Hearts
+	{
+		// Render number of hearts left
+		for (int i=0; i<hearts; i++){
+			int marginW = 12;
+			int tempX = screenWidth - ((1+i)*32) - marginW;
+			gSwords.render(gRenderer, tempX, 12, 32, 32,
+									  &rSwords[24], 0, NULL);
+		}
 	}
 
 	// Used by all 3 below
 	int marginW = 12;
 	int marginH = 32 + 4;
-	int tempX = screenWidth - marginW;
+	int tempX = marginW;
+	//int tempX = screenWidth - marginW;
 	int tempY;
 	std::stringstream tempsi;
 
 	// Coins
 	{
-		// Render number of Coins
+		// Render Icon
 		tempY = 12 + marginH;
 		for (int i=0; i<coins+1; i++){
-			gSwords.render(gRenderer, tempX - 64 - 16, 12+marginH, 32, 32,
+			gSwords.render(gRenderer, tempX, 12+marginH, 32, 32,
 									  &rSwords[25], 0, NULL);
 		}
 
-		// Render number of Coins text
+		// Render Text
 		tempsi.str( std::string() );
 		tempsi  << " x " << this->coins;
 		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-		gText.render(gRenderer, tempX-gText.getWidth(), tempY, gText.getWidth(), gText.getHeight());
+		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());
 	}
 
 	// Silver keys
 	{
+		// Render Icon
 		tempY = 12+marginH*2;
-
-		// Render number of Silver keys
 		for (int i=0; i<silverKeys+1; i++){
-			gSwords.render(gRenderer, tempX - 64, 12+marginH*2, 16, 32,
+			gSwords.render(gRenderer, tempX, 12+marginH*2, 16, 32,
 									  &rSwords[26], 0, NULL);
 		}
 
-		// Render number of Silver keys text
+		// Render Text
 		tempsi.str( std::string() );
 		tempsi << " x " <<this->silverKeys;
 		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-		gText.render(gRenderer, tempX-gText.getWidth(), tempY, gText.getWidth(), gText.getHeight());
+		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());
 
 
 	}
 
 	// Gold keys
 	{
-		// Render number of Gold keys
+		// Render Icon
 		tempY = 12+marginH*3;
 		for (int i=0; i<goldKeys+1; i++){
-			gSwords.render(gRenderer, tempX - 64, 12+marginH*3, 16, 32,
+			gSwords.render(gRenderer, tempX, 12+marginH*3, 16, 32,
 									  &rSwords[27], 0, NULL);
 		}
 
-		// Render number of Gold keys text
+		// Render Text
 		tempsi.str( std::string() );
 		tempsi  << " x " << this->goldKeys;
 		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-		gText.render(gRenderer, tempX-gText.getWidth(), tempY, gText.getWidth(), gText.getHeight());
+		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());
+	}
+
+	// Bombs
+	{
+		// Render Icon
+		tempY = 12+marginH*4;
+		for (int i=0; i<bombs+1; i++){
+			gSwords.render(gRenderer, tempX, 12+marginH*4, 32, 32,
+									  &rSwords[23], 0, NULL);
+		}
+
+		// Render Text
+		tempsi.str( std::string() );
+		tempsi  << " x " << this->bombs;
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());
 	}
 
 
-	// Highscore text
-	tempsi.str( std::string() );
-	tempsi << "Highscore: " << this->highscore;
-	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {244, 144, 20}, gFont24);
-	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*3, gText.getWidth(), gText.getHeight());
+	// Text UI
+	{
+		// Highscore text
+		/*tempsi.str( std::string() );
+		tempsi << "Highscore: " << this->highscore;
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {244, 144, 20}, gFont24);
+		gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*3, gText.getWidth(), gText.getHeight());
 
-	tempsi.str( std::string() );
-	tempsi << "Score: " << this->score;
-	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*4, gText.getWidth(), gText.getHeight());
+		tempsi.str( std::string() );
+		tempsi << "Score: " << this->score;
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*4, gText.getWidth(), gText.getHeight());
 
-	tempsi.str( std::string() );
-	tempsi << "Level: " << CurrentLevel;
-	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*5, gText.getWidth(), gText.getHeight());
+		tempsi.str( std::string() );
+		tempsi << "Level: " << CurrentLevel;
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*5, gText.getWidth(), gText.getHeight());
 
-	tempsi.str( std::string() );
-	tempsi << "Damage +" << this->damage;
-	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*13, gText.getWidth(), gText.getHeight());
+		tempsi.str( std::string() );
+		tempsi << "Damage +" << this->damage;
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*13, gText.getWidth(), gText.getHeight());
 
-	tempsi.str( std::string() );
-	tempsi << "Cast Damage +" << this->castDamage;
-	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*14, gText.getWidth(), gText.getHeight());
-
-	//tempsi.str( std::string() );
-	//tempsi << "dmg x " << this->damageMultipler;
-	//gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255,255,255}, gFont13);
-	//gText.render(gRenderer, this->x+this->w/2-gText.getWidth()/2-camX, this->y-gText.getHeight()-camY, gText.getWidth(), gText.getHeight());
-
+		tempsi.str( std::string() );
+		tempsi << "Cast Damage +" << this->castDamage;
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*14, gText.getWidth(), gText.getHeight());*/
+	}
 }
 
 void Players::RenderDebug(SDL_Renderer *gRenderer, int camX, int camY)
@@ -1470,9 +1486,9 @@ void Players::RenderDebug(SDL_Renderer *gRenderer, int camX, int camY)
 	SDL_RenderDrawRect(gRenderer, &tempRect);
 
 	// Original box, untouched
-	tempRect = {x-camX, y-camY, realw, realh};
-	SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
-	SDL_RenderDrawRect(gRenderer, &tempRect);
+	//tempRect = {x-camX, y-camY, realw, realh};
+	//SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
+	//SDL_RenderDrawRect(gRenderer, &tempRect);
 
 	////////////////////////////////////////////////////////////
 	//---------------------- Render text ---------------------//
@@ -1809,6 +1825,13 @@ void Players::IncreaseCoins(int value) {
 	this->coins += value;
 	if (this->coins > this->coins) {
 		this->coins = this->coinsMax;
+	}
+}
+
+void Players::IncreaseBombs(int value) {
+	this->bombs += value;
+	if (this->bombs > this->bombsMax) {
+		this->bombs = this->bombsMax;
 	}
 }
 

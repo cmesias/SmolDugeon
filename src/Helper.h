@@ -35,10 +35,10 @@ public:
     static const int UniqueTileBarTiles = 512;
 
 
-    //int screenWidth = 1920;
-    //int screenHeight = 1080;
-    const int screenWidth = 1280;
-    const int screenHeight = 720;
+    int screenWidth = 1920;
+    int screenHeight = 1080;
+    //const int screenWidth = 1280;
+    //const int screenHeight = 720;
 
 
 

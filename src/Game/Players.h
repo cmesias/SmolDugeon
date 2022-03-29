@@ -269,9 +269,11 @@ private:	// Save these player stats in a file. This will be the players save dat
 	int silverKeys;						// Keys
 	int goldKeys;						// Keys
 	int coins;							// Coins
-	const int silverKeysMax = 9999;		// Keys,  	Default: 9999
-	const int goldKeysMax = 9999;		// Keys,  	Default: 9999
-	const int coinsMax = 9999;			// Coins,  	Default: 9999
+	const int silverKeysMax = 9999;		// Keys,  	Default: 99
+	const int goldKeysMax = 9999;		// Keys,  	Default: 99
+	const int coinsMax = 9999;			// Coins,  	Default: 99
+	int bombs;							// Bombs
+	const int bombsMax = 99;			// Bombs,	Deafult: 99
 
 	// Health
 	int hearts;							// Default: 3
@@ -330,7 +332,7 @@ private:	// Variables used in Textures
 	const float xOffSetSwordSlashingRight = 30;
 
 	// X offset walking right and left
-	const float xOffSetSwordWalkAndDash = 30;
+	//const float xOffSetSwordWalkAndDash = 30;
 
 	// Y offset Sword default
 	const float yOffSetSword = 3;
@@ -344,6 +346,11 @@ private:	// Variables used in Textures
 
 	// X offset Player Walking Right
 	const float xOffSetWalkingRight = -12;
+
+public:
+
+	// X offset walking right and left
+	const float xOffSetSwordWalkAndDash = 30;
 
 public:	// Functions to do stuff?
 
@@ -381,6 +388,9 @@ public:	// Mutator functions
 
 	// Increase Coins
 	void IncreaseCoins(int value = 1);
+
+	// Increase Bombs
+	void IncreaseBombs(int value = 1);
 
 	// Increase Hearts
 	void IncreaseHearts(int value = 1);

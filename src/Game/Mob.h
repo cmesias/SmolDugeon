@@ -32,19 +32,26 @@ public:
 	Mix_Chunk *sCast 			= NULL;
 	SDL_RendererFlip flip;
 
-	SDL_Rect rClip[2];
+	SDL_Rect rClip[6];
 
 	/*
-	 * 0: Walk
-	 * 1: Attack
+	 * 0 - 3: 	Idle
+	 * 4: 	  	Cool down
+	 * 5: 	  	Pre-Attack
 	 *
 	 */
 	int sprite_index;
 
 public: // variables
+
+	// Walking timer
 	double walkTimer;
 	double walkSpeed;
 	double walkFrame;
+
+	// Idle timer
+	float idleTimer;
+	const float idleSpe = 10;
 
 public:	// Core Functions
 	void Init(Mob mob[]);
@@ -97,6 +104,10 @@ public:	// Animations
 	int pixelSizeH = 24;
 	int	shadowSize = 15;
 
+	// Used for textures
+	float yOffset;
+
+	// Mob will use this to lock on to the player when the bullet shoots out
 	float *xFollow;
 	float *yFollow;
 

@@ -20,9 +20,12 @@
 #include "LTexture.h"
 #include "LWindow.h"
 
+#include "Game/TextNFont.h"
+
 class Options {
 public:
 	Helper helper;
+	TextNFont textNFont;
 	//enum OptionsResult { Back, Nothing, ShowingMenu, Exit };
 	enum OptionsResult { Back, Exit, Nothing, StartGame, ShowingMenu };
 	OptionsResult optionsResult = Nothing;
@@ -94,12 +97,6 @@ public:	// Bar variables
 	};*/
 
 public:	// Settings that can be changed by user
-	// Textures
-	LTexture gText;
-	// Fonts
-	TTF_Font *gFont 			= NULL;
-	TTF_Font *gFont13 			= NULL;
-	TTF_Font *gFont26 			= NULL;
 
 	// Audio, Video Settings
 	int MASTER_VOL;

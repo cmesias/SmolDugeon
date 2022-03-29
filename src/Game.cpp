@@ -75,11 +75,6 @@ void Game::Init() {
 
 // Load
 void Game::Load() {
-	// load fonts
-	gFont 	= TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 18);
-	gFont13 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 13);
-	gFont26 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 26);
-
 	// load particle textures
 	setClips(cParticles, 32, 0, 8, 8);
 	gParticles.loadFromFile(gRenderer, "resource/gfx/particles.png");
@@ -93,20 +88,16 @@ void Game::Load() {
 
 	// Apply audio configurations
 	applyMasterAudioCFG();
+
+	// Other classes Fonts
+	LoadFonts();
 }
 
 // Free
 void Game::Free() {
-	// free textures
-	gText.free();
 	gParticles.free();
-	// free fonts
-	TTF_CloseFont(gFont);
-	TTF_CloseFont(gFont13);
-	TTF_CloseFont(gFont26);
-	gFont = NULL;
-	gFont13 = NULL;
-	gFont26 = NULL;
+	// Other classes Fonts
+	FreeFonts();
 }
 
 // Start Game

@@ -49,6 +49,7 @@ void Mob::Init(Mob mob[]) {
 		mob[i].walkTimer			= 0;
 		mob[i].walkSpeed			= 1;
 		mob[i].walkFrame			= 0;
+		mob[i].idleTimer			= 0;
 		mob[i].animState			= -1;
 		mob[i].randomAttack			= 0;
 		mob[i].sprite_index 		= 0;
@@ -71,8 +72,24 @@ void Mob::Load(SDL_Renderer *gRenderer) {
 	sCast 			= Mix_LoadWAV("sounds/bfxr/snd_cast.wav");
 
 	// Mob clips
-	rClip[0] = {0, 0, 10, 12};
-	rClip[1] = {10, 0, 10, 12};
+
+	// Idle 1
+	rClip[0] = {1, 3, 14, 12};
+
+	// Idle 2
+	rClip[1] = {16, 2, 14, 12};
+
+	// Idle 3
+	rClip[2] = {31, 1, 14, 12};
+
+	// Idle 4
+	rClip[3] = {46, 2, 14, 12};
+
+	// Cooldown 1
+	rClip[4] = {1, 18, 14, 12};
+
+	// Attack 1
+	rClip[5] = {16, 17, 14, 12};
 }
 
 void Mob::Free() {
@@ -255,8 +272,21 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 			// Cooldown animation
 			if (mob[i].animState == -1)
 			{
-				// Set sprite index
-				mob[i].sprite_index = 0;
+				// Start idle timer
+				mob[i].idleTimer += idleSpe;
+
+				// Timer is done, go to next frame
+				if (mob[i].idleTimer > 60) {
+					mob[i].idleTimer = 0;
+
+					// Go to next frame for idle
+					mob[i].sprite_index += 1;
+				}
+
+				// Loop around
+				if (mob[i].sprite_index > 3) {
+					mob[i].sprite_index = 0;
+				}
 
 				// If cool down timer greater than 0
 				if (mob[i].coolDownTimer > 0) {
@@ -272,14 +302,30 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 
 					// Reset animation state
 					mob[i].animState = 0;
+
+					// Start at 0 index to get ready for sprite idling
+					mob[i].sprite_index = 0;
 				}
 			}
 
 			// Walking around
 			else if (mob[i].animState == 0)
 			{
-				// Set sprite index
-				mob[i].sprite_index = 0;
+				// Start idle timer
+				mob[i].idleTimer += idleSpe;
+
+				// Timer is done, go to next frame
+				if (mob[i].idleTimer > 60) {
+					mob[i].idleTimer = 0;
+
+					// Go to next frame for idle
+					mob[i].sprite_index += 1;
+				}
+
+				// Loop around
+				if (mob[i].sprite_index > 3) {
+					mob[i].sprite_index = 0;
+				}
 
 				// If mob has vision of player (no obstacles in line of sight)
 				if (mob[i].hasVision) {
@@ -375,12 +421,28 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 						Mix_PlayChannel(-1, sCast, 0);
 					}
 
+					// Do idle anyways, but this will get ovverridden by the code below
+					{
+						// Start idle timer
+						mob[i].idleTimer += idleSpe;
 
-					// Set sprite index
+						// Timer is done, go to next frame
+						if (mob[i].idleTimer > 60) {
+							mob[i].idleTimer = 0;
+
+							// Go to next frame for idle
+							mob[i].sprite_index += 1;
+						}
+
+						// Loop around
+						if (mob[i].sprite_index > 3) {
+							mob[i].sprite_index = 0;
+						}
+					}
+
+					// Ovveride above code: Set sprite index
 					if (mob[i].chargeTime > 15) {
-						mob[i].sprite_index = 1;
-					} else {
-						mob[i].sprite_index = 0;
+						mob[i].sprite_index = 5;
 					}
 
 					// If count down has not reached 0 seconds
@@ -684,14 +746,22 @@ void Mob::RenderBack(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTextu
 				if (mob[i].animState == -1)
 				{
 					gMob.setColor(255, 255, 255);
+					gMob.setAlpha(255);
+					gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+												mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
+												0.0, NULL, mob[i].flip);
 				}
 
 				// Walking around or idle
 				else if (mob[i].animState == 0) {
-
+					gMob.setColor(255, 255, 255);
+					gMob.setAlpha(255);
+					gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+												mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
+												0.0, NULL, mob[i].flip);
 				}
 
-				// Moving towards player animation
+				// Mob attack: 0 - basic attack
 				else if (mob[i].animState == 1) {
 
 					// If mob is chargingAttack
@@ -700,30 +770,38 @@ void Mob::RenderBack(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTextu
 						//gMob.setColor(200, 0, 0);
 					}
 
+					// Render shade of Red color
 					if (mob[i].chargeTime > 15) {
 						// Set color red
 						gMob.setColor(200, 0, 0);
+						gMob.setAlpha(255);
+						gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+													mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
+													0.0, NULL, mob[i].flip);
+					}
+
+					// Render normal color
+					else {
+						// Render mob
+						if (mob[i].flash) {
+							gMobFlashed.setAlpha(255);
+							gMobFlashed.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+														mob[i].w, mob[i].h, NULL,
+														0.0, NULL, mob[i].flip);
+						} else {
+							gMob.setColor(255, 255, 255);
+							gMob.setAlpha(255);
+							gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+														mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
+														0.0, NULL, mob[i].flip);
+						}
 					}
 				}
 
 				// Charging-attack animation
 				else if (mob[i].animState == 2) {
-					gMob.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
+				//	gMob.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
 				}
-
-				// Render mob
-				if (mob[i].flash) {
-					gMobFlashed.setAlpha(255);
-					gMobFlashed.render(gRenderer, mob[i].x - camx, mob[i].y - camy,
-												mob[i].w, mob[i].h, NULL,
-												0.0, NULL, mob[i].flip);
-				} else {
-					gMob.setAlpha(255);
-					gMob.render(gRenderer, mob[i].x - camx, mob[i].y - camy,
-												mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
-												0.0, NULL, mob[i].flip);
-				}
-
 			}
 		}
 	}
@@ -738,11 +816,19 @@ void Mob::RenderFront(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 				if (mob[i].animState == -1)
 				{
 					gMob.setColor(255, 255, 255);
+					gMob.setAlpha(255);
+					gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+												mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
+												0.0, NULL, mob[i].flip);
 				}
 
 				// Walking around or idle
 				else if (mob[i].animState == 0) {
-
+					gMob.setColor(255, 255, 255);
+					gMob.setAlpha(255);
+					gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+												mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
+												0.0, NULL, mob[i].flip);
 				}
 
 				// Mob attack: 0 - basic attack
@@ -754,28 +840,37 @@ void Mob::RenderFront(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 						//gMob.setColor(200, 0, 0);
 					}
 
+					// Render shade of Red color
 					if (mob[i].chargeTime > 15) {
 						// Set color red
 						gMob.setColor(200, 0, 0);
+						gMob.setAlpha(255);
+						gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+													mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
+													0.0, NULL, mob[i].flip);
+					}
+
+					// Render normal color
+					else {
+						// Render mob
+						if (mob[i].flash) {
+							gMobFlashed.setAlpha(255);
+							gMobFlashed.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+														mob[i].w, mob[i].h, NULL,
+														0.0, NULL, mob[i].flip);
+						} else {
+							gMob.setColor(255, 255, 255);
+							gMob.setAlpha(255);
+							gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+														mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
+														0.0, NULL, mob[i].flip);
+						}
 					}
 				}
 
 				// Charging-attack animation
 				else if (mob[i].animState == 2) {
-					gMob.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
-				}
-
-				// Render mob
-				if (mob[i].flash) {
-					gMobFlashed.setAlpha(255);
-					gMobFlashed.render(gRenderer, mob[i].x - camx, mob[i].y - camy,
-												mob[i].w, mob[i].h, NULL,
-												0.0, NULL, mob[i].flip);
-				} else {
-					gMob.setAlpha(255);
-					gMob.render(gRenderer, mob[i].x - camx, mob[i].y - camy,
-												mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
-												0.0, NULL, mob[i].flip);
+				//	gMob.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
 				}
 			}
 		}
@@ -797,14 +892,14 @@ void Mob::RenderUI(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy) {
 				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255, 255, 255}, gFont36);
 				gText.render(gRenderer, uiX, uiY, gText.getWidth(), gText.getHeight());
 			}*/
+			const float yOffsetBar = 30;
 			const float barHeight = 12;
 			const float barWidth = mob[i].w*1.25;
+			float uiX = mob[i].x + mob[i].w/2 - barWidth/2;
+			float uiY = mob[i].y - barHeight - yOffsetBar;
 
 			// Health Decay bar on Mobes
 			{
-				float uiX = mob[i].x + mob[i].w/2 - barWidth/2;
-				float uiY = mob[i].y - barHeight;
-
 				// Health Decay bar, bg
 				RenderFillRect(gRenderer, uiX-camx, uiY-camy, (barWidth*mob[i].maxHealth)/mob[i].maxHealth, barHeight, {0, 0, 0} );
 
@@ -814,9 +909,6 @@ void Mob::RenderUI(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy) {
 
 			// Health bar on Mobes
 			{
-				float uiX = mob[i].x + mob[i].w/2 - barWidth/2;
-				float uiY = mob[i].y - barHeight;
-
 				// Render health
 				RenderFillRect(gRenderer, uiX-camx, uiY-camy, (barWidth*mob[i].health)/mob[i].maxHealth, barHeight, {200, 30, 30} );
 			}
@@ -858,7 +950,7 @@ void Mob::RenderDebug(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 			// If mob has vision of player
 			if (mob[i].hasVision) {
 				// Render Green box
-				SDL_Rect tempr = {mob[i].x + mob[i].w/2-8/2-10 - camx, mob[i].y-45 - camy, 8, 30};
+				SDL_Rect tempr = {mob[i].x + mob[i].w/2-8/2-10 - camx, mob[i].y-55 - camy, 8, 30};
 				SDL_SetRenderDrawColor(gRenderer, 110, 110, 110, 255);
 				SDL_RenderFillRect(gRenderer, &tempr);
 			}
@@ -866,7 +958,7 @@ void Mob::RenderDebug(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 			// If mob is alert of player
 			if (mob[i].alert) {
 				// Render Green box
-				SDL_Rect tempr = {mob[i].x + mob[i].w/2-8/2 - camx, mob[i].y-45 - camy, 8, 30};
+				SDL_Rect tempr = {mob[i].x + mob[i].w/2-8/2 - camx, mob[i].y-55 - camy, 8, 30};
 				SDL_SetRenderDrawColor(gRenderer, 255, 0, 200, 255);
 				SDL_RenderFillRect(gRenderer, &tempr);
 
@@ -880,12 +972,9 @@ void Mob::RenderDebug(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 
 			// Render Text
 			std::stringstream tempss;
-			tempss << "AS: " << mob[i].animState
-					<< ", AL: " << mob[i].alert
-					<< ", CT: " <<  mob[i].chargeTime
-					<< ", CH: " <<  mob[i].chargingAttack;
+			tempss << mob[i].sprite_index;
 			gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255, 255, 255}, gFont);
-			gText.render(gRenderer, mob[i].x-camx, mob[i].y-gText.getHeight()-camy, gText.getWidth(), gText.getHeight());
+			gText.render(gRenderer, mob[i].x-gText.getWidth()-camx, mob[i].y-gText.getHeight()-camy, gText.getWidth(), gText.getHeight());
 
 		}
 	}
@@ -988,15 +1077,22 @@ void Mob::GetDistanceOfPlayer(Mob mob[], float targetX, float targetY, float tar
 void Mob::setStatsBasedOnType(Mob mob[], int i) {
 	// Set defeault parameters depending on what mobs were spawning
 	if (mob[i].type == 0) {
+		mob[i].w 			= 14*2;
+		mob[i].h 			= 12*2;
 		mob[i].health 		= 100;
 		mob[i].maxHealth 	= 100;
 		mob[i].healthDecay 	= 100;
+		mob[i].yOffset = -20;
 		mob[i].setSightRange(64*10);
 		mob[i].setAtkRange(64*2);
+
 	} else {
+		mob[i].w 			= 14*2;
+		mob[i].h 			= 12*2;
 		mob[i].health 		= 200;
 		mob[i].maxHealth 	= 200;
 		mob[i].healthDecay 	= 200;
+		mob[i].yOffset = -20;
 		mob[i].setSightRange(64*10);
 		mob[i].setAtkRange(64*2);
 	}

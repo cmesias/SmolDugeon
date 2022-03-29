@@ -17,22 +17,24 @@ void MainMenu::Init() {
 
 }
 
-void MainMenu::Load(SDL_Renderer *gRenderer) {
+void MainMenu::Load(SDL_Renderer *gRenderer)
+{
 	// Load Video settings from file
 	loadVideoCFG();
+
 	// Load Audio settings from file
 	loadAudioCFG();
+
 	// Load audio files
 	LoadAudioFiles();
+
 	// Apply audio configurations
 	applyMasterAudioCFG();
+
 	// Textures
 	gMenu.loadFromFile(gRenderer, "resource/gfx/menu.png");
 	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
-	// Fonts
-	gFont 	= TTF_OpenFont("resource/fonts/FredokaOne-Regular.ttf", 18);
-	gFont13 = TTF_OpenFont("resource/fonts/FredokaOne-Regular.ttf", 13);
-	gFont26 = TTF_OpenFont("resource/fonts/FredokaOne-Regular.ttf", 26);
+
 	// Buttons
 	buttonName[0] = "New Game";
 	buttonName[1] = "How To Play";
@@ -40,6 +42,9 @@ void MainMenu::Load(SDL_Renderer *gRenderer) {
 	buttonName[3] = "Options";
 	buttonName[4] = "Exit";
     joy = SDL_JoystickOpen(0);
+
+	// Other classes Fonts
+	LoadFonts();
 }
 
 void MainMenu::Free() {
@@ -47,15 +52,11 @@ void MainMenu::Free() {
 	FreeAudioFiles();
 	gMenu.free();
 	gCursor.free();
-	gText.free();
-	TTF_CloseFont(gFont);
-	TTF_CloseFont(gFont13);
-	TTF_CloseFont(gFont26);
-	gFont = NULL;
-	gFont13 = NULL;
-	gFont26 = NULL;
     SDL_JoystickClose(joy);
 	joy = NULL;
+
+	// Other classes Fonts
+	FreeFonts();
 }
 
 void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuResult &result) {

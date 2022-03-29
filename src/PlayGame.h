@@ -18,16 +18,27 @@
 #include "Game/Tilec.h"
 #include "Game/Item.h"
 #include "Game/Mob.h"
+#include "Game/TextNFont.h"
 #include "Helper.h"
 #include "Options.h"
 
-class PlayGame : public Helper, public Options {
+#include <cassert>
+#include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+
+
+class PlayGame : public Helper, public Options, public TextNFont {
+
 public:	// Global World Variables
 	double gravity = 0.6;
 	bool RestartLevel = false;
 
 public: // global functions
 	bool checkCollisionRect( SDL_Rect a, SDL_Rect b );
+	float getDistance( float x, float y, float x2, float y2 );
 
 public:	// globals
 	bool shift;
@@ -43,12 +54,30 @@ public:	// globals
 	int place_type;
 	int newMx, newMy;
 	int mex, mey;
+	bool leftClick = false;
+	bool rightClick = false;
+
+public:
+    // camera
+    float camx;
+    float camy;
+    bool camlock;
 	bool camUp = false;
 	bool camDown = false;
 	bool camLeft = false;
 	bool camRight = false;
-	bool leftClick = false;
-	bool rightClick = false;
+
+	/* This will bring the player
+	 * to life. At least, that's what
+	 * it'll look like. This will rustle
+	 * the player's armor as they move
+	 */
+	float rustleW;
+	float rustleSpe;
+	float rustleDirX;
+    bool camshake;
+
+	void ShakeCamera();
 
 public: // System variables
 	enum Result { Back, Nothing, StartGame, ShowingMenu, Exit };
@@ -209,11 +238,6 @@ public:	// Player variables
 	std::string saveSpawnPoint();
 	std::string saveMapSize();
 	void loadSpawnPoint();
-public:
-    // camera
-    int camx;
-    int camy;
-    bool camlock;
 
 public:	// Initial functions
 
@@ -261,6 +285,9 @@ public:	// Functions mixed with other classes
 
 	// Check collision between Player & Item
 	void checkCollisionPlayerItem();
+
+	// Check collision between Player & Tilec
+	void checkPlayerTilceCollision();
 
 	//------------------ Items
 
@@ -335,9 +362,6 @@ private:	// Load level
 
 	// Load previous high-score for Level
 	void LoadHighScore();
-
-	// Check collision between Player & Tilec
-	void checkPlayerTilceCollision();
 
 	unsigned int previousLevel = -1;
 	unsigned int LevelToLoad;

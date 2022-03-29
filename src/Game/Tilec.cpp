@@ -273,8 +273,9 @@ void Tilec::Init(Tilec tilec[]) {
 		tilec[i].h 				= 0;
 		tilec[i].mouse 			= false;
 		tilec[i].mouseBox 		= false;
-		tilec[i].alive 			= false;
+		tilec[i].promptSelf 	= false;
 		tilec[i].collision 		= false;
+		tilec[i].alive 			= false;
 		tilec[i].type 			= 0;
 		tilec[i].layer 			= 0;
 		tilec[i].LevelToLoad 	= 0;
@@ -379,6 +380,7 @@ void Tilec::Spawn(Tilec tilec[], float x, float y, int w, int h) {
 			tilec[i].mouse 			= false;
 			tilec[i].mouseBox 		= false;
 			tilec[i].collision 		= false;
+			tilec[i].promptSelf 	= false;
 			tilec[i].alive 			= true;
 			count++;
 			break;
@@ -415,6 +417,23 @@ void Tilec::MoveTilecs(Tilec tilec[], std::string direction){
 		}
 	}
 }
+void Tilec::RenderUI(SDL_Renderer *gRenderer, Tilec tilec[], int camx, int camy) {
+	for (int i = 0; i < max; i++) {
+		if (tilec[i].alive) {
+			if (tilec[i].promptSelf) {
+				std::stringstream tempsi;
+				tempsi << "E";
+				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+				gText.render(gRenderer, tilec[i].x+tilec[i].w/2-gText.getWidth()/2-camx,
+										tilec[i].y+tilec[i].h/2-gText.getHeight()/2-camy,
+										gText.getWidth(),
+										gText.getHeight());
+			}
+		}
+	}
+}
+
+
 
 void Tilec::Render(SDL_Renderer *gRenderer, Tilec tilec[], int layer, int camx, int camy) {
 	for (int i = 0; i < max; i++) {

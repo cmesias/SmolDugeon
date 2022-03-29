@@ -150,6 +150,9 @@ void Options::applyMasterAudioCFG() {
 //Get's input from user and returns it
 void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 {
+	// Other classes fonts
+	textNFont.LoadFonts();
+
 	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
 
 	SDL_Event e;
@@ -370,6 +373,8 @@ void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 			SDL_Delay((1000/FRAMES_PER_SECOND ) - fps.get_ticks());
 		}*/
 	}
+	// Other classes fonts
+	textNFont.LoadFonts();
 	gCursor.free();
 }
 
@@ -596,18 +601,18 @@ void Options::SaveLevel(LWindow &gWindow, SDL_Renderer *gRenderer, bool &mainLoo
 		SDL_RenderClear(gRenderer);
 
 			//Render text tip
-			gText.loadFromRenderedText(gRenderer, "Enter level directory (ending with a '/'):", {255,255,255}, gFont13);
-			int newWidth = gText.getWidth()/2;
-			int newHeight = gText.getHeight()/2;
-			gText.render(gRenderer, 5, 5, newWidth, newHeight);
+			textNFont.gText.loadFromRenderedText(gRenderer, "Enter level directory (ending with a '/'):", {255,255,255}, textNFont.gFont13);
+			int newWidth = textNFont.gText.getWidth()/2;
+			int newHeight = textNFont.gText.getHeight()/2;
+			textNFont.gText.render(gRenderer, 5, 5, newWidth, newHeight);
 
 			//Render text input
-			gText.loadFromRenderedText(gRenderer, tempSS.str().c_str(), {0,255,0}, gFont13);
+			textNFont.gText.loadFromRenderedText(gRenderer, tempSS.str().c_str(), {0,255,0}, textNFont.gFont13);
 			customRect.x = 10;
 			customRect.y = 15;
-			newWidth = gText.getWidth()/2;
-			newHeight = gText.getHeight()/2;
-			gText.render(gRenderer, customRect.x+4, customRect.y +newHeight - 2, newWidth, newHeight);
+			newWidth = textNFont.gText.getWidth()/2;
+			newHeight = textNFont.gText.getHeight()/2;
+			textNFont.gText.render(gRenderer, customRect.x+4, customRect.y +newHeight - 2, newWidth, newHeight);
 			customRect.w = newWidth+8;
 			customRect.h = newHeight * 2;
 			if ( helper.checkCollision(mex, mey, 1, 1, customRect.x,customRect.y, customRect.w, customRect.h)  ){
@@ -749,16 +754,16 @@ std::string Options::GetInput(LWindow &gWindow, SDL_Renderer *gRenderer, bool &m
 		SDL_RenderClear(gRenderer);
 
 			//Render text tip
-			gText.loadFromRenderedText(gRenderer, hint.c_str(), {255,255,255}, gFont13);
-			gText.render(gRenderer, 5, 5,gText.getWidth(), gText.getHeight());
+			textNFont.gText.loadFromRenderedText(gRenderer, hint.c_str(), {255,255,255}, textNFont.gFont13);
+			textNFont.gText.render(gRenderer, 5, 5,textNFont.gText.getWidth(), textNFont.gText.getHeight());
 
 			//Render text input
-			gText.loadFromRenderedText(gRenderer, tempSS.str().c_str(), {0,255,0}, gFont13);
+			textNFont.gText.loadFromRenderedText(gRenderer, tempSS.str().c_str(), {0,255,0}, textNFont.gFont13);
 			customRect.x = 10;
 			customRect.y = 20;
-			gText.render(gRenderer, customRect.x+4, customRect.y,gText.getWidth(), gText.getHeight());
-			customRect.w = gText.getWidth()+8;
-			customRect.h = gText.getHeight();
+			textNFont.gText.render(gRenderer, customRect.x+4, customRect.y,textNFont.gText.getWidth(), textNFont.gText.getHeight());
+			customRect.w = textNFont.gText.getWidth()+8;
+			customRect.h = textNFont.gText.getHeight();
 			if ( helper.checkCollision(mex, mey, 1, 1, customRect.x,customRect.y, customRect.w, customRect.h)  ){
 				SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
 				SDL_RenderDrawRect(gRenderer, &customRect);
@@ -1061,10 +1066,10 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 	// Welcome text
 	std::stringstream tempss;
 	tempss << "index: " << index << ", indexX: " << indexX << ", indexOther: " << indexOther << ", focusedOther: " << focusedOther;
-	gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont);
-		int newWidth = gText.getWidth();
-		int newHeight = gText.getHeight();
-	gText.render(gRenderer, helper.screenWidth-newWidth, 0, newWidth, newHeight);
+	textNFont.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, textNFont.gFont);
+		int newWidth = textNFont.gText.getWidth();
+		int newHeight = textNFont.gText.getHeight();
+	textNFont.gText.render(gRenderer, helper.screenWidth-newWidth, 0, newWidth, newHeight);
 
 	// Render Game items
 	int typeShown;
@@ -1088,18 +1093,18 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 
 
 					) {
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {0,200,0}, gFont);
+				textNFont.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {0,200,0}, textNFont.gFont);
 			}else if (index == i && indexX == 0) {
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {244,144,20}, gFont);
+				textNFont.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {244,144,20}, textNFont.gFont);
 			}
 			else{
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont);
+				textNFont.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, textNFont.gFont);
 			}
 
 			// Render text
-			title[i].w = gText.getWidth();
-			title[i].h = gText.getHeight();
-			gText.render(gRenderer, title[i].x,title[i].y, title[i].w, title[i].h);
+			title[i].w = textNFont.gText.getWidth();
+			title[i].h = textNFont.gText.getHeight();
+			textNFont.gText.render(gRenderer, title[i].x,title[i].y, title[i].w, title[i].h);
 		}else if (key==1) {
 
 			// Get PauseMenu item name
@@ -1107,18 +1112,18 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 			tempss << title[i].name;
 			// Set index if mouse if over a title item
 			if (mouseTitle[i] && leftclick) {
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {0,200,0}, gFont);
+				textNFont.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {0,200,0}, textNFont.gFont);
 			}else if (mouseTitle[i]) {
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {244,144,20}, gFont);
+				textNFont.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {244,144,20}, textNFont.gFont);
 			}
 			else{
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont);
+				textNFont.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, textNFont.gFont);
 			}
 
 			// Render text
-			title[i].w = gText.getWidth();
-			title[i].h = gText.getHeight();
-			gText.render(gRenderer, title[i].x,title[i].y, title[i].w, title[i].h);
+			title[i].w = textNFont.gText.getWidth();
+			title[i].h = textNFont.gText.getHeight();
+			textNFont.gText.render(gRenderer, title[i].x,title[i].y, title[i].w, title[i].h);
 		}
 	}
 
@@ -1142,10 +1147,10 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 				// Render Volume number
 				tempss.str(std::string());
 				tempss << bar[i].value;
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont);
-				int newWidth = gText.getWidth();
-				int newHeight = gText.getHeight();
-				gText.render(gRenderer, bar[i].rect.x+bar[i].rect.w+2,
+				textNFont.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, textNFont.gFont);
+				int newWidth = textNFont.gText.getWidth();
+				int newHeight = textNFont.gText.getHeight();
+				textNFont.gText.render(gRenderer, bar[i].rect.x+bar[i].rect.w+2,
 											 bar[i].rect.y+bar[i].rect.h/2-newHeight/2,
 											 newWidth, newHeight);
 			}
@@ -1159,10 +1164,10 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 				// Render Volume number
 				tempss.str(std::string());
 				tempss << bar[i].value;
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont);
-				int newWidth = gText.getWidth();
-				int newHeight = gText.getHeight();
-				gText.render(gRenderer, bar[i].rect.x+bar[i].rect.w+2,
+				textNFont.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, textNFont.gFont);
+				int newWidth = textNFont.gText.getWidth();
+				int newHeight = textNFont.gText.getHeight();
+				textNFont.gText.render(gRenderer, bar[i].rect.x+bar[i].rect.w+2,
 											 bar[i].rect.y+bar[i].rect.h/2-newHeight/2,
 											 newWidth, newHeight);
 			}
@@ -1171,10 +1176,10 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 			std::stringstream tempss;
 			tempss.str(std::string());
 			tempss << bar[i].name;
-			gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont);
-			int newWidth = gText.getWidth();
-			int newHeight = gText.getHeight();
-			gText.render(gRenderer, bar[i].rect.x-newWidth-10,
+			textNFont.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, textNFont.gFont);
+			int newWidth = textNFont.gText.getWidth();
+			int newHeight = textNFont.gText.getHeight();
+			textNFont.gText.render(gRenderer, bar[i].rect.x-newWidth-10,
 										 bar[i].rect.y+bar[i].rect.h/2-newHeight/2,
 										 newWidth, newHeight);
 		}
@@ -1207,14 +1212,14 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		SDL_SetRenderDrawColor(gRenderer, 55, 55, 55, 155);
 		SDL_RenderFillRect(gRenderer, &tempr);
 		// Render box in current resolution selection
-		gText.loadFromRenderedText(gRenderer, tempsss.str().c_str(), {255,255,255}, gFont);
+		textNFont.gText.loadFromRenderedText(gRenderer, tempsss.str().c_str(), {255,255,255}, textNFont.gFont);
 		int individualBoxWidth = bar[0].rect.w;
-		//gText.render(gRenderer,  ((bar[3].rect.x+individualBoxWidth*4)+individualBoxWidth) - individualBoxWidth/2 - gText.getWidth()/2,
-		//							 bar[3].rect.y+bar[3].rect.h/2-gText.getHeight()/2,
-		//							 gText.getWidth(), gText.getHeight());
-		int newWidth = gText.getWidth();
-		int newHeight = gText.getHeight();
-		gText.render(gRenderer,  bar[3].rect.x+bar[3].rect.w + 2,
+		//textNFont.gText.render(gRenderer,  ((bar[3].rect.x+individualBoxWidth*4)+individualBoxWidth) - individualBoxWidth/2 - textNFont.gText.getWidth()/2,
+		//							 bar[3].rect.y+bar[3].rect.h/2-textNFont.gText.getHeight()/2,
+		//							 textNFont.gText.getWidth(), textNFont.gText.getHeight());
+		int newWidth = textNFont.gText.getWidth();
+		int newHeight = textNFont.gText.getHeight();
+		textNFont.gText.render(gRenderer,  bar[3].rect.x+bar[3].rect.w + 2,
 									 bar[3].rect.y+bar[3].rect.h/2-newHeight/2,
 									 newWidth, newHeight);
 		// Resolution selection borders (5 selection)
@@ -1243,10 +1248,10 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 				SDL_SetRenderDrawColor(gRenderer, 55, 55, 55, 155);
 				SDL_RenderFillRect(gRenderer, &tempr);
 			}
-			gText.loadFromRenderedText(gRenderer, ssF.str().c_str(), {255,255,255}, gFont);
-			int newWidth = gText.getWidth();
-			int newHeight = gText.getHeight();
-			gText.render(gRenderer, bar[j].rect.x+bar[j].rect.w + 2,
+			textNFont.gText.loadFromRenderedText(gRenderer, ssF.str().c_str(), {255,255,255}, textNFont.gFont);
+			int newWidth = textNFont.gText.getWidth();
+			int newHeight = textNFont.gText.getHeight();
+			textNFont.gText.render(gRenderer, bar[j].rect.x+bar[j].rect.w + 2,
 										 bar[j].rect.y+bar[j].rect.h/2-newHeight/2,
 										 newWidth, newHeight);
 
@@ -1311,14 +1316,14 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 			}
 			SDL_RenderDrawRect(gRenderer, &temprV);
 			if (i==0) {
-				gText.loadFromRenderedText(gRenderer, "APPLY AUDIO", {255,255,255}, gFont);
+				textNFont.gText.loadFromRenderedText(gRenderer, "APPLY AUDIO", {255,255,255}, textNFont.gFont);
 			}
 			if (i==1) {
-				gText.loadFromRenderedText(gRenderer, "APPLY VIDEO", {255,255,255}, gFont);
+				textNFont.gText.loadFromRenderedText(gRenderer, "APPLY VIDEO", {255,255,255}, textNFont.gFont);
 			}
-			int newWidth = gText.getWidth();
-			int newHeight = gText.getHeight();
-			gText.render(gRenderer, applyButton[i].x+applyButton[i].w/2-newWidth/2,
+			int newWidth = textNFont.gText.getWidth();
+			int newHeight = textNFont.gText.getHeight();
+			textNFont.gText.render(gRenderer, applyButton[i].x+applyButton[i].w/2-newWidth/2,
 					applyButton[i].y+applyButton[i].h/2-newHeight/2,
 					newWidth, newHeight);
 		}
@@ -1383,18 +1388,18 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 			// Render confirmation text
 			std::stringstream tempss;
 			tempss << "Reverting settings in " << timer/60 << ".";
-			gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont);
+			textNFont.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, textNFont.gFont);
 
 			// Set text width and height
-			int newWidth = gText.getWidth();
-			int newHeight = gText.getHeight();
+			int newWidth = textNFont.gText.getWidth();
+			int newHeight = textNFont.gText.getHeight();
 
 			// Render text
-			gText.render(gRenderer, confirmButton[0].x,
+			textNFont.gText.render(gRenderer, confirmButton[0].x,
 									confirmButton[0].y-newHeight,
 									newWidth, newHeight);
 
-			//gText.render(gRenderer, helper.screenWidth-newWidth,
+			//textNFont.gText.render(gRenderer, helper.screenWidth-newWidth,
 			//						helper.screenHeight-newHeight - barHeight,
 			//						newWidth, newHeight);
 
@@ -1427,13 +1432,13 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 					// Render Keep and Revert buttons as White, no selection
 					SDL_RenderDrawRect(gRenderer, &confirmButton[i]);
 					if (i==0) {
-						gText.loadFromRenderedText(gRenderer, "Keep", {255,255,255}, gFont);
+						textNFont.gText.loadFromRenderedText(gRenderer, "Keep", {255,255,255}, textNFont.gFont);
 					}else{
-						gText.loadFromRenderedText(gRenderer, "Revert", {255,255,255}, gFont);
+						textNFont.gText.loadFromRenderedText(gRenderer, "Revert", {255,255,255}, textNFont.gFont);
 					}
-					int newWidth = gText.getWidth();
-					int newHeight = gText.getHeight();
-					gText.render(gRenderer, confirmButton[i].x+confirmButton[i].w/2-newWidth/2,
+					int newWidth = textNFont.gText.getWidth();
+					int newHeight = textNFont.gText.getHeight();
+					textNFont.gText.render(gRenderer, confirmButton[i].x+confirmButton[i].w/2-newWidth/2,
 												 confirmButton[i].y+confirmButton[i].h/2-newHeight/2,
 												 newWidth, newHeight);
 				}
@@ -1470,22 +1475,22 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 					if (i==0)
 					{
 						// Set text field as "Keep"
-						gText.loadFromRenderedText(gRenderer, "Keep", {255,255,255}, gFont);
+						textNFont.gText.loadFromRenderedText(gRenderer, "Keep", {255,255,255}, textNFont.gFont);
 					}
 
 					// If for loop is on index "1", which is the Revert buttone
 					else
 					{
 						// Set text field as "Revert"
-						gText.loadFromRenderedText(gRenderer, "Revert", {255,255,255}, gFont);
+						textNFont.gText.loadFromRenderedText(gRenderer, "Revert", {255,255,255}, textNFont.gFont);
 					}
 
 					// Set width of text
-					int newWidth = gText.getWidth();
-					int newHeight = gText.getHeight();
+					int newWidth = textNFont.gText.getWidth();
+					int newHeight = textNFont.gText.getHeight();
 
 					// Render text
-					gText.render(gRenderer, confirmButton[i].x+confirmButton[i].w/2-newWidth/2,
+					textNFont.gText.render(gRenderer, confirmButton[i].x+confirmButton[i].w/2-newWidth/2,
 											confirmButton[i].y+confirmButton[i].h/2-newHeight/2,
 											newWidth, newHeight);
 				}

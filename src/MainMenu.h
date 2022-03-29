@@ -14,8 +14,9 @@
 // Native for this header only
 #include "Options.h"
 #include "LTexture.h"
+#include "Game/TextNFont.h"
 
-class MainMenu : public Helper, public Options  {
+class MainMenu : public Helper, public Options, public TextNFont  {
 public:	// Resources
 	LTexture gMenu;
 	LTexture gText;
