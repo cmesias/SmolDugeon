@@ -20,6 +20,7 @@ public:
 
 	// Fonts
 	TTF_Font *gFont = NULL;
+	TTF_Font *gFont12 = NULL;
 	TTF_Font *gFont13 = NULL;
 	TTF_Font *gFont20 = NULL;
 	TTF_Font *gFont24 = NULL;

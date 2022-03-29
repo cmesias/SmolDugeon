@@ -860,6 +860,9 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		// Player and Tilec collision check with LoadNextLevel Tilec's
 		checkPlayerTilceCollision();
 
+		// Unlock Locked Tile doors
+		checkPlayerTileCollision();
+
 		// Check collision between Player attacks & Boss
 		checkPlayerAttacksCollisionBoss();
 
@@ -1195,6 +1198,9 @@ void PlayGame::RenderUI(SDL_Renderer *gRenderer, LWindow &gWindow)
 
 	// Render item texts
 	ite.RenderUI(gRenderer, item, camx, camy);
+
+	// Render "E" prompt on doors to new areas
+	tl.RenderUI(gRenderer, tile, camx, camy);
 
 	// Render Player Health
 	player.RenderUI(gRenderer, camx, camy, this->LevelToLoad);
@@ -1710,6 +1716,49 @@ void PlayGame::checkPlayerTilceCollision() {
 	}
 }
 
+void PlayGame::checkPlayerTileCollision()
+{
+	for (int i = 0; i < tl.max; i++)
+	{
+		if (tile[i].alive)
+		{
+			if (tile[i].collisionTile)
+			{
+				if (tile[i].id == 306)
+				{
+					// If player collides with a Tilec that can load levels
+					if (checkCollision(player.getX(), player.getY(), player.getW(), player.getH(),
+									   tile[i].x, tile[i].y, tile[i].w, tile[i].h+10))
+					{
+						// Prompt self, this will render an "E" above the Item to equip it
+						tile[i].promptSelf = true;
+
+							// If player has enough keys
+							if (player.getSilverKeys() > 0) {
+
+								// If player is pressing equip
+								if (player.getEquipState()) {
+
+								player.IncreaseSilverKeys(-1);
+
+								// Chang Tile into unlocked door Tile
+								tile[i].id = 309;
+								tile[i].clip = rTiles[309];
+								tile[i].collisionTile = false;
+
+								// play sound effect
+								Mix_PlayChannel(-1, sCastHitBoss, 0);
+							}
+						}
+					} else {
+						tile[i].promptSelf = false;
+					}
+				}
+			}
+		}
+	}
+}
+
 void PlayGame::checkCollisionParticleMob()
 {
 	for (int j = 0; j < part.max; j++)
@@ -1763,6 +1812,9 @@ void PlayGame::checkCollisionParticleMob()
 								particles[j].time = 0;
 								particles[j].alive = false;
 								part.count--;
+
+								// Spawn blood VFX
+								part.spawnBloodVFX(particles, mob[i].x, mob[i].y, mob[i].w, mob[i].h, {255,0,0});
 
 								// New velocity going away from Bullet Particle
 								float newvX = 0.25 * (bmx - bmx2) / distance;
@@ -2022,6 +2074,9 @@ void PlayGame::checkPlayerAttacksCollisionMob() {
 
 								// Shake camera
 								ShakeCamera();
+
+								// Spawn blood VFX
+								part.spawnBloodVFX(particles, mob[i].x, mob[i].y-mob[i].h, mob[i].w, mob[i].h, {204,57,123});
 
 								// Flash Bosses sprite
 								mob[i].flash = true;
@@ -2316,6 +2371,9 @@ void PlayGame::checkPlayerAttacksCollisionBoss() {
 							// Check collision between object and boss
 							if (checkCollision(object[j].x, object[j].y, object[j].w, object[j].h, boss[i].x, boss[i].y, boss[i].w, boss[i].h))
 							{
+								// Shake camera
+								ShakeCamera();
+
 								// If attack-type: Slash
 								if (player.attackType == 0)
 								{
@@ -2551,6 +2609,9 @@ void PlayGame::checkPlayerAttacksBossParticleCollision() {
 							// Circle Collision
 							if (distance < object[j].h/2 + particles[i].w/2)
 							{
+								// Shake camera
+								ShakeCamera();
+
 								// Deflect projectile if we have fists on
 								if (player.getItemEqipped(0)) {
 
@@ -3059,9 +3120,6 @@ void PlayGame::checkCollisionParticlePlayer() {
 												   rand() % 15 + 2, 1);
 							}
 
-							// Shake camera
-							ShakeCamera();
-
 							// play sound effect
 							Mix_PlayChannel(-1, sSlashHitBoss, 0);
 
@@ -3078,6 +3136,9 @@ void PlayGame::checkCollisionParticlePlayer() {
 							part.count--;
 
 						}
+
+						// Shake camera
+						ShakeCamera();
 						//---------------- NOT Parrying, so hurt the Player -------------//
 						//---------------------------------------------------------------//
 						///////////////////////////////////////////////////////////////////
@@ -4021,6 +4082,22 @@ void PlayGame::LoadLevel()
 	if (previousLevel > LevelToLoad) {
 		player.x		= 1200;
 		player.y		= lastKnownPositionY;
+	}
+
+	// Spawn for 1 -> 2
+	if (previousLevel == 1) {
+		if (LevelToLoad == 2) {
+			player.x		= 256;
+			player.y		= 320;
+		}
+	}
+
+	// Spawn for 2 -> 1
+	if (previousLevel == 2) {
+		if (LevelToLoad == 1) {
+			player.x		= 2432;
+			player.y		= 1664;
+		}
 	}
 
 	// Spawn for 2 -> 3

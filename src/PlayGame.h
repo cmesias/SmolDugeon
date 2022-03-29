@@ -289,6 +289,9 @@ public:	// Functions mixed with other classes
 	// Check collision between Player & Tilec
 	void checkPlayerTilceCollision();
 
+	// Check collision between Player & Tile
+	void checkPlayerTileCollision();
+
 	//------------------ Items
 
 

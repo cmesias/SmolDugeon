@@ -482,6 +482,15 @@ public:	// Accessor functions
 	// Get item index in hand
 	int getItemEqipped(int checkThisIndex);
 
+	// Return number of Coins keys for Player
+	int getCoins();
+
+	// Return number of Silver keys for Player
+	int getSilverKeys();
+
+	// Return number of Gold keys for Player
+	int getGoldKeys();
+
 public:
 
 	// Reset High Scores

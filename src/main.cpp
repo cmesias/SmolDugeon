@@ -97,7 +97,12 @@ int main(int argc, char *argv[]) {
  * TODO [x] (3-27-2022) - Crashes when returning to menu or exiting game, fixed some how?
  * TODO [x] (3-28-2022) - Create prompt for items pick-up
  * TODO [x] (3-28-2022) - Create prompt for leaving-area door
- * TODO [ ] (3-28-2022) - Create prompt to unlock doors when the player has a key to unlock
+ * TODO [x] (3-28-2022) - Create prompt to unlock doors when the player has a key to unlock
+ * TODO [ ] (3-28-2022) - Create prompt to unlock Chests with appropriate keys, then Spawn a random Sword out of the chests
+ * TODO [ ] (3-28-2022) - Create an autosave when the player goes to a new area autosave.
+ * 						  [ ] Create autosave tiles that will save a checkpoint.
+ * 						  [ ] Figure out if we should spawn back monsters or keep them dead.
+ * 						  [ ] Autosave when the player takes a key from an area, and keep it gone.
  *
  *
  * //---------- Item.cpp

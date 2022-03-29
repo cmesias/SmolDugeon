@@ -2036,6 +2036,18 @@ int Players::getItemEqipped(int checkThisIndex) {
 	}
 }
 
+int Players::getCoins() {
+	return this->coins;
+}
+
+int Players::getSilverKeys() {
+	return this->silverKeys;
+}
+
+int Players::getGoldKeys() {
+	return this->goldKeys;
+}
+
 void Players::ResetHighScore(int LevelWeLoaded){
 
 	// Set a file path for score.txt

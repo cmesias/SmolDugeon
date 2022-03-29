@@ -25,14 +25,17 @@
 
 void Tile::load(SDL_Renderer *gRenderer) {
 	gTiles.loadFromFile(gRenderer, "resource/gfx/author_0x72/0x72_16x16DungeonTileset_v4Walls_v2.png");
-	gFont12 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 12);
+	gFont12 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 12);
+	gFont24 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 24);
 }
 
 void Tile::free() {
 	gTiles.free();
 	gText.free();
 	TTF_CloseFont(gFont12);
+	TTF_CloseFont(gFont24);
 	gFont12 = NULL;
+	gFont24 = NULL;
 }
 
 
@@ -58,6 +61,7 @@ void Tile::initTile(Tile tile[]) {
 		tile[i].collisionTile = false;
 		tile[i].collisionMobs = false;
 		tile[i].PlayerBehindTile = false;
+		tile[i].promptSelf = false;
 		tile[i].alive = false;
 	}
 }
@@ -597,6 +601,21 @@ void Tile::RenderOnTopOfPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerTo
 	}
 }
 
+void Tile::RenderUI(SDL_Renderer *gRenderer, Tile Tile[], int camx, int camy) {
+	for (int i = 0; i < max; i++) {
+		if (Tile[i].alive) {
+			if (Tile[i].promptSelf) {
+				std::stringstream tempsi;
+				tempsi << "E";
+				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+				gText.render(gRenderer, Tile[i].x+Tile[i].w/2-gText.getWidth()/2-camx,
+						Tile[i].y-gText.getWidth()*2-camy,
+										gText.getWidth(), gText.getHeight());
+			}
+		}
+	}
+}
+
 void Tile::renderTileDebug(SDL_Renderer *gRenderer, Tile tile[], int newMx, int newMy, int mex, int mey, int camx, int camy, SDL_Rect rTiles[]){
 	for (int i = 0; i < max; i++) {
 		if (tile[i].alive){
@@ -739,6 +758,12 @@ void Tile::setStatsBasedOnType(Tile tile[], int i) {
 			tile[i].rectB.h = 4*4;
 		}
 	}
+
+	// Default parameters
+	{
+		tile[i].promptSelf = false;
+	}
+
 }
 
 void Tile::MoveTiles(Tile tile[], std::string direction){

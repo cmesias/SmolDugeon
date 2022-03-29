@@ -26,6 +26,7 @@ public:
 	LTexture gTiles;
 	LTexture gText;
 	TTF_Font *gFont12 = NULL;
+	TTF_Font *gFont24 = NULL;
 
 public:
 	float x;
@@ -57,6 +58,7 @@ public:
 	bool mouseBox;			// Mouse box
 	bool screen;
 	bool player;
+	bool promptSelf;
 	bool alive;
 	std::string side;		// collision with player
 	std::string sideSlime;	// collision with Slime
@@ -115,6 +117,8 @@ public:	// core game functions
 	void RenderBehindPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerToRender, int camx, int camy, SDL_Rect rTiles[]);
 
 	void RenderOnTopOfPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerToRender, int camx, int camy, SDL_Rect rTiles[]);
+
+	void RenderUI(SDL_Renderer *gRenderer, Tile tile[], int camx, int camy);
 
 	// Render Tile Debug info
 	void renderTileDebug(SDL_Renderer *gRenderer, Tile tile[], int newMx, int newMy, int mex, int mey, int camx, int camy, SDL_Rect rTiles[]);
