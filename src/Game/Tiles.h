@@ -38,7 +38,8 @@ public:
 
 	/*
 	 * 0: Used to collide with the player to move into a new area/level
-	 *
+	 * 306: locked door
+	 * 309: Unlocked door
 	 */
 	int id;
 	int alpha;

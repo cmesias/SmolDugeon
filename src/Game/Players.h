@@ -279,6 +279,7 @@ private:	// Save these player stats in a file. This will be the players save dat
 	int hearts;							// Default: 3
 	const int heartsMax = 99;			// Default: 99
 	float health;						// Default: 100
+	float healthDecay;					// Default: 100
 	float healthMax;					// Default: 100
 
 	// Damage

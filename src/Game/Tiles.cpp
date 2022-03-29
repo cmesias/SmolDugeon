@@ -710,6 +710,21 @@ void Tile::setStatsBasedOnType(Tile tile[], int i) {
 			tile[i].rectB.h = 8*4;
 		}
 
+		// Locked door
+		if (tile[i].id == 306) {
+			tile[i].w = 128;
+			tile[i].h = 128;
+			tile[i].clip = {272, 128, 32, 32};
+		}
+
+		// Unlocked door
+		if (tile[i].id == 309) {
+			tile[i].w = 128;
+			tile[i].h = 128;
+			tile[i].clip = {320, 128, 32, 32};
+		}
+
+
 		// Chest tile
 		if (tile[i].id == 366) {
 			tile[i].rectB.x = tile[i].x;

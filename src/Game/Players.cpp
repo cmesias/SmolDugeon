@@ -102,6 +102,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName){
 
 	// Health
 	this->hearts 				= 3;
+	this->healthDecay 			= 100;
 	this->health				= 100;
 	this->healthMax				= 100;
 
@@ -363,6 +364,11 @@ void Players::Update(Map &map,
 	// Player alive
 	if (alive)
 	{
+
+		// Player health decay
+		if (this->healthDecay > this->health) {
+			this->healthDecay -= 0.25;
+		}
 
 		////////////////////////////////////////////////////////////////////////////////////
 		//--------------------------------------------------------------------------------//
@@ -698,7 +704,7 @@ void Players::Update(Map &map,
 							int xOffsetTemp;
 
 							// Attack-object's width and height
-							int tempHeight = 16;
+							int tempHeight = 16*2;
 							int tempWidth = getW() + 32 + swordW;
 
 							// Player facing direction
@@ -1252,9 +1258,9 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 
 
 		// Health
-		/*{
+		{
 			// Health bar
-			int uiX = screenWidth * 0.95 - 100 - 10;
+			/*int uiX = screenWidth * 0.95 - 100 - 10;
 			int uiY = screenHeight * 0.96 - 20 - 20 - 48 - 6;
 
 			gText.loadFromRenderedText(gRenderer, "Health", {255,255,255}, gFont13);
@@ -1274,10 +1280,33 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 			// Render health, border
 			tempRect = {uiX, uiY, (barWidth*this->healthMax)/this->healthMax, 24};
 			SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-			SDL_RenderDrawRect(gRenderer, &tempRect);
+			SDL_RenderDrawRect(gRenderer, &tempRect);*/
+
+			const float yOffsetBar = 4;
+			const float barHeight = 12;
+			const float barWidth = this->w*1.75;
+			float uiX = this->x + this->w/2 - barWidth/2;
+			float uiY = this->y - barHeight - yOffsetBar;
+
+			// Health Decay bar on Mobes
+			{
+				// Health Decay bar, bg
+				RenderFillRect(gRenderer, uiX-camX, uiY-camY, (barWidth*this->healthMax)/this->healthMax, barHeight, {0, 0, 0} );
+
+				// Render Decay health
+				RenderFillRect(gRenderer, uiX-camX, uiY-camY, (barWidth*this->healthDecay)/this->healthMax, barHeight, {30, 60, 30} );
+			}
+
+			// Health bar on Mobes
+			{
+				// Render health
+				RenderFillRect(gRenderer, uiX-camX, uiY-camY, (barWidth*this->health)/this->healthMax, barHeight, {30, 200, 30} );
+			}
+
+
 		}
 
-		// Mana
+		/*// Mana
 		{
 			// Mana bar
 			int uiX = screenWidth * 0.95 - 100 - 10;

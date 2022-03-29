@@ -95,6 +95,9 @@ int main(int argc, char *argv[]) {
  * TODO [ ] (3-27-2022) - When picking up an item from an area, permanently remove that item from that area
  * TODO [x] (3-27-2022) - No inventory slot, just one slot per run
  * TODO [x] (3-27-2022) - Crashes when returning to menu or exiting game, fixed some how?
+ * TODO [x] (3-28-2022) - Create prompt for items pick-up
+ * TODO [x] (3-28-2022) - Create prompt for leaving-area door
+ * TODO [ ] (3-28-2022) - Create prompt to unlock doors when the player has a key to unlock
  *
  *
  * //---------- Item.cpp

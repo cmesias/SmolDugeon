@@ -50,6 +50,15 @@ void PlayGame::Init() {
 				i++;
 			}
 		}
+
+		// Do specific tiles, locked door
+		rTiles[306] = {272, 128, 32, 32};
+
+		// Do specific tiles, unlocked door
+		rTiles[309] = {320, 128, 32, 32};
+
+		//272, 128, tile 306
+
 	}
 
 	// Initialize
@@ -136,7 +145,7 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
 
 	// load audio
-	sAmbientMusic 		= Mix_LoadMUS("sounds/necrophageonNeonStarlight.mp3");
+	sAmbientMusic 		= Mix_LoadMUS("sounds/music.mp3");
 	sRockBreak 			= Mix_LoadWAV("sounds/bfxr/rock_break.wav");
 	sAtariBoom 			= Mix_LoadWAV("sounds/bfxr/atari_boom.wav");
 	sDownStabHitTilec	= Mix_LoadWAV("sounds/bfxr/snd_downStabHitTilec.wav");
@@ -247,6 +256,7 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 
     // Play Music, looped
 	//Mix_FadeInMusic(sAmbientMusic, -1, 0);
+	//Mix_PlayMusic( sAmbientMusic, -1);
 
 	//SDL_ShowCursor(false);
 
@@ -1068,17 +1078,21 @@ void PlayGame::RenderShadows(SDL_Renderer *gRenderer, LWindow &gWindow) {
 	mb.RenderShadow(gRenderer, mob, camx, camy);
 
 	// Render player shadow
-	int shadowSizeW = 24;
-	int shadowSizeH = 10;
-	if (player.facing == "right") {
-		gShadow.render(gRenderer, player.getX()+player.getW()/2-shadowSizeW/2-7 - camx,
-								  player.getY()+player.getH()-shadowSizeH/2-5 - camy,
-								  shadowSizeW, shadowSizeH);
+	{
+		int shadowSizeW = 24;
+		int shadowSizeH = 10;
+		if (player.facing == "right") {
+			gShadow.setAlpha(110);
+			gShadow.render(gRenderer, player.getX()+player.getW()/2-shadowSizeW/2-7 - camx,
+									  player.getY()+player.getH()-shadowSizeH/2-5 - camy,
+									  shadowSizeW, shadowSizeH);
 
-	} else {
-		gShadow.render(gRenderer, player.getX()+player.getW()/2-shadowSizeW/2+7 - camx,
-								  player.getY()+player.getH()-shadowSizeH/2-5 - camy,
-								  shadowSizeW, shadowSizeH);
+		} else {
+			gShadow.setAlpha(110);
+			gShadow.render(gRenderer, player.getX()+player.getW()/2-shadowSizeW/2+7 - camx,
+									  player.getY()+player.getH()-shadowSizeH/2-5 - camy,
+									  shadowSizeW, shadowSizeH);
+		}
 	}
 }
 
