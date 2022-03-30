@@ -17,6 +17,7 @@ void Item::Init(Item item[]){
 		item[i].PlayerBehindItem = false;
 		item[i].promptSelf = false;
 		item[i].damage 			= 0;
+		item[i].slashAtkSpe 	= 0.25;
 	}
 }
 
@@ -114,7 +115,7 @@ void Item::RemoveAll(Item item[]) {
 	}
 }
 
-void Item::Spawn(Item item[], float x, float y) {
+void Item::Spawn(Item item[], float x, float y, int id) {
 	Remove(item, 0);
 	for (int i = 0; i < max; i++) {
 		if (!item[i].alive) {
@@ -124,7 +125,7 @@ void Item::Spawn(Item item[], float x, float y) {
 			item[i].y 				= y;
 			item[i].vX 				= 0.0;
 			item[i].vY 				= 0.0;
-			item[i].id 				= this->id;
+			item[i].id 				= id;
 			item[i].collision 		= false;
 			item[i].mouse 			= false;
 			item[i].promptSelf 		= false;
@@ -138,13 +139,39 @@ void Item::Spawn(Item item[], float x, float y) {
 	}
 }
 
+void Item::SpawnAndThrowItem(Item item[], float x, float y, int id, float vX, float vY) {
+	Remove(item, 0);
+	for (int i = 0; i < max; i++) {
+		if (!item[i].alive) {
+			item[i].w 				= getItemSizeW();
+			item[i].h 				= getItemSizeH();
+			item[i].x 				= x;
+			item[i].y 				= y;
+			item[i].id 				= id;
+			item[i].collision 		= false;
+			item[i].mouse 			= false;
+			item[i].promptSelf 		= false;
+			item[i].mouseBox 		= false;
+			item[i].onScreen 		= false;
+			item[i].alive 			= true;
+			// Applies atk spe, damage for spawning object
+			setStatsBasedOnType(item, i);
+			// Apply speed the item was spawned at
+			item[i].vX 				= vX;
+			item[i].vY 				= vY;
+			count++;
+			break;
+		}
+	}
+}
+
 void Item::SpawnAll(Item item[], int newMx, int newMy, int camx, int camy) {
 	Remove(item, 0);
 	for (int j = 0; j < multiW; j++) {
 		for (int h = 0; h < multiH; h++) {
 			int x = int(newMx + j * getItemSizeW() + camx);
 			int y = int(newMy + h * getItemSizeH() + camy);
-			Spawn(item, x, y);
+			Spawn(item, x, y,  this->id);
 		}
 	}
 }
@@ -163,6 +190,14 @@ void Item::Update(Item item[], int newMx, int newMy, int mex, int mey, int camx,
 			} else {
 				item[i].PlayerBehindItem = false;
 			}
+
+			// Move item if it has velocity
+			item[i].x += item[i].vX;
+			item[i].y += item[i].vY;
+
+			// Slow down item every frame
+			item[i].vX = item[i].vX - item[i].vX * 0.7;
+			item[i].vY = item[i].vY - item[i].vY * 0.7;
 
 			// item target
 			/*float bmx2 = item[i].x+item[i].w/2;
@@ -340,10 +375,10 @@ void Item::RenderUI(SDL_Renderer *gRenderer, Item item[], int camx, int camy) {
 		if (item[i].alive) {
 			if (item[i].promptSelf) {
 				std::stringstream tempsi;
-				tempsi << "E";
+				tempsi << "id: " << item[i].slashAtkSpe;
 				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
 				gText.render(gRenderer, item[i].x+item[i].w/2-gText.getWidth()/2-camx,
-									    item[i].y+item[i].hoverAmount*0.6-gText.getWidth()*2-camy,
+									    item[i].y+item[i].hoverAmount*0.6-gText.getHeight()-camy,
 										gText.getWidth(), gText.getHeight());
 			}
 		}
@@ -388,30 +423,178 @@ void Item::RenderHand(SDL_Renderer *gRenderer, Item item[], int newMx, int newMy
 
 void Item::setStatsBasedOnType(Item item[], int i) {
 
-	// TODO do damage for all swords
-	if (item[i].id == 0) {
-		item[i].damage 			= 10;
-	} else if (item[i].id == 1) {
-		item[i].damage 			= 20;
-	} else if (item[i].id == 2) {
-		item[i].damage 			= 35;
-	} else if (item[i].id >= 3 && item[i].id <= 23) {
-		item[i].damage 			= 50;
-	} else {
-		item[i].damage 			= 0;
+	// Sword damage and attack speed
+	{
+		// TODO do damage for all swords
+		if (item[i].id == 0) {
+			item[i].slashAtkSpe 	= 5;
+			item[i].damage 			= 2.5;
+		}
+		// Wood sword
+		if (item[i].id == 1) {
+			item[i].slashAtkSpe 	= 1;
+			item[i].damage 			= 10;
+		}
+		// Rusty sword
+		if (item[i].id == 2) {
+			item[i].slashAtkSpe 	= 1;
+			item[i].damage 			= 15;
+		}
+		// Iron sword
+		if (item[i].id >= 3 && item[i].id <= 10) {
+			item[i].slashAtkSpe 	= 2.5;
+			item[i].damage 			= 20;
+		}
+		// Mini rapier
+		if (item[i].id == 11) {
+			item[i].slashAtkSpe 	= 5;
+			item[i].damage 			= 5;
+		}
+		// Hammer
+		if (item[i].id == 12) {
+			item[i].slashAtkSpe 	= 1;
+			item[i].damage 			= 50;
+		}
+		// Fat sword
+		if (item[i].id == 13) {
+			item[i].slashAtkSpe 	= 0.70;
+			item[i].damage 			= 100;
+		}
+		// Long rapier
+		if (item[i].id == 14) {
+			item[i].slashAtkSpe 	= 5;
+			item[i].damage 			= 10;
+		}
+		// Gold sword
+		if (item[i].id == 15) {
+			item[i].slashAtkSpe 	= 0.55;
+			item[i].damage 			= 200;
+		}
+		// Sivler swords
+		if (item[i].id >= 16 && item[i].id <= 18) {
+			item[i].slashAtkSpe 	= 2;
+			item[i].damage 			= 75;
+		}
+		// Broken swords
+		if (item[i].id >= 19 && item[i].id <= 22) {
+			item[i].slashAtkSpe 	= 10;
+			item[i].damage 			= 1;
+		}
+		// Bomb
+		if (item[i].id == 23) {
+			item[i].slashAtkSpe 	= 0.5;
+			item[i].damage 			= 100;
+		}
 	}
 
-	// Set size for Swords when loaded
-	if (item[i].id >= 0 && item[i].id <= 10) {
-		item[i].w = 10*2;
-		item[i].h = 21*2;
+	// Sizes
+	{
+		// Set size for Swords when loaded
+		if (item[i].id >= 0 && item[i].id <= 10) {
+			item[i].w = 10*2;
+			item[i].h = 21*2;
+		}
+
+		// Set size for wide sword
+		if (item[i].id == 13) {
+			item[i].w = 10*2;
+			item[i].h = 25*2;
+		}
+
+		// Long rapier
+		if (item[i].id == 14) {
+			item[i].w = 8*2;
+			item[i].h = 27*2;
+		}
+
+		// Gold long sword
+		if (item[i].id == 15) {
+			item[i].w = 10*2;
+			item[i].h = 29*2;
+		}
+
+		// Silver sword rapier
+		if (item[i].id == 16) {
+			item[i].w = 6*2;
+			item[i].h = 27*2;
+		}
+
+		// Silver sword
+		if (item[i].id == 17) {
+			item[i].w = 10*2;
+			item[i].h = 24*2;
+		}
+
+		// Silver sword w/ gold
+		if (item[i].id == 18) {
+			item[i].w = 10*2;
+			item[i].h = 24*2;
+		}
+
+		// Broken sword 1
+		if (item[i].id == 19) {
+			item[i].w = 6*2;
+			item[i].h = 9*2;
+		}
+
+		// Broken sword 2
+		if (item[i].id == 20) {
+			item[i].w = 6*2;
+			item[i].h = 12*2;
+		}
+
+		// Broken sword 3
+		if (item[i].id == 21) {
+			item[i].w = 6*2;
+			item[i].h = 12*2;
+		}
+
+		// Broken sword 4
+		if (item[i].id == 22) {
+			item[i].w = 6*2;
+			item[i].h = 12*2;
+		}
+
+		// Bomb
+		if (item[i].id == 23) {
+			item[i].w = 14*2;
+			item[i].h = 13*2;
+		}
+
+		// Heart
+		if (item[i].id == 24) {
+			item[i].w = 10*2;
+			item[i].h = 10*2;
+		}
+
+		// Coin
+		if (item[i].id == 25) {
+			item[i].w = 10*2;
+			item[i].h = 10*2;
+		}
+
+		// Silver key
+		if (item[i].id == 26) {
+			item[i].w = 5*2;
+			item[i].h = 10*2;
+		}
+
+		// Gold key
+		if (item[i].id == 27) {
+			item[i].w = 5*2;
+			item[i].h = 10*2;
+		}
+
+		// Set size for Keys when loaded
+		if (item[i].id == 26 || item[i].id == 27) {
+			item[i].w = 7*2;
+			item[i].h = 15*2;
+		}
 	}
 
-	// Set size for Keys when loaded
-	if (item[i].id == 26 || item[i].id == 27) {
-		item[i].w = 7*2;
-		item[i].h = 15*2;
-	}
+	// Defaults
+	item[i].vX 				= 0.0;
+	item[i].vY 				= 0.0;
 }
 
 int Item::getItemSizeW() {

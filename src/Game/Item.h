@@ -43,7 +43,10 @@ public:	// Parent object Variables
 	 * 27: 		Gold key
 	 */
 	int id;			// id of instances
+
+	// These get applied to the players stats
 	float damage;
+	float slashAtkSpe;
 
 public:	// Object Variables
 	float x, y;
@@ -115,7 +118,10 @@ public:	// Core functions
 	void RemoveAll(Item item[]);
 
 	// Spawn
-	void Spawn(Item item[], float x, float y);
+	void Spawn(Item item[], float x, float y, int id);
+
+	// Spawn and throw in a direction
+	void SpawnAndThrowItem(Item item[], float x, float y, int id, float vX, float vY);
 
 	void SpawnAll(Item item[], int newMx, int newMy, int camx, int camy);
 

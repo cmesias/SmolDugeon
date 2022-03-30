@@ -149,8 +149,8 @@ public:	// variables
 public: // Attack variables
 
 	SDL_RendererFlip flipW;
-	int attackTimer;
-	int attackTimerSpe = 1;	// default: 1 or 3 for fast attacks
+	float attackTimer;
+	float slashAtkSpe = 1;	// default: 1 or 3 for fast attacks
 	int attackFrame;
 	int attackType;	// 0: slash, 1: down stab
 	int stunTimer;
@@ -420,7 +420,10 @@ public:	// Mutator functions
 	void ResetDashing();
 
 	// Equip a sword
-	void EquipSword(int swordInHand_Index, float damage);
+	void EquipSword(int swordInHand_Index, float damage, float slashAtkSpe);
+
+	// Set false to equip key state
+	void stopEquipState();
 
 public:	// Accessor functions
 

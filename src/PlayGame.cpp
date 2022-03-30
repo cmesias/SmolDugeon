@@ -1608,7 +1608,7 @@ void PlayGame::checkCollisionPlayerItem() {
 						// If player is pressing equip
 						if (player.getEquipState()) {
 							// reduce enemy health
-							player.EquipSword(item[i].id, item[i].damage);
+							player.EquipSword(item[i].id, item[i].damage, item[i].slashAtkSpe);
 
 							// Remove item
 							item[i].alive = false;
@@ -1750,20 +1750,21 @@ void PlayGame::checkPlayerTileCollision()
 		{
 			if (tile[i].collisionTile)
 			{
+				// Locked door Tile
 				if (tile[i].id == 306)
 				{
-					// If player collides with a Tilec that can load levels
+					// If collision happened
 					if (checkCollision(player.getX(), player.getY(), player.getW(), player.getH(),
 									   tile[i].x, tile[i].y, tile[i].w, tile[i].h+10))
 					{
 						// Prompt self, this will render an "E" above the Item to equip it
 						tile[i].promptSelf = true;
 
-							// If player has enough keys
-							if (player.getSilverKeys() > 0) {
+						// If player has enough keys
+						if (player.getSilverKeys() > 0) {
 
-								// If player is pressing equip
-								if (player.getEquipState()) {
+							// If player is pressing equip
+							if (player.getEquipState()) {
 
 								player.IncreaseSilverKeys(-1);
 
@@ -1781,9 +1782,90 @@ void PlayGame::checkPlayerTileCollision()
 						tile[i].promptSelf = false;
 					}
 				}
+
+				// Silver chest
+				if (tile[i].id == 366)
+				{
+					// If collision happened
+					if (checkCollision(player.getX(), player.getY(), player.getW(), player.getH(),
+									   tile[i].x, tile[i].y, tile[i].w, tile[i].h+10))
+					{
+						// Prompt self, this will render an "E" above the Item to equip it
+						tile[i].promptSelf = true;
+
+						// If player has enough keys
+						if (player.getSilverKeys() > 0) {
+
+							// If player is pressing equip
+							if (player.getEquipState()) {
+
+								// Reduce silver keys
+								player.IncreaseSilverKeys(-1);
+
+								// Chang Tile into an unlocked chest
+								tile[i].promptSelf = false;
+								tile[i].id = 398;
+								tile[i].clip = rTiles[398];
+
+								// Spawn random item out form chest
+								int randItem = rand() % 11 + 1;
+								ite.SpawnAndThrowItem(item, tile[i].x+tile[i].w/2-ite.rSwords[randItem].w/2, tile[i].y+tile[i].h,
+										rand() % 11 + 1,
+										0.0, randDouble(4, 5));
+
+								// play sound effect
+								Mix_PlayChannel(-1, sCastHitBoss, 0);
+							}
+						}
+					} else {
+						tile[i].promptSelf = false;
+					}
+				}
+
+				// Gold chest
+				else if (tile[i].id == 367)
+				{
+					// If collision happened
+					if (checkCollision(player.getX(), player.getY(), player.getW(), player.getH(),
+									   tile[i].x, tile[i].y, tile[i].w, tile[i].h+10))
+					{
+						// Prompt self, this will render an "E" above the Item to equip it
+						tile[i].promptSelf = true;
+
+						// If player has enough keys
+						if (player.getGoldKeys() > 0) {
+
+							// If player is pressing equip
+							if (player.getEquipState()) {
+
+								// Reduce gold keys
+								player.IncreaseGoldKeys(-1);
+
+								// Chang Tile into an unlocked chest
+								tile[i].promptSelf = false;
+								tile[i].id = 399;
+								tile[i].clip = rTiles[399];
+
+								// Spawn random item out form chest
+								int randItem = rand() % 5 + 13;
+								ite.SpawnAndThrowItem(item, tile[i].x+tile[i].w/2-ite.rSwords[randItem].w/2, tile[i].y+tile[i].h,
+										rand() % 5 + 13,
+										0.0, randDouble(4, 5));
+
+								// play sound effect
+								Mix_PlayChannel(-1, sCastHitBoss, 0);
+							}
+						}
+					} else {
+						tile[i].promptSelf = false;
+					}
+				}
 			}
 		}
 	}
+
+	// After checking for equipping state, every frame, stop equipping for Player
+	player.stopEquipState();
 }
 
 void PlayGame::checkCollisionParticleMob()

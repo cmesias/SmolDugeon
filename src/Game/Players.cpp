@@ -82,7 +82,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName){
 	// Dash ability
 	this->dash 				= false;
 	this->dashSpeed 		= 10;
-	this->dashLength 		= 10;
+	this->dashLength 		= 6;
 	this->dashCounter 		= 0;
 	this->dashCoolCounter 	= 0;
 
@@ -144,7 +144,7 @@ void Players::ResetLivesAndPlayer() {
 	newName="AAA";
 
 	// Set default sword: fists
-	this->EquipSword(0, 10);
+	this->EquipSword(0, 10, 5);
 
 	// Reset score and lives, and turn player alive
 	this->score 				= 0;
@@ -682,7 +682,7 @@ void Players::Update(Map &map,
 						this->attackTimer += 3;
 					} else {
 						// Increase attack timer/frames
-						this->attackTimer += this->attackTimerSpe;
+						this->attackTimer += this->slashAtkSpe;
 					}
 
 					// If attack timer below 15 frames
@@ -1575,7 +1575,7 @@ void Players::RenderDebug(SDL_Renderer *gRenderer, int camX, int camY)
 	gText.render(gRenderer, x-camX, y-camY-gText.getHeight(), gText.getWidth(), gText.getHeight());
 
 	tempsi.str( std::string() );
-	tempsi << "attackType: " << attackType;
+	tempsi << "E: " << this->pressedEquipKey;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255,255,255}, gFont24);
 	gText.render(gRenderer, 0, 57, gText.getWidth(), gText.getHeight());
 
@@ -1644,7 +1644,7 @@ void Players::OnKeyDown(SDL_Keycode sym )
 		this->movedown = true;
 		break;
 	case SDLK_e:
-		this->pressedEquipKey = true;
+		//this->pressedEquipKey = true;
 		break;
 	case SDLK_h:
 		//debug = ( !debug );
@@ -1704,7 +1704,7 @@ void Players::OnKeyUp(SDL_Keycode sym )
 		this->movedown = false;
 		break;
 	case SDLK_e:
-		this->pressedEquipKey = false;
+		this->pressedEquipKey = true;
 		break;
 	case SDLK_j:
 
@@ -1968,17 +1968,15 @@ void Players::ResetDashing()
 	this->dashCoolCounter = 0;
 }
 
-void Players::EquipSword(int swordInHand_Index, float swordDamage)
+void Players::EquipSword(int swordInHand_Index, float swordDamage, float slashAtkSpe)
 {
 	this->swordInHand_Index = swordInHand_Index;
 	this->damage = swordDamage;
+	this->slashAtkSpe = slashAtkSpe;
+}
 
-	// Set attack speed based on sword/item equipping
-	if (swordInHand_Index ==0) {
-		this->attackTimerSpe = 5;
-	} else {
-		this->attackTimerSpe = 1;
-	}
+void Players::stopEquipState() {
+	this->pressedEquipKey = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -2073,7 +2071,6 @@ float Players::getScore() {
 bool Players::getEquipState() {
 	return this->pressedEquipKey;
 }
-
 int Players::getItemEqipped(int checkThisIndex) {
 	if (checkThisIndex == swordInHand_Index) {
 		return true;
