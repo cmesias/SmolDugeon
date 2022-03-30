@@ -97,9 +97,11 @@ public:	// variables
 	std::string name;
 	int timer = 0;
 	int realw = 48, realh = 48;			// object size in actual pixel size
-	int w = 24, h = 48;					// object size in collision pixels
+	int w = 24, h = 24;					// object size in collision pixels
 	float x = 0,
 		  y = 0;
+	float armX;							// This is where we will attach the sword to
+	float armY;
 	float x2, y2;						// player center
 	float angle 		= 0.0,
 		   radians 		= 0.0,
@@ -303,7 +305,7 @@ private:	// Official player control keys
 private:	// Variables used in Textures
 
 	const float xOffset = 0;
-	const float yOffset = -5;
+	const float yOffset = -29;
 	int shadowW = 44;
 
 	/* Sword Types (TODO [ ] (3-25-2022) - save this in player data)

@@ -39,28 +39,6 @@ void PlayGame::Init() {
 	lastKnownPositionX = 100;
 	lastKnownPositionY = 0;
 
-	// Tiles
-	{
-		for (int h = 0; h < HowManyTilesVertical; h++) {
-			for (int w = 0; w < HowManyTilesHorizontal; w++) {
-				rTiles[i].x = 0 + w * TilesCutSizeW;
-				rTiles[i].y = 0 + (h * TilesCutSizeH);
-				rTiles[i].w = TilesCutSizeW;
-				rTiles[i].h = TilesCutSizeH;
-				i++;
-			}
-		}
-
-		// Do specific tiles, locked door
-		rTiles[306] = {272, 128, 32, 32};
-
-		// Do specific tiles, unlocked door
-		rTiles[309] = {320, 128, 32, 32};
-
-		//272, 128, tile 306
-
-	}
-
 	// Initialize
 	bos.Init(boss);
 	mb.Init(mob);
@@ -82,6 +60,35 @@ void PlayGame::Init() {
 	camx = map.x;
 	camy = map.y + screenHeight/2 + 100;
 	camlock		= false;
+
+	// Tiles
+	{
+		for (int h = 0; h < HowManyTilesVertical; h++) {
+			for (int w = 0; w < HowManyTilesHorizontal; w++) {
+				rTiles[i].x = 0 + w * TilesCutSizeW;
+				rTiles[i].y = 0 + (h * TilesCutSizeH);
+				rTiles[i].w = TilesCutSizeW;
+				rTiles[i].h = TilesCutSizeH;
+				i++;
+			}
+		}
+		// Do specific tiles
+
+		// When choosing these tiles, they will be the same thing: Locked door
+		// Do specific tiles, locked door
+		rTiles[273] = {272, 128, 32, 32};
+		rTiles[274] = {272, 128, 32, 32};
+		rTiles[305] = {272, 128, 32, 32};
+		rTiles[306] = {272, 128, 32, 32};
+
+		// Do specific tiles, unlocked door
+		rTiles[276] = {320, 128, 32, 32};
+		rTiles[277] = {320, 128, 32, 32};
+		rTiles[308] = {320, 128, 32, 32};
+		rTiles[309] = {320, 128, 32, 32};
+
+		//272, 128, tile 306
+	}
 }
 /*
 void PlayGame::saveCFG(std::string fileName){
@@ -1308,7 +1315,7 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 		tempss << ", ite.count: " 				<< ite.count << "ite.id: " << ite.id
 			   << ", ite.multiW: " 			<< ite.multiW 			<< ", ite.multiH: " 				<< ite.multiH;
 		tempss << ",  shakeLength: " 				<<  "test" 	<< ", rustleW: " 			<< rustleW;
-		tempss << ", Tiles: " 				<< tl.tileCount 		<< ", Tilecs: " 		<< tlc.count 			<< ", Mob: " << mb.count;
+		tempss << ", tl.tilew: " 				<< tl.tilew 		<< ", tl.tileh: " 				<< tl.tileh 		<< ", Tilecs: " 		<< tlc.count 			<< ", Mob: " << mb.count;
 		tempss << ", place_type: " 			<< place_type 			<< ", tl.id: " 			<< tl.id 				<< ", tlc.id: " << tlc.id;
 		tempss << ", tl.collisionTile: " 	<< tl.collisionTile 	<< ", layer: " 			<< tl.layer;
 		tempss << ", tilew: " 				<< tl.tilew 			<< ", tileh: " 			<< tl.tileh				<< ", LevelToLoad: " << tlc.LevelToLoad;

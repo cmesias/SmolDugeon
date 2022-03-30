@@ -211,18 +211,15 @@ public:	// Other classes
 
 public: // Tile Variables
 
-	const int HowManyTilesVertical   = 16;
-	const int HowManyTilesHorizontal = 32;
-
-	const int TilesCutSizeW   = 16;
-	const int TilesCutSizeH = 16;
+	SDL_Rect rTiles[512];
+    static const int HowManyTilesVertical   = 16;
+    static const int HowManyTilesHorizontal = 32;
+    static const int TilesCutSizeW   = 16;
+    static const int TilesCutSizeH = 16;
 
 	// Tilebar
 	TileBar tb;
 	TileBar tilebar[UniqueTileBarTiles];
-
-	// For Tiles.cpp
-	SDL_Rect rTiles[UniqueTileBarTiles];
 
 	// Tiles
 	Tile tl;

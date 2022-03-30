@@ -22,6 +22,8 @@ public:
 	int multiH = 1;
 	int tilew = 64;
 	int tileh = 64;
+	const int expandW = 4;		// 4 times larger than original texture size
+	const int expandH = 4;	// 4 times larger than original texture size
 	bool hideOtherLayers = false;
 	LTexture gTiles;
 	LTexture gText;
@@ -127,6 +129,13 @@ public:	// core game functions
 	void RenderHand(SDL_Renderer *gRenderer, Tile tile[], int newMx, int newMy, int mex, int mey, int camx, int camy, SDL_Rect rTiles[]);
 
 	void setStatsBasedOnType(Tile tile[], int i);
+
+public:	// Get functions
+	// Get size of Tile in pixels
+	int getPixelW(SDL_Rect rTiles[]);
+
+	// Get size of Tile in pixels
+	int getPixelH(SDL_Rect rTiles[]);
 
 public:	// Tile manipulation
 

@@ -171,8 +171,8 @@ void Tile::spawnTile(Tile tile[], int newMx, int newMy, int camx, int camy, SDL_
 	removeTile(tile, 0);
 	for (int j = 0; j < multiW; j++) {
 		for (int h = 0; h < multiH; h++) {
-			int x = int(newMx + j * tilew+camx);
-			int y = int(newMy + h * tileh+camy);
+			int x = int(newMx + j *(rTiles[id].w*this->expandW)+camx);
+			int y = int(newMy + h *(rTiles[id].h*this->expandH)+camy);
 			placeTile(tile, x, y, id, layer, collisionTile, rTiles[id]);
 		}
 	}
@@ -186,8 +186,8 @@ void Tile::updateTile(Tile tile[], LWindow &gWindow,
 
 	//std::cout << "newMx: " << newMx << std::endl;
 	//std::cout << "newMy: " << newMy << std::endl;
-	int tileW = tilew*multiW;
-	int tileH = tileh*multiH;
+	int tileW = getPixelW(rTiles)*multiW;
+	int tileH = getPixelH(rTiles)*multiH;
 	for (int i = 0; i < max; i++)
 	{
 		if (tile[i].alive)
@@ -632,6 +632,13 @@ void Tile::renderTileDebug(SDL_Renderer *gRenderer, Tile tile[], int newMx, int 
 					SDL_RenderFillRect(gRenderer, &tempr);
 				}
 			}
+			if (tile[i].id == 306) {
+				std::stringstream tempsi;
+				tempsi << "w: " << tile[i].w << ", h" << tile[i].h;
+				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+				gText.render(gRenderer, tile[i].x-camx, tile[i].y-gText.getHeight()-camy,
+										gText.getWidth(), gText.getHeight());
+			}
 		}
 	}
 }
@@ -671,15 +678,25 @@ void Tile::RenderHand(SDL_Renderer *gRenderer, Tile tile[], int newMx, int newMy
 	for (int j = 0; j < multiW; j++) {
 		for (int h = 0; h < multiH; h++) {
 			gTiles.setAlpha(110);
-			gTiles.render(gRenderer, newMx+j*tilew, newMy+h*tileh, tilew, tileh, &rTiles[id]);
+			//gTiles.render(gRenderer, newMx+j*tilew, newMy+h*tileh, tilew, tileh, &rTiles[id]);
+			gTiles.render(gRenderer, newMx+j*(rTiles[id].w*expandW), newMy+h*(rTiles[id].h*expandH), rTiles[id].w*expandW, rTiles[id].h*expandH, &rTiles[id]);
 
 			// Render mouse coordinates snapped to grid
-			SDL_Rect tempr = {newMx, newMy, tilew*multiW, tileh*multiH};
+			SDL_Rect tempr = {newMx, newMy, (rTiles[id].w*expandW)*multiW, (rTiles[id].h*expandH)*multiH};
 			SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
 			SDL_RenderDrawRect(gRenderer, &tempr);
 		}
 	}
 }
+
+int Tile::getPixelW(SDL_Rect rTiles[]) {
+	return rTiles[id].w*expandW;
+}
+
+int Tile::getPixelH(SDL_Rect rTiles[]) {
+	return rTiles[id].h*expandH;
+}
+
 
 void Tile::setStatsBasedOnType(Tile tile[], int i) {
 
@@ -696,19 +713,19 @@ void Tile::setStatsBasedOnType(Tile tile[], int i) {
 		// Wall tiles
 		if (tile[i].id == 32) {
 			tile[i].rectB.x = tile[i].x;
-			tile[i].rectB.y = tile[i].y+(8*4);
+			tile[i].rectB.y = tile[i].y+(8*this->expandH);
 			tile[i].rectB.w = tile[i].w;
 			tile[i].rectB.h = tile[i].h/2;
 		}
 		if (tile[i].id == 33) {
 			tile[i].rectB.x = tile[i].x;
-			tile[i].rectB.y = tile[i].y+(8*4);
+			tile[i].rectB.y = tile[i].y+(8*this->expandH);
 			tile[i].rectB.w = tile[i].w;
 			tile[i].rectB.h = tile[i].h/2;
 		}
 		if (tile[i].id == 34) {
 			tile[i].rectB.x = tile[i].x;
-			tile[i].rectB.y = tile[i].y+(8*4);
+			tile[i].rectB.y = tile[i].y+(8*this->expandH);
 			tile[i].rectB.w = tile[i].w;
 			tile[i].rectB.h = tile[i].h/2;
 		}
@@ -716,9 +733,9 @@ void Tile::setStatsBasedOnType(Tile tile[], int i) {
 		// Top of yellow box tile
 		if (tile[i].id == 197) {
 			tile[i].rectB.x = tile[i].x;
-			tile[i].rectB.y = tile[i].y+(11*4);
+			tile[i].rectB.y = tile[i].y+(11*this->expandH);
 			tile[i].rectB.w = tile[i].w;
-			tile[i].rectB.h = 2.5*4;
+			tile[i].rectB.h = 2.5*this->expandH;
 		}
 
 		// Bottom of yellow box tile
@@ -726,20 +743,40 @@ void Tile::setStatsBasedOnType(Tile tile[], int i) {
 			tile[i].rectB.x = tile[i].x;
 			tile[i].rectB.y = tile[i].y;
 			tile[i].rectB.w = tile[i].w;
-			tile[i].rectB.h = 8*4;
+			tile[i].rectB.h = 16*this->expandH;
 		}
 
 		// Locked door
-		if (tile[i].id == 306) {
-			tile[i].w = 128;
-			tile[i].h = 128;
+		if (tile[i].id == 273 || tile[i].id == 274 || tile[i].id == 305 || tile[i].id == 306)
+		{
+			// Set size
+			tile[i].w = 32*this->expandW;
+			tile[i].h = 32*this->expandH;
+
+			// Set collision box around tile
+			tile[i].rectB.x = tile[i].x;
+			tile[i].rectB.y = tile[i].y;
+			tile[i].rectB.w = tile[i].w;
+			tile[i].rectB.h = tile[i].h;
+
+			// Set clips for texture
 			tile[i].clip = {272, 128, 32, 32};
 		}
 
 		// Unlocked door
-		if (tile[i].id == 309) {
+		if (tile[i].id == 276 || tile[i].id == 277 || tile[i].id == 308 || tile[i].id == 309)
+		{
+			// Set size
 			tile[i].w = 128;
 			tile[i].h = 128;
+
+			// Set collision box around tile
+			tile[i].rectB.x = tile[i].x;
+			tile[i].rectB.y = tile[i].y;
+			tile[i].rectB.w = tile[i].w;
+			tile[i].rectB.h = tile[i].h;
+
+			// Set clips for texture
 			tile[i].clip = {320, 128, 32, 32};
 		}
 
@@ -747,15 +784,15 @@ void Tile::setStatsBasedOnType(Tile tile[], int i) {
 		// Chest tile
 		if (tile[i].id == 366) {
 			tile[i].rectB.x = tile[i].x;
-			tile[i].rectB.y = tile[i].y+(8*4);
+			tile[i].rectB.y = tile[i].y+(8*this->expandH);
 			tile[i].rectB.w = tile[i].w;
-			tile[i].rectB.h = 4*4;
+			tile[i].rectB.h = 4*this->expandH;
 		}
 		if (tile[i].id == 367) {
 			tile[i].rectB.x = tile[i].x;
-			tile[i].rectB.y = tile[i].y+(8*4);
+			tile[i].rectB.y = tile[i].y+(8*this->expandH);
 			tile[i].rectB.w = tile[i].w;
-			tile[i].rectB.h = 4*4;
+			tile[i].rectB.h = 4*this->expandH;
 		}
 	}
 

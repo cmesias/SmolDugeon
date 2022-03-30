@@ -361,6 +361,10 @@ void Players::Update(Map &map,
 	x2 = x+w/2;
 	y2 = y+h/2;
 
+	// Set arm location
+	armX = x;
+	armY = y - 24;
+
 	// Player alive
 	if (alive)
 	{
@@ -714,7 +718,7 @@ void Players::Update(Map &map,
 								xOffsetTemp = getRightSide()-tempWidth;
 
 							// Spawn attack object (it will appear in the world for 1 frame then remove itself)
-							obj.spawn(object, xOffsetTemp, this->y+16,
+							obj.spawn(object, xOffsetTemp, armY+16,
 											  tempWidth, tempHeight, 0);
 						}
 						// Play slash sound effect
@@ -1108,40 +1112,52 @@ void Players::Render(int mx, int my, int camx, int camy, LWindow gWindow, SDL_Re
 				if (facing == "right") {
 					gPlayer.render(gRenderer, x-camx, y+yOffset-camy, 75, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
 
-					// Render player sword
+					//------- Render weapon
 					if (swordInHand_Index == -1) {
 
 					} else {
 						// Don't rotate if holding fists
 						if (swordInHand_Index ==0) {
-							gSwords.render(gRenderer, x+xOffSetSwordSlashingRight+xOffSetFistPunchRight-camx, y-camy,
-									swordW, swordH, &rSwords[swordInHand_Index], 0, NULL, flipW);
+							gSwords.render(gRenderer, armX + xOffSetSwordSlashingRight+xOffSetFistPunchRight-camx,
+													  armY-camy,
+													  swordW, swordH, &rSwords[swordInHand_Index],
+													  0.0, NULL, flipW);
 						}
 						// Rotate swords
 						else {
-							gSwords.render(gRenderer, x+xOffSetSwordSlashingRight-camx, y+yOffSetSwordSlashing-camy,
-									swordW, swordH, &rSwords[swordInHand_Index], 90, NULL, flipW);
+							gSwords.render(gRenderer, armX + xOffSetSwordSlashingRight-camx,
+													  armY + yOffSetSwordSlashing-camy,
+													  swordW, swordH, &rSwords[swordInHand_Index],
+													  90, NULL, flipW);
 						}
 					}
 				}
 
 				// Looking Left
 				else{
-					gPlayer.render(gRenderer, x+xOffSetSlashingLeft-camx, y+yOffset-camy, 75, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
+					gPlayer.render(gRenderer, x+xOffSetSlashingLeft-camx,
+													  y + yOffset-camy,
+													  75, 48, &rPlayer[sprite_index],
+													  0.0, NULL, flipW);
 
-					// Render player sword
+					//------- Render weapon
 					if (swordInHand_Index == -1) {
 
 					} else {
 						// Don't rotate if holding fists
 						if (swordInHand_Index ==0) {
-							gSwords.render(gRenderer, x+xOffSetSwordSlashingLeft+xOffSetFistPunchLeft-camx, y-camy,
-									swordW, swordH, &rSwords[swordInHand_Index], 0, NULL, flipW);
+							gSwords.render(gRenderer, armX + xOffSetSwordSlashingLeft + xOffSetFistPunchLeft-camx,
+													  armY-camy,
+													  swordW, swordH,
+													  &rSwords[swordInHand_Index],
+													  0.0, NULL, flipW);
 						}
 						// Rotate swords
 						else {
-							gSwords.render(gRenderer, x+xOffSetSwordSlashingLeft-camx, y+yOffSetSwordSlashing-camy,
-									swordW, swordH, &rSwords[swordInHand_Index], -90, NULL, flipW);
+							gSwords.render(gRenderer, armX + xOffSetSwordSlashingLeft-camx,
+													  armY + yOffSetSwordSlashing-camy,
+													  swordW, swordH, &rSwords[swordInHand_Index],
+													  -90, NULL, flipW);
 						}
 					}
 				}
@@ -1162,22 +1178,28 @@ void Players::Render(int mx, int my, int camx, int camy, LWindow gWindow, SDL_Re
 
 				// Looking Right
 				if (facing == "right") {
-					// Render player sword
+
+					//------- Render weapon
 					if (swordInHand_Index == -1) {
 
 					} else {
-						gSwords.render(gRenderer, x+xOffSetWalkingRight+xOffSetSwordWalkAndDash-camx, y+yOffSetSword-camy, swordW, swordH,
-								&rSwords[swordInHand_Index], 0.0, NULL, flipW);
+						gSwords.render(gRenderer, armX + xOffSetWalkingRight + xOffSetSwordWalkAndDash-camx,
+												  armY + yOffSetSword-camy,
+												  swordW, swordH, &rSwords[swordInHand_Index],
+												  0.0, NULL, flipW);
 					}
 				}
 
 				// Looking Left
 				else {
-					// Render player sword
+					//------- Render weapon
 					if (swordInHand_Index == -1) {
 
 					} else {
-						gSwords.render(gRenderer, x-xOffSetSwordWalkAndDash/2-camx, y+yOffSetSword-camy, swordW, swordH, &rSwords[swordInHand_Index], 0.0, NULL, flipW);
+						gSwords.render(gRenderer, armX-xOffSetSwordWalkAndDash/2-camx,
+												  armY + yOffSetSword-camy,
+												  swordW, swordH, &rSwords[swordInHand_Index],
+												  0.0, NULL, flipW);
 					}
 				}
 			}
@@ -1282,11 +1304,11 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 			SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
 			SDL_RenderDrawRect(gRenderer, &tempRect);*/
 
-			const float yOffsetBar = 4;
+			const float yOffsetBar = 7;
 			const float barHeight = 12;
 			const float barWidth = this->w*1.75;
 			float uiX = this->x + this->w/2 - barWidth/2;
-			float uiY = this->y - barHeight - yOffsetBar;
+			float uiY = this->y - this->h - barHeight - yOffsetBar;
 
 			// Health Decay bar on Mobes
 			{
