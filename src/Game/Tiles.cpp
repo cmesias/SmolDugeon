@@ -53,13 +53,14 @@ void Tile::initTile(Tile tile[]) {
 		tile[i].alpha = 255;
 		tile[i].layer = -1;
 		tile[i].animTimer = 0;
+		tile[i].hoverAmount = 9;
+		tile[i].hoverDir = 1;
 		tile[i].mouse = false;
 		tile[i].mouseBox = false;
 		tile[i].screen = false;
 		tile[i].player = false;
 		tile[i].side = "right";
 		tile[i].collisionTile = false;
-		tile[i].collisionMobs = false;
 		tile[i].PlayerBehindTile = false;
 		tile[i].promptSelf = false;
 		tile[i].alive = false;
@@ -81,7 +82,6 @@ void Tile::placeTile(Tile tile[], float x, float y,
 			tile[i].clip 	= clip;
 			tile[i].layer 	= layer;
 			tile[i].collisionTile 	= collisionTile;
-			tile[i].collisionMobs = false;
 			tile[i].PlayerBehindTile = false;
 			tile[i].animTimer = 0;
 			tile[i].mouse 	= false;
@@ -360,23 +360,31 @@ void Tile::checkCollisionXY(Tile tile[],
 				// Check only collision-enabled Tiles
 				if (tile[i].collisionTile) {
 
-					// If Player colliding with Tile
-					if  ( checkCollisionRect( rectA, tile[i].rectB )) {
-						/*// If Player has more than 0 keys, then unlock door, otherwise continue collision check
-						if (keys > 0 && useKey) {
-							useKey = false;
-							if (tile[i].id == 65 || tile[i].id == 69 || tile[i].id == 73 || tile[i].id == 77 ||
-								tile[i].id == 67 || tile[i].id == 71 || tile[i].id == 75 || tile[i].id == 79) {
-								keys--;
-								Mix_PlayChannel(-1, sKeyPickup, 0);
-								tile[i].alive = false;
-								tl.tileCount--;
-							}
-						}*/
+					// Only do collision check to nearby tiles
+					if (getDistance(rectA.x+rectA.w/2,
+									rectA.y+rectA.h/2,
+								    tile[i].rectB.x+tile[i].rectB.w/2,
+									tile[i].rectB.y+tile[i].rectB.h/2) < 75) {
 
-						// Continue handling collision
-						moveBack = true;
+						// If Player colliding with Tile
+						if  ( checkCollisionRect( rectA, tile[i].rectB )) {
+							/*// If Player has more than 0 keys, then unlock door, otherwise continue collision check
+							if (keys > 0 && useKey) {
+								useKey = false;
+								if (tile[i].id == 65 || tile[i].id == 69 || tile[i].id == 73 || tile[i].id == 77 ||
+									tile[i].id == 67 || tile[i].id == 71 || tile[i].id == 75 || tile[i].id == 79) {
+									keys--;
+									Mix_PlayChannel(-1, sKeyPickup, 0);
+									tile[i].alive = false;
+									tl.tileCount--;
+								}
+							}*/
+
+							// Continue handling collision
+							moveBack = true;
+						}
 					}
+
 				}
 			}
 		}
@@ -398,20 +406,28 @@ void Tile::checkCollisionXY(Tile tile[],
 		for (int i = 0; i < max; i++) {
 			if (tile[i].alive){
 				if (tile[i].collisionTile) {
-					if  ( checkCollisionRect( rectA, tile[i].rectB )) {
-						// If Player has more than 0 keys, then unlock door, otherwise continue collision check
-						/*if (keys > 0 && useKey) {
-							useKey = false;
-							if (tile[i].id == 65 || tile[i].id == 69 || tile[i].id == 73 || tile[i].id == 77 ||
-								tile[i].id == 67 || tile[i].id == 71 || tile[i].id == 75 || tile[i].id == 79) {
-								keys--;
-								Mix_PlayChannel(-1, sKeyPickup, 0);
-								tile[i].alive = false;
-								tl.tileCount--;
-							}
-						}*/
-						// Continue handling collision
-						moveBack = true;
+
+					// Only do collision check to nearby tiles
+					if (getDistance(rectA.x+rectA.w/2,
+									rectA.y+rectA.h/2,
+								    tile[i].rectB.x+tile[i].rectB.w/2,
+									tile[i].rectB.y+tile[i].rectB.h/2) < 75) {
+
+						if  ( checkCollisionRect( rectA, tile[i].rectB )) {
+							// If Player has more than 0 keys, then unlock door, otherwise continue collision check
+							/*if (keys > 0 && useKey) {
+								useKey = false;
+								if (tile[i].id == 65 || tile[i].id == 69 || tile[i].id == 73 || tile[i].id == 77 ||
+									tile[i].id == 67 || tile[i].id == 71 || tile[i].id == 75 || tile[i].id == 79) {
+									keys--;
+									Mix_PlayChannel(-1, sKeyPickup, 0);
+									tile[i].alive = false;
+									tl.tileCount--;
+								}
+							}*/
+							// Continue handling collision
+							moveBack = true;
+						}
 					}
 				}
 			}
@@ -601,15 +617,24 @@ void Tile::RenderOnTopOfPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerTo
 	}
 }
 
-void Tile::RenderUI(SDL_Renderer *gRenderer, Tile Tile[], int camx, int camy) {
+void Tile::RenderUI(SDL_Renderer *gRenderer, Tile tile[], int camx, int camy) {
 	for (int i = 0; i < max; i++) {
-		if (Tile[i].alive) {
-			if (Tile[i].promptSelf) {
+		if (tile[i].alive) {
+			if (tile[i].promptSelf) {
+				// Hover effect prompt for Tiles with prompts
+				tile[i].hoverAmount += 0.1 * tile[i].hoverDir;
+				if (tile[i].hoverAmount > 4) {
+					tile[i].hoverDir = -1;
+				}
+				else if (tile[i].hoverAmount < 1) {
+					tile[i].hoverDir = 1;
+				}
+
 				std::stringstream tempsi;
 				tempsi << "E";
 				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-				gText.render(gRenderer, Tile[i].x+Tile[i].w/2-gText.getWidth()/2-camx,
-						Tile[i].y-gText.getWidth()*2-camy,
+				gText.render(gRenderer, tile[i].x+tile[i].w/2-gText.getWidth()/2-camx,
+						tile[i].y+tile[i].hoverAmount-gText.getWidth()-camy,
 										gText.getWidth(), gText.getHeight());
 			}
 		}
@@ -710,25 +735,6 @@ void Tile::setStatsBasedOnType(Tile tile[], int i) {
 
 	// Specific Tiles
 	{
-		// Wall tiles
-		if (tile[i].id == 32) {
-			tile[i].rectB.x = tile[i].x;
-			tile[i].rectB.y = tile[i].y+(8*this->expandH);
-			tile[i].rectB.w = tile[i].w;
-			tile[i].rectB.h = tile[i].h/2;
-		}
-		if (tile[i].id == 33) {
-			tile[i].rectB.x = tile[i].x;
-			tile[i].rectB.y = tile[i].y+(8*this->expandH);
-			tile[i].rectB.w = tile[i].w;
-			tile[i].rectB.h = tile[i].h/2;
-		}
-		if (tile[i].id == 34) {
-			tile[i].rectB.x = tile[i].x;
-			tile[i].rectB.y = tile[i].y+(8*this->expandH);
-			tile[i].rectB.w = tile[i].w;
-			tile[i].rectB.h = tile[i].h/2;
-		}
 
 		// Top of yellow box tile
 		if (tile[i].id == 197) {
@@ -755,9 +761,9 @@ void Tile::setStatsBasedOnType(Tile tile[], int i) {
 
 			// Set collision box around tile
 			tile[i].rectB.x = tile[i].x;
-			tile[i].rectB.y = tile[i].y;
+			tile[i].rectB.y = tile[i].y+tile[i].h/2;
 			tile[i].rectB.w = tile[i].w;
-			tile[i].rectB.h = tile[i].h;
+			tile[i].rectB.h = tile[i].h/2;
 
 			// Set clips for texture
 			tile[i].clip = {272, 128, 32, 32};

@@ -38,7 +38,6 @@ public:	// Global World Variables
 
 public: // global functions
 	bool checkCollisionRect( SDL_Rect a, SDL_Rect b );
-	float getDistance( float x, float y, float x2, float y2 );
 
 public:	// globals
 	bool shift;
@@ -278,7 +277,7 @@ public:	// Functions mixed with other classes
 	// Check collision between Particle & Boss
 	void checkCollisionParticleBoss();
 
-	//------------------ Items
+	//------------------ Collision
 
 	// Check collision between Player & Item
 	void checkCollisionPlayerItem();
@@ -289,7 +288,7 @@ public:	// Functions mixed with other classes
 	// Check collision between Player & Tile
 	void checkPlayerTileCollision();
 
-	//------------------ Items
+	//------------------ Collision
 
 
 	//------------------ Mobs

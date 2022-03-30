@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include "Helper.h"
+#include <math.h>
 
 // Set Texture clips
 void Helper::setClips(SDL_Rect &tempRect, int x, int y, int w, int h){
@@ -77,6 +78,16 @@ bool Helper::checkCollisionRect( SDL_Rect a, SDL_Rect b )
 
     //If none of the sides from A are outside B
     return true;
+}
+
+float Helper::getDistance( float targetX, float targetY, float selfX, float selfY ) {
+
+	float distance = 10;
+
+	distance = sqrt((targetX - selfX) * (targetX - selfX)+
+					(targetY - selfY) * (targetY - selfY));
+
+	return distance;
 }
 
 void Helper::ChangeRenderResolution(SDL_Renderer *gRenderer, int changeTo) {

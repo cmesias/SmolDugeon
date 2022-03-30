@@ -36,10 +36,8 @@ public:
     // Tiles
     static const int UniqueTileBarTiles = 512;
 
-    //int screenWidth = 1920;
-    //int screenHeight = 1080;
-    const int screenWidth = 1280;
-    const int screenHeight = 720;
+    //int screenWidth = 1920, screenHeight = 1080;
+    const int screenWidth = 1280, screenHeight = 720;
 
 
     //int screenWidth = 1920;
@@ -70,6 +68,8 @@ public:
 	bool checkCollision(int x, int y, int w, int h, int x2, int y2, int w2, int h2);
 
 	bool checkCollisionRect( SDL_Rect a, SDL_Rect b );
+
+	float getDistance( float x, float y, float x2, float y2 );
 
 	// Doesnt work properly (3/17/2022)
 	void ChangeRenderResolution(SDL_Renderer *gRenderer, int changeTo);

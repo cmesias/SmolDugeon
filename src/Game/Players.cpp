@@ -358,15 +358,15 @@ void Players::Update(Map &map,
 					int LevelWeLoaded)
 {
 	// Player center
-	x2 = x+w/2;
-	y2 = y+h/2;
+	this->x2 = this->x+this->w/2;
+	this->y2 = this->y+this->h/2;
 
 	// Set arm location
-	armX = x;
-	armY = y - 24;
+	this->armX = this->x;
+	this->armY = this->y - this->h;
 
 	// Player alive
-	if (alive)
+	if (this->alive)
 	{
 
 		// Player health decay
@@ -1412,86 +1412,110 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 	// Hearts
 	{
 		// Render number of hearts left
+		int marginW = 16;
+		int marginH = 16;
+		int size = 32;
 		for (int i=0; i<hearts; i++){
-			int marginW = 12;
-			int tempX = screenWidth - ((1+i)*32) - marginW;
-			gSwords.render(gRenderer, tempX, 12, 32, 32,
+			//int tempX = screenWidth - ((1+i)*32) - marginW;
+			int tempX = marginW + i*32;
+			int tempY = marginH;
+			gSwords.render(gRenderer, tempX, tempY, size, size,
 									  &rSwords[24], 0, NULL);
 		}
 	}
 
 	// Used by all 3 below
-	int marginW = 12;
-	int marginH = 32 + 4;
+	int marginW = 32;
+	int marginH = 32*2 + 4;
 	int tempX = marginW;
 	//int tempX = screenWidth - marginW;
 	int tempY;
 	std::stringstream tempsi;
 
 	// Coins
-	{
+	/*{
 		// Render Icon
 		tempY = 12 + marginH;
 		for (int i=0; i<coins+1; i++){
-			gSwords.render(gRenderer, tempX, 12+marginH, 32, 32,
+			gSwords.render(gRenderer, 16, 16+32, 24, 24,
 									  &rSwords[25], 0, NULL);
 		}
 
 		// Render Text
+		marginH = 4;
 		tempsi.str( std::string() );
 		tempsi  << " x " << this->coins;
 		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());
-	}
+		gText.render(gRenderer, 100 + 24/2 - gText.getWidth()/2, 32*2  + 24 + marginH, gText.getWidth(), gText.getHeight());
+	}*/
 
 	// Silver keys
 	{
 		// Render Icon
-		tempY = 12+marginH*2;
-		for (int i=0; i<silverKeys+1; i++){
-			gSwords.render(gRenderer, tempX, 12+marginH*2, 16, 32,
+		int marginW = 24;
+		int marginH = 16;
+		int spacing = 10;
+		int sizeW = 16;
+		int sizeH = 32;
+		int sizeOfHearts = 32;
+		for (int i=0; i<silverKeys; i++){
+			int tempX = marginW + i*sizeW;
+			int tempY = marginH + sizeOfHearts + spacing;
+			gSwords.render(gRenderer, tempX, tempY, sizeW, sizeH,
 									  &rSwords[26], 0, NULL);
 		}
 
 		// Render Text
-		tempsi.str( std::string() );
+		/*tempsi.str( std::string() );
 		tempsi << " x " <<this->silverKeys;
 		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());
-
-
+		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());*/
 	}
 
 	// Gold keys
 	{
 		// Render Icon
-		tempY = 12+marginH*3;
-		for (int i=0; i<goldKeys+1; i++){
-			gSwords.render(gRenderer, tempX, 12+marginH*3, 16, 32,
+		int marginW = 24;
+		int marginH = 16;
+		int spacing = 5;
+		int sizeW = 16;
+		int sizeH = 32;
+		int sizeOfHearts = 32;
+		for (int i=0; i<goldKeys; i++){
+			int tempX = marginW + i*sizeW;
+			int tempY = (marginH + sizeOfHearts)*2 + spacing;
+			gSwords.render(gRenderer, tempX, tempY, sizeW, sizeH,
 									  &rSwords[27], 0, NULL);
 		}
 
 		// Render Text
-		tempsi.str( std::string() );
+		/*tempsi.str( std::string() );
 		tempsi  << " x " << this->goldKeys;
 		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());
+		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());*/
 	}
 
 	// Bombs
 	{
 		// Render Icon
-		tempY = 12+marginH*4;
-		for (int i=0; i<bombs+1; i++){
-			gSwords.render(gRenderer, tempX, 12+marginH*4, 32, 32,
+		int marginW = 24;
+		int marginH = 16;
+		int spacing = 5;
+		int sizeW = 16;
+		int sizeH = 32;
+		int sizeOfHearts = 32;
+		for (int i=0; i<bombs; i++){
+			int tempX = marginW + i*sizeW;
+			int tempY = (marginH + sizeOfHearts)*3 + spacing;
+			gSwords.render(gRenderer, tempX, tempY, sizeW, sizeH,
 									  &rSwords[23], 0, NULL);
 		}
 
 		// Render Text
-		tempsi.str( std::string() );
+		/*tempsi.str( std::string() );
 		tempsi  << " x " << this->bombs;
 		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());
+		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());*/
 	}
 
 

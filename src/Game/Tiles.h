@@ -61,11 +61,11 @@ public:
 	bool screen;
 	bool player;
 	bool promptSelf;
+	float hoverAmount;
+	float hoverDir;
 	bool alive;
 	std::string side;		// collision with player
-	std::string sideSlime;	// collision with Slime
 	bool collisionTile;		// If true, this Tile is considered a collision tile
-	bool collisionMobs;
 
 public:	// animation for light Tile
 

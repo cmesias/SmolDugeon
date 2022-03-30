@@ -1749,6 +1749,7 @@ void PlayGame::checkPlayerTileCollision()
 								player.IncreaseSilverKeys(-1);
 
 								// Chang Tile into unlocked door Tile
+								tile[i].promptSelf = false;
 								tile[i].id = 309;
 								tile[i].clip = rTiles[309];
 								tile[i].collisionTile = false;
@@ -3947,16 +3948,6 @@ bool PlayGame::checkCollisionRect( SDL_Rect a, SDL_Rect b )
 
     //If none of the sides from A are outside B
     return true;
-}
-
-float PlayGame::getDistance( float targetX, float targetY, float selfX, float selfY ) {
-
-	float distance = 10;
-
-	distance = sqrt((targetX - selfX) * (targetX - selfX)+
-					(targetY - selfY) * (targetY - selfY));
-
-	return distance;
 }
 
 
