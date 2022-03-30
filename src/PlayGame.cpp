@@ -1069,15 +1069,17 @@ void PlayGame::RenderFG(SDL_Renderer *gRenderer, LWindow &gWindow) {
 void PlayGame::RenderShadows(SDL_Renderer *gRenderer, LWindow &gWindow) {
 
 	// Render shadow for Item.cpp
-	for (int i = 0; i < ite.max; i++) {
-		if (item[i].alive) {
-			gShadow.setAlpha(110);
-			int shadowSize = item[i].w/2 + item[i].hoverAmount;
-			int yOffsetShadow = -(shadowSize/4);
-			yOffsetShadow +=  item[i].yOffset;
-			gShadow.render(gRenderer, item[i].x+item[i].w/2-shadowSize/2 - camx,
-									  item[i].y+item[i].h-shadowSize/2+yOffsetShadow - camy,
-									  shadowSize, shadowSize);
+	{
+		for (int i = 0; i < ite.max; i++) {
+			if (item[i].alive) {
+				gShadow.setAlpha(110);
+				int shadowSize = item[i].w/2 + item[i].hoverAmount;
+				int yOffsetShadow = -(shadowSize/4);
+				yOffsetShadow +=  item[i].yOffset;
+				gShadow.render(gRenderer, item[i].x+item[i].w/2-shadowSize/2 - camx,
+										  item[i].y+item[i].h-shadowSize/2+yOffsetShadow - camy,
+										  shadowSize, shadowSize);
+			}
 		}
 	}
 
@@ -1102,6 +1104,23 @@ void PlayGame::RenderShadows(SDL_Renderer *gRenderer, LWindow &gWindow) {
 			gShadow.render(gRenderer, player.getX()+player.getW()/2-shadowSizeW/2+7 - camx,
 									  player.getY()+player.getH()-shadowSizeH/2-5 - camy,
 									  shadowSizeW, shadowSizeH);
+		}
+	}
+
+	// Render particle shadow
+	{
+		for (int i = 0; i < part.max; i++) {
+			if (particles[i].alive) {
+				gShadow.setAlpha(110);
+				int shadowSizeW = particles[i].w/2;
+				int shadowSizeH = particles[i].h/2;
+				int yOffset = 16;
+				gShadow.render(gRenderer,
+						particles[i].x+particles[i].w/2-shadowSizeW/2 - camx,
+						particles[i].y+particles[i].h-shadowSizeH/2 + yOffset - camy,
+						shadowSizeW,
+						shadowSizeH);
+			}
 		}
 	}
 }
