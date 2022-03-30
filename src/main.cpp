@@ -98,7 +98,11 @@ int main(int argc, char *argv[]) {
  * TODO [x] (3-28-2022) - Create prompt for items pick-up
  * TODO [x] (3-28-2022) - Create prompt for leaving-area door
  * TODO [x] (3-28-2022) - Create prompt to unlock doors when the player has a key to unlock
- * TODO [ ] (3-28-2022) - Create prompt to unlock Chests with appropriate keys, then Spawn a random Sword out of the chests
+ * TODO [x] (3-28-2022) - Create prompt to unlock Chests with appropriate keys, then Spawn a random Sword out of the chests
+ * TODO [ ] (3-28-2022) - When picking up a new weapon, drop the old one near by
+ * TODO [ ] (3-28-2022) - Create some kind of stun for the enemies if tehy are getting hit by the player?
+ * 						  But then again this can be a difficulty? If its on easy then the enemies will get "stunned" when hit,
+ * 						  but if the Player wants to play on hard then enemies will not get stunned when hit regularly.
  *
  *
  *
