@@ -82,7 +82,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName){
 	// Dash ability
 	this->dash 				= false;
 	this->dashSpeed 		= 10;
-	this->dashLength 		= 5;
+	this->dashLength 		= 10;
 	this->dashCounter 		= 0;
 	this->dashCoolCounter 	= 0;
 

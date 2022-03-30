@@ -26,13 +26,24 @@ class Mob: public Monster, public Helper, public TextNFont {
 public:
 	int count;
 	const int max = 100;
-	LTexture gMob;
+	/*
+	 * 0: red angel
+	 * 1: yellow mob
+	 */
+	LTexture gMob[2];
 	LTexture gMobFlashed;
 	LTexture gMobShadow;
 	Mix_Chunk *sCast 			= NULL;
 	SDL_RendererFlip flip;
 
-	SDL_Rect rClip[6];
+	static const int numberOfMobs = 2;
+	static const int numberOfSprites = numberOfMobs * 6;
+
+	/*
+	 * 0: red angel
+	 * 1: yellow mob
+	 */
+	SDL_Rect rMobs[2][numberOfSprites];
 
 	/*
 	 * 0 - 3: 	Idle
@@ -59,7 +70,7 @@ public:	// Core Functions
 	void Free();
 	void RemoveAll(Mob mob[]);
 	void Remove(Mob mob[]);
-	void Spawn(Mob mob[], float x, float y, float w, float h, float angle, float speed, int type);
+	void Spawn(Mob mob[], float x, float y, float w, float h, float angle, float speed);
 
 	void Update(Mob mob[],
 			Object &obj, Object object[],
@@ -104,8 +115,10 @@ public:	// Animations
 	int pixelSizeH = 24;
 	int	shadowSize = 15;
 
+	// These are different per mob
 	// Used for textures
 	float yOffset;
+	float moveSpe;
 
 	// Mob will use this to lock on to the player when the bullet shoots out
 	float *xFollow;

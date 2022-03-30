@@ -278,6 +278,81 @@ void Particle::spawnSlashAttackProjectile(Particle particle[], float spawnX, flo
 		   false, 0);
 }
 
+
+
+// Spawn a Particle: moves based on angle given and fixed speed
+void Particle::spawnRedAngelAttack(Particle particle[], float spawnX, float spawnY,
+		float spawnW, float spawnH,
+		float angle, float damage, float speed) {
+
+	spawnParticleAngle(particle, 1,
+			spawnX,
+			spawnY,
+			spawnW, spawnH,
+			angle, 7,
+			   25, 0, 20,
+			   {255, 255, 255, 255}, 1,
+			   1, 1,
+			   255, 0,
+			   60*6, 1,
+			   false, 0,
+			   100, 10);
+}
+
+void Particle::spawn360RedAttack(Particle particle[], float spawnX, float spawnY,
+		float spawnW, float spawnH,
+		float h, float speed, SDL_Color color) {
+
+	spawnParticleAngle(particle, 1,
+			spawnX,
+			spawnY,
+			spawnW, spawnH,
+			h, speed,
+		   10, 0, 20,
+		   color, 1,
+		   1, 1,
+		   255, 0,
+		   rand() % 50 + 90, 0,
+		   true, randDouble(0.1, 0.7),
+		   100, 10);
+}
+
+void Particle::spawnQuick360BlueAttackPart1(Particle particle[], float spawnX, float spawnY,
+		float spawnW, float spawnH,
+		float h, float speed, SDL_Color color) {
+
+	spawnParticleAngle(particle, 1,
+			spawnX,
+			spawnY,
+			spawnW, spawnH,
+			h, speed,
+		   5, 0, 20,
+		   color, 1,
+		   1, 1,
+		   255, 0,
+		   15, 3,
+		   false, 0.0,
+		   100, 10);
+}
+
+void Particle::spawnQuick360BlueAttackPart2(Particle particle[], float spawnX, float spawnY,
+		float spawnW, float spawnH,
+		float h, SDL_Color color) {
+
+	spawnParticleAngle(particle, 1,
+			spawnX,
+			spawnY,
+			spawnW, spawnH,
+			h, 5,
+		   5, 0, 20,
+		   color, 1,
+		   1, 1,
+		   255, 0,
+		   50, 1,
+		   false, 0,
+		   100, 10);
+}
+
 void Particle::spawnExplosion(Particle particle[], float x, float y, int size) {
 	// spawn blood particle effect
 	for (double j=0.0; j< 360.0; j+=rand() % 10 + 10){

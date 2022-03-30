@@ -113,6 +113,26 @@ public:	// functions
 	void spawnSlashAttackProjectile(Particle particle[], float spawnX, float spawnY,
 			  float spawnW, float spawnH, float damage);
 
+
+	// Spawn Red Angel (type: 0) Attack
+	void spawnRedAngelAttack(Particle particle[], float spawnX, float spawnY,
+			float spawnW, float spawnH,
+			float angle, float damage, float speed);
+
+	void spawn360RedAttack(Particle particle[], float spawnX, float spawnY,
+			float spawnW, float spawnH,
+			float h, float speed, SDL_Color color);
+
+	// Spawn attack: Quick 360 burst of blue colored projectiles PART 1
+	void spawnQuick360BlueAttackPart1(Particle particle[], float spawnX, float spawnY,
+			float spawnW, float spawnH,
+			float h, float speed, SDL_Color color);
+
+	// Spawn attack: Quick 360 burst of blue colored projectiles PART 2
+	void spawnQuick360BlueAttackPart2(Particle particle[], float spawnX, float spawnY,
+			float spawnW, float spawnH,
+			float h, SDL_Color color);
+
 	void spawnExplosion(Particle particle[], float x, float y, int size);
 
 	void RemoveAll(Particle particle[]);

@@ -66,34 +66,62 @@ void Mob::Init(Mob mob[]) {
 }
 
 void Mob::Load(SDL_Renderer *gRenderer) {
-	gMob.loadFromFile(gRenderer, "resource/gfx/mob.png");
+	gMob[0].loadFromFile(gRenderer, "resource/gfx/mob.png");
+	gMob[1].loadFromFile(gRenderer, "resource/gfx/mob_yellow.png");
+
+
 	gMobFlashed.loadFromFile(gRenderer, "resource/gfx/mob_flash.png");
 	gMobShadow.loadFromFile(gRenderer, "resource/gfx/shadow.png");
 	sCast 			= Mix_LoadWAV("sounds/bfxr/snd_cast.wav");
 
 	// Mob clips
 
-	// Idle 1
-	rClip[0] = {1, 3, 14, 12};
+	// Red angel wings
+	{
+		// Idle 1
+		rMobs[0][0] = {1, 3, 14, 12};
 
-	// Idle 2
-	rClip[1] = {16, 2, 14, 12};
+		// Idle 2
+		rMobs[0][1] = {16, 2, 14, 12};
 
-	// Idle 3
-	rClip[2] = {31, 1, 14, 12};
+		// Idle 3
+		rMobs[0][2] = {31, 1, 14, 12};
 
-	// Idle 4
-	rClip[3] = {46, 2, 14, 12};
+		// Idle 4
+		rMobs[0][3] = {46, 2, 14, 12};
 
-	// Cooldown 1
-	rClip[4] = {1, 18, 14, 12};
+		// Cooldown 1
+		rMobs[0][4] = {1, 18, 14, 12};
 
-	// Attack 1
-	rClip[5] = {16, 17, 14, 12};
+		// Attack 1
+		rMobs[0][5] = {16, 17, 14, 12};
+	}
+
+	// Yellow mob
+	{
+		// Idle 1
+		rMobs[1][0] = {0, 0, 16, 16};
+
+		// Idle 2
+		rMobs[1][1] = {16, 0, 16, 16};
+
+		// Idle 3
+		rMobs[1][2] = {32, 0, 16, 16};
+
+		// Idle 4
+		rMobs[1][3] = {48, 0, 16, 16};
+
+		// Cooldown 1
+		rMobs[1][4] = {0, 16, 16, 16};
+
+		// Attack 1
+		rMobs[1][5] = {16, 16, 16, 16};
+	}
 }
 
 void Mob::Free() {
-	gMob.free();
+	gMob[0].free();
+	gMob[1].free();
 	gMobFlashed.free();
 	gMobShadow.free();
 	Mix_FreeChunk(sCast);
@@ -122,7 +150,7 @@ void Mob::Remove(Mob mob[]) {
 	}
 }
 
-void Mob::Spawn(Mob mob[], float x, float y, float w, float h, float angle, float speed, int type) {
+void Mob::Spawn(Mob mob[], float x, float y, float w, float h, float angle, float speed) {
 	for (int i = 0; i < max; i++) {
 		if (!mob[i].alive) {
 
@@ -344,8 +372,8 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 				if (mob[i].alert) {
 
 					// Walk towards player
-					mob[i].vX = 1.5 * (mob[i].bmx - mob[i].bmx2) / mob[i].distance;
-					mob[i].vY = 1.5 * (mob[i].bmy - mob[i].bmy2) / mob[i].distance;
+					mob[i].vX = mob[i].moveSpe * (mob[i].bmx - mob[i].bmx2) / mob[i].distance;
+					mob[i].vY = mob[i].moveSpe * (mob[i].bmy - mob[i].bmy2) / mob[i].distance;
 				}
 
 				// If distance less than attack range
@@ -366,10 +394,18 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 						// Depending on what type of mob we have, they will only
 						// have a select few attacks that they have access to
 
-						// Normal mob:
-						// Access to Attack 0: Basic Projectile Attack
+						// Red angel mob
 						if (mob[i].type == 0) {
 							mob[i].animState = 1;
+
+							// Stop moving mob
+							mob[i].vX = 0.0;
+							mob[i].vY = 0.0;
+						}
+
+						// Yellow Mob
+						if (mob[i].type == 1) {
+							mob[i].animState = 4;
 
 							// Stop moving mob
 							mob[i].vX = 0.0;
@@ -379,9 +415,9 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 						// Crazy mob:
 						// Access to Attack 1: Circular Attack
 						// Access to Attack 2: Barrage Attack
-						else if (mob[i].type == 1) {
-							mob[i].animState = randNum;	// random number from 2-3
-						}
+						//else if (mob[i].type == 1) {
+						//	mob[i].animState = randNum;	// random number from 2-3
+						//}
 
 						// Set mob to NOT alert mode
 						mob[i].alert = false;
@@ -401,21 +437,11 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 					float tempX = mob[i].x + mob[i].w/2 - rands/2;
 					float tempY = mob[i].y + mob[i].h/2 - rands/2;
 
-					if (mob[i].chargeTime == 16) {
-						//p_dummy.spawnParticleAngleFollow(particle, 1,
-								p_dummy.spawnParticleAngle(particle, 1,
-										   tempX,
-										   tempY,
-										   rands, rands,
-										   mob[i].angleFacingTarget, speed,
-										   25, 0, 20,
-										   {255, 255, 255, 255}, 1,
-										   1, 1,
-										   255, 0,
-										   60*6, 1,
-										   false, 0,
-										   100, 10);
-								   	   	   //true, mob[i].xFollow, mob[i].yFollow);
+					// If charge time at 16
+					if (mob[i].chargeTime == 16)
+					{
+						// Spawn projectile
+						p_dummy.spawnRedAngelAttack(particle, tempX, tempY, rands, rands, mob[i].angleFacingTarget, speed, 20);
 
 						// Play SFX
 						Mix_PlayChannel(-1, sCast, 0);
@@ -477,34 +503,49 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 				if (mob[i].chargingAttack)
 				{
 					// Typical Mob Attack
-					for (int j=0; j<5; j++)
+					for (int j=0; j<3; j++)
 					{
 						// Mob shoots based on what our chargeTime is
-						if (mob[i].chargeTime == j * 6)
+						if (mob[i].chargeTime == j * 10)
 						{
 							// Spawn particle effect
 							int rands = 24;
-							int speed = randDouble(1, 1);
+							int speed = randDouble(2, 2);
 							float tempX = mob[i].x + mob[i].w/2 - rands/2;
 							float tempY = mob[i].y + mob[i].h/2 - rands/2;
-							for (double h=0.0; h< 360.0; h+=rand() % 10 + 50){
-								p_dummy.spawnParticleAngle(particle, 1,
-												   tempX,
-												   tempY,
-												   rands, rands,
-												   h, speed,
-												   10, 0, 20,
-												   {255, 255, 255, 255}, 1,
-												   1, 1,
-												   255, 0,
-												   rand() % 50 + 90, 0,
-												   true, randDouble(0.1, 0.7),
-												   100, 10);
+							for (double h=0.0; h< 360.0; h+=rand() % 10 + 90){
+
+								// Spawn projectile
+								p_dummy.spawn360RedAttack(particle, tempX, tempY, rands, rands, h, speed, {255,255,255});
 							}
 
 							// Play SFX
 							Mix_PlayChannel(-1, sCast, 0);
 						}
+					}
+
+					// Do idle anyways, but this will get ovverridden by the code below
+					{
+						// Start idle timer
+						mob[i].idleTimer += idleSpe;
+
+						// Timer is done, go to next frame
+						if (mob[i].idleTimer > 60) {
+							mob[i].idleTimer = 0;
+
+							// Go to next frame for idle
+							mob[i].sprite_index += 1;
+						}
+
+						// Loop around
+						if (mob[i].sprite_index > 3) {
+							mob[i].sprite_index = 0;
+						}
+					}
+
+					// Ovveride above code: Set sprite index
+					if (mob[i].chargeTime > 15) {
+						mob[i].sprite_index = 5;
 					}
 
 					// If count down has not reached 0 seconds
@@ -545,25 +586,12 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 
 							// Spawn particle effect
 							int rands = 16;
-							float speed = 1;
+							float speed = 4;
 							float tempX = mob[i].x + mob[i].w/2 - rands/2;
 							float tempY = mob[i].y + mob[i].h/2 - rands/2;
 							for (double h=0.0; h< 360.0; h+=rand() % 10 + 50){
 
-								//int rands = rand() % 11 + 3;
-
-								p_dummy.spawnParticleAngle(particle, 1,
-												   tempX,
-												   tempY,
-												   rands, rands,
-												   h, speed,
-												   5, 0, 20,
-												   {0, 254, 254, 255}, 1,
-												   1, 1,
-												   255, 0,
-												   15, 1,
-												   false, 0.0,
-												   100, 10);
+								p_dummy.spawnQuick360BlueAttackPart1(particle, tempX, tempY, rands, rands, h, speed, {244,144,40});
 							}
 
 							// Play SFX
@@ -604,35 +632,46 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 				// If Charge attack animation
 				if (mob[i].chargingAttack)
 				{
-					for (int j=0; j<5; j++) {
-						if (mob[i].chargeTime == j * 3) {
+					//for (int j=0; j<3; j++) {
+						//if (mob[i].chargeTime == j * 1) {
+						if (mob[i].chargeTime == 15) {
 
 							// Spawn particle effect
 							int rands = 16;
-							float speed = randDouble(0.5, 1.5);
 							float tempX = mob[i].x + mob[i].w/2 - rands/2;
 							float tempY = mob[i].y + mob[i].h/2 - rands/2;
-							for (double h=0.0; h< 360.0; h+=rand() % 10 + 50){
+							for (double h=0.0; h< 360.0; h+=20){
 
-								//int rands = rand() % 11 + 3;
-
-								p_dummy.spawnParticleAngle(particle, 1,
-												   tempX,
-												   tempY,
-												   rands, rands,
-												   h, speed,
-												   5, 0, 20,
-												   {0, 254, 254, 255}, 1,
-												   1, 1,
-												   255, 0,
-												   randDouble(5, 30), 0.2,
-												   false, 0,
-												   100, 10);
+								p_dummy.spawnQuick360BlueAttackPart2(particle, tempX, tempY, rands, rands, h, {255,255,255});
 							}
 
 							// Play SFX
 							Mix_PlayChannel(-1, sCast, 0);
 						}
+					//}
+
+					// Do idle anyways, but this will get ovverridden by the code below
+					{
+						// Start idle timer
+						mob[i].idleTimer += idleSpe;
+
+						// Timer is done, go to next frame
+						if (mob[i].idleTimer > 60) {
+							mob[i].idleTimer = 0;
+
+							// Go to next frame for idle
+							mob[i].sprite_index += 1;
+						}
+
+						// Loop around
+						if (mob[i].sprite_index > 3) {
+							mob[i].sprite_index = 0;
+						}
+					}
+
+					// Ovveride above code: Set sprite index
+					if (mob[i].chargeTime > 15) {
+						mob[i].sprite_index = 5;
 					}
 
 					// If count down has not reached 0 seconds
@@ -741,66 +780,17 @@ void Mob::RenderBack(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTextu
 	for (int i = 0; i < max; i++) {
 		if (mob[i].alive) {
 			if (!mob[i].renderInFront) {
-
-				// Walking around or idle
-				if (mob[i].animState == -1)
-				{
-					gMob.setColor(255, 255, 255);
-					gMob.setAlpha(255);
-					gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
-												mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
+				if (mob[i].flash) {
+					gMobFlashed.setAlpha(255);
+					gMobFlashed.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+												mob[i].w, mob[i].h, NULL,
 												0.0, NULL, mob[i].flip);
-				}
-
-				// Walking around or idle
-				else if (mob[i].animState == 0) {
-					gMob.setColor(255, 255, 255);
-					gMob.setAlpha(255);
-					gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
-												mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
+				} else {
+					gMob[mob[i].type].setColor(255, 255, 255);
+					gMob[mob[i].type].setAlpha(255);
+					gMob[mob[i].type].render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+							mob[i].w, mob[i].h, &rMobs[mob[i].type][mob[i].sprite_index],
 												0.0, NULL, mob[i].flip);
-				}
-
-				// Mob attack: 0 - basic attack
-				else if (mob[i].animState == 1) {
-
-					// If mob is chargingAttack
-					if (mob[i].chargingAttack)
-					{
-						//gMob.setColor(200, 0, 0);
-					}
-
-					// Render shade of Red color
-					if (mob[i].chargeTime > 15) {
-						// Set color red
-						gMob.setColor(200, 0, 0);
-						gMob.setAlpha(255);
-						gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
-													mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
-													0.0, NULL, mob[i].flip);
-					}
-
-					// Render normal color
-					else {
-						// Render mob
-						if (mob[i].flash) {
-							gMobFlashed.setAlpha(255);
-							gMobFlashed.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
-														mob[i].w, mob[i].h, NULL,
-														0.0, NULL, mob[i].flip);
-						} else {
-							gMob.setColor(255, 255, 255);
-							gMob.setAlpha(255);
-							gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
-														mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
-														0.0, NULL, mob[i].flip);
-						}
-					}
-				}
-
-				// Charging-attack animation
-				else if (mob[i].animState == 2) {
-				//	gMob.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
 				}
 			}
 		}
@@ -812,65 +802,17 @@ void Mob::RenderFront(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 		if (mob[i].alive) {
 			if (mob[i].renderInFront) {
 
-				// Walking around or idle
-				if (mob[i].animState == -1)
-				{
-					gMob.setColor(255, 255, 255);
-					gMob.setAlpha(255);
-					gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
-												mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
+				if (mob[i].flash) {
+					gMobFlashed.setAlpha(255);
+					gMobFlashed.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+												mob[i].w, mob[i].h, NULL,
 												0.0, NULL, mob[i].flip);
-				}
-
-				// Walking around or idle
-				else if (mob[i].animState == 0) {
-					gMob.setColor(255, 255, 255);
-					gMob.setAlpha(255);
-					gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
-												mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
+				} else {
+					gMob[mob[i].type].setColor(255, 255, 255);
+					gMob[mob[i].type].setAlpha(255);
+					gMob[mob[i].type].render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
+							mob[i].w, mob[i].h, &rMobs[mob[i].type][mob[i].sprite_index],
 												0.0, NULL, mob[i].flip);
-				}
-
-				// Mob attack: 0 - basic attack
-				else if (mob[i].animState == 1) {
-
-					// If mob is chargingAttack
-					if (mob[i].chargingAttack)
-					{
-						//gMob.setColor(200, 0, 0);
-					}
-
-					// Render shade of Red color
-					if (mob[i].chargeTime > 15) {
-						// Set color red
-						gMob.setColor(200, 0, 0);
-						gMob.setAlpha(255);
-						gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
-													mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
-													0.0, NULL, mob[i].flip);
-					}
-
-					// Render normal color
-					else {
-						// Render mob
-						if (mob[i].flash) {
-							gMobFlashed.setAlpha(255);
-							gMobFlashed.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
-														mob[i].w, mob[i].h, NULL,
-														0.0, NULL, mob[i].flip);
-						} else {
-							gMob.setColor(255, 255, 255);
-							gMob.setAlpha(255);
-							gMob.render(gRenderer, mob[i].x - camx, mob[i].y+mob[i].yOffset - camy,
-														mob[i].w, mob[i].h, &rClip[mob[i].sprite_index],
-														0.0, NULL, mob[i].flip);
-						}
-					}
-				}
-
-				// Charging-attack animation
-				else if (mob[i].animState == 2) {
-				//	gMob.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
 				}
 			}
 		}
@@ -972,7 +914,7 @@ void Mob::RenderDebug(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 
 			// Render Text
 			std::stringstream tempss;
-			tempss << mob[i].sprite_index;
+			tempss << mob[i].vX << ", "<< mob[i].vY;
 			gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255, 255, 255}, gFont);
 			gText.render(gRenderer, mob[i].x-gText.getWidth()-camx, mob[i].y-gText.getHeight()-camy, gText.getWidth(), gText.getHeight());
 
@@ -982,8 +924,8 @@ void Mob::RenderDebug(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LText
 
 void Mob::RenderHand(SDL_Renderer *gRenderer, Mob mob[], int newMx, int newMy, int mex, int mey, int camx, int camy){
 	// Render mob in hand
-	gMob.setAlpha(110);
-	gMob.render(gRenderer, newMx, newMy, pixelSizeW, pixelSizeH, NULL);
+	gMob[type].setAlpha(110);
+	gMob[type].render(gRenderer, newMx, newMy, pixelSizeW, pixelSizeH, &rMobs[type][0]); // TODO add clips
 
 	// Render mouse coordinates snapped to grid
 	SDL_Rect tempr = {newMx, newMy, pixelSizeW, pixelSizeH};
@@ -1083,6 +1025,7 @@ void Mob::setStatsBasedOnType(Mob mob[], int i) {
 		mob[i].maxHealth 	= 100;
 		mob[i].healthDecay 	= 100;
 		mob[i].yOffset = -20;
+		mob[i].moveSpe = 1.5;
 		mob[i].setSightRange(64*10);
 		mob[i].setAtkRange(64*2);
 
@@ -1092,14 +1035,17 @@ void Mob::setStatsBasedOnType(Mob mob[], int i) {
 		mob[i].health 		= 200;
 		mob[i].maxHealth 	= 200;
 		mob[i].healthDecay 	= 200;
-		mob[i].yOffset = -20;
-		mob[i].setSightRange(64*10);
-		mob[i].setAtkRange(64*2);
+		mob[i].yOffset = 0;
+		mob[i].moveSpe = 5;
+		mob[i].setSightRange(64*15);
+		mob[i].setAtkRange(64*1);
 	}
 
 	// Other defaults on spawn
 	mob[i].hasVision 			= false;
 	mob[i].sprite_index = 0;
+	mob[i].vX = 0.0;
+	mob[i].vY = 0.0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

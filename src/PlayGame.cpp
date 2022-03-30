@@ -1331,7 +1331,7 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 		std::stringstream tempss;
 		tempss << "mapW: " 		<< map.w 		<< ", mapH: " 	<< map.h;
 		tempss << ", previousLevel: " 		<< previousLevel 		<< ", LevelToLoad: " 	<< this->LevelToLoad;
-		tempss << ", ite.count: " 				<< ite.count << "ite.id: " << ite.id
+		tempss << ", mb.type: " 				<< mb.type << "ite.id: " << ite.id
 			   << ", ite.multiW: " 			<< ite.multiW 			<< ", ite.multiH: " 				<< ite.multiH;
 		tempss << ",  shakeLength: " 				<<  "test" 	<< ", rustleW: " 			<< rustleW;
 		tempss << ", tl.tilew: " 				<< tl.tilew 		<< ", tl.tileh: " 				<< tl.tileh 		<< ", Tilecs: " 		<< tlc.count 			<< ", Mob: " << mb.count;
@@ -1903,12 +1903,10 @@ void PlayGame::checkCollisionTileMob()
 					//}
 				}
 				SDL_Rect rectA;
-				if (mob[i].type == 0) {
-					rectA.x = mob[i].x;
-					rectA.y = mob[i].y;
-					rectA.w = mob[i].w;
-					rectA.h = mob[i].h;
-				}
+				rectA.x = mob[i].x;
+				rectA.y = mob[i].y;
+				rectA.w = mob[i].w;
+				rectA.h = mob[i].h;
 				bool moveBack;
 				moveBack = false;
 				for (int j = 0; j < tl.max; j++) {
@@ -1954,12 +1952,10 @@ void PlayGame::checkCollisionTileMob()
 				}
 				//mob[i].y += mob[i].velY;
 				SDL_Rect rectA;
-				if (mob[i].type == 0) {
-					rectA.x = mob[i].x;
-					rectA.y = mob[i].y;
-					rectA.w = mob[i].w;
-					rectA.h = mob[i].h;
-				}
+				rectA.x = mob[i].x;
+				rectA.y = mob[i].y;
+				rectA.w = mob[i].w;
+				rectA.h = mob[i].h;
 				bool moveBack;
 				moveBack = false;
 				for (int j = 0; j < tl.max; j++) {
@@ -3460,7 +3456,7 @@ PlayGame::Result PlayGame::mousePressed(SDL_Event event){
 					if (place_type == 4) {
 
 						// Spawn Mob
-						mb.Spawn(mob, mex+camx, mey+camy, 14*2, 12*2, 0.0, randDouble(1.6, 1.4), 0);
+						mb.Spawn(mob, mex+camx, mey+camy, 14*2, 12*2, 0.0, randDouble(1.6, 1.4));
 					}
 				}
 			}
@@ -3621,6 +3617,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 			break;
 		}
 	case SDLK_i:								// Change tile id to place
+		// TODO [ ] make change types for Mobs
 		if (shift) {
 			// Tiles
 			if (place_type==0) {
@@ -3639,6 +3636,14 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 					ite.id = ite.ITEMS_UNIQUE-1;
 				}
 			}
+
+			// Mobs
+			else if (place_type==4) {
+				mb.type--;
+				if (mb.type < 0) {
+					mb.type = 1;
+				}
+			}
 		}else{
 			// Tiles
 			if (place_type==0) {
@@ -3655,6 +3660,14 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				ite.id++;
 				if (ite.id > ite.ITEMS_UNIQUE-1) {
 					ite.id = 0;
+				}
+			}
+
+			// Mobs
+			else if (place_type==4) {
+				mb.type++;
+				if (mb.type > 1) {
+					mb.type = 0;
 				}
 			}
 		}

@@ -111,7 +111,7 @@ void Game::Start() {
 	Load();
 
 	// Lock cursor
-	SDL_SetRelativeMouseMode(SDL_TRUE);
+	//SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	// Hide cursor
 	SDL_ShowCursor(false);
