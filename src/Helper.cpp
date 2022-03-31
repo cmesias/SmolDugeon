@@ -82,12 +82,19 @@ bool Helper::checkCollisionRect( SDL_Rect a, SDL_Rect b )
 
 float Helper::getDistance( float targetX, float targetY, float selfX, float selfY ) {
 
-	float distance = 10;
+	float distance = 1;
 
 	distance = sqrt((targetX - selfX) * (targetX - selfX)+
 					(targetY - selfY) * (targetY - selfY));
 
 	return distance;
+}
+
+float Helper::getCenter(float pos, float size) {
+
+	float centerPos = pos + size/2;
+
+	return centerPos;
 }
 
 void Helper::ChangeRenderResolution(SDL_Renderer *gRenderer, int changeTo) {

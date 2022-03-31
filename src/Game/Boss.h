@@ -67,6 +67,11 @@ public:	// Core Functions
 	void RenderHand(SDL_Renderer *gRenderer, Boss boss[], int newMx, int newMy,
 						  int mex, int mey, int camx, int camy);
 
+
+public:	// Setter functions
+
+	void setStatsBasedOnType(Boss boss[], int i);
+
 public:	// Functions that work with other classes
 
 	void GetDistanceOfPlayer(Boss boss[], float targetX, float targetY,

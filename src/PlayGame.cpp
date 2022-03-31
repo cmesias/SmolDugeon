@@ -74,6 +74,10 @@ void PlayGame::Init() {
 		}
 		// Do specific tiles
 
+		// Tile 197 and 229 are the same yellow box
+		rTiles[197] = {80, 107, 16, 21};
+		rTiles[229] = {80, 107, 16, 21};
+
 		// When choosing these tiles, they will be the same thing: Locked door
 		// Do specific tiles, locked door
 		rTiles[273] = {272, 128, 32, 32};
@@ -238,6 +242,10 @@ void PlayGame::ShakeCamera()
 
 void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 					PlayGame::Result &result, int &LevelToLoad) {
+
+
+	// Set renderer
+	this->gRenderer = gRenderer;
 
 	// Set level to load to a local variable
 	// that is only available inside PlayGame.cpp
@@ -442,8 +450,8 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 			//SDL_RenderFillRect(gRenderer, &backgroundRect);
 
 			// Render particles
-			part.renderStarParticle(particles, camx, camy, 1, gRenderer);
-			part.renderBulletParticle(particles, camx, camy, 1, gRenderer);
+			part.RenderVFX(particles, camx, camy, 1, gRenderer);
+			part.RenderBullets(particles, camx, camy, 1, gRenderer);
 
 			// Render UI
 			//player.renderUI();
@@ -738,9 +746,13 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		}
 	}
 
+	// Update debug texts
+	tex.updateDebugText(text);
+
 	// Update Particles
-	part.updateStarParticles(particles, map.x, map.y, map.w, map.h);
-	part.updateBulletParticles(particles, map.x, map.y, map.w, map.h);
+	part.Update(particles, map.x, map.y, map.w, map.h);
+	part.UpdateVFX(particles, map.x, map.y, map.w, map.h);
+	part.UpdateBullets(particles, map.x, map.y, map.w, map.h);
 
 	// Update Asteroids
 	/*aste.updateAsteroid(asteroid, particles, part,
@@ -756,7 +768,11 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 	//tl.checkCollision(tile, player.x, player.y, player.realw, player.realh, player.jumpstate, player.vX, player.vY, player.jumps);
 
 	// If not in editor mode
+	// If player mode
 	if (!editor) {
+
+		// Update damage texts
+		tex.updateDamageText(text);
 
 		// If Player is alive
 		if (player.alive) {
@@ -793,16 +809,6 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 
 		// Update Asteroids: Wave re-spawn
 		spawnAsteroidsNow2();*/
-
-		/* Notes on order:
-		 *
-		 * 0. obj.Update()
-		 * 1. bos.GetDistanceOfPlayer()
-		 * 2. bos.Update()
-		 * 3. player.Update()
-		 *
-		 *
-		 */
 
 		// Move boss towards player
 		bos.GetDistanceOfPlayer(boss, player.getX(), player.getY(), player.getW(), player.getH(), &player.x2, &player.y2);
@@ -874,13 +880,13 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		checkPlayerAttacksCollisionBoss();
 
 		// Check collision between Player attacks & Tile
-		//checkPlayerAttacksTileCollision();
+		checkPlayerAttacksTileCollision();
 
 		// Check collision between Player attacks & Boss Particle
 		checkPlayerAttacksBossParticleCollision();
 
 		// Check collision between Boss attacks & Player
-		checkBossAttacksCollisionPlayer();
+		//checkBossAttacksCollisionPlayer();
 
 		// Check collision between Boss & Player
 		//checkCollisionBossPlayer();
@@ -1114,10 +1120,9 @@ void PlayGame::RenderShadows(SDL_Renderer *gRenderer, LWindow &gWindow) {
 				gShadow.setAlpha(110);
 				int shadowSizeW = particles[i].w/2;
 				int shadowSizeH = particles[i].h/2;
-				int yOffset = 16;
 				gShadow.render(gRenderer,
 						particles[i].x+particles[i].w/2-shadowSizeW/2 - camx,
-						particles[i].y+particles[i].h-shadowSizeH/2 + yOffset - camy,
+						particles[i].y+particles[i].h-shadowSizeH/2 + particles[i].yOffsetShadow - camy,
 						shadowSizeW,
 						shadowSizeH);
 			}
@@ -1162,27 +1167,22 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 		// Render Tile in behind player sprite
 		tl.RenderBehindPlayer(gRenderer, tile, 2, camx, camy, &rTiles[0]);
 
-			// Render Boss
-			bos.RenderBack(gRenderer, boss, gFont13, gText, camx, camy);
-
 			// Render Mob
 			mb.RenderBack(gRenderer, mob, gFont13, gText, camx, camy);
+
+			// Render Boss
+			bos.RenderBack(gRenderer, boss, gFont13, gText, camx, camy);
 
 			// Render our player
 			player.Render(mex, mey, camx, camy, gWindow,
 					  gRenderer, {255,255,255}, part.count, gText);
 
-		// Render Boss
-		bos.RenderFront(gRenderer, boss, gFont13, gText, camx, camy);
 
-		// Render Mob
-		mb.RenderFront(gRenderer, mob, gFont13, gText, camx, camy);
+			// Render Mob
+			mb.RenderFront(gRenderer, mob, gFont13, gText, camx, camy);
 
-		// Render Star particles
-		part.renderStarParticle(particles, camx, camy, 1, gRenderer);
-
-		// Render Particles
-		part.renderBulletParticle(particles, camx, camy, 1, gRenderer);
+			// Render Boss
+			bos.RenderFront(gRenderer, boss, gFont13, gText, camx, camy);
 
 		// Render items
 		ite.RenderOnTopOfPlayer(gRenderer, item, camx, camy);
@@ -1192,6 +1192,12 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 
 		// Render Tile on top of player
 		tl.RenderOnTopOfPlayer(gRenderer, tile, 2, camx, camy, &rTiles[0]);
+
+			// Render Star particles
+			part.RenderVFX(particles, camx, camy, 1, gRenderer);
+
+			// Render Particles
+			part.RenderBullets(particles, camx, camy, 1, gRenderer);
 
 		// Render Tile, ceiling
 		tl.renderTile(gRenderer, tile, 3, camx, camy);
@@ -1242,7 +1248,7 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 		player.RenderDebug(gRenderer, camx, camy);
 
 		// Render Particle debug
-		part.renderBulletParticleDebug(particles, camx, camy, gRenderer);
+		part.RenderBulletDebug(particles, camx, camy, gRenderer);
 
 		// Render player attack collisions
 		obj.render(gRenderer, object, camx, camy);
@@ -1411,14 +1417,15 @@ void PlayGame::RenderText(SDL_Renderer *gRenderer, LWindow &gWindow)
 			if (text[i].type == 0) {
 				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), text[i].color, gFont26);
 				gText.setAlpha(text[i].alpha);
-				gText.render(gRenderer, 0, 0 + i*28, gText.getWidth(), gText.getHeight());
+				gText.render(gRenderer, 0, 0 + i*28, text[i].w, text[i].h);
 			}
 
 			// These texts have an x & y coordinate, render these (like damage text)
 			else if (text[i].type == 1) {
 				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), text[i].color, gFont26);
 				gText.setAlpha(text[i].alpha);
-				gText.render(gRenderer, text[i].x-camx, text[i].y-camy, gText.getWidth(), gText.getHeight());
+				gText.render(gRenderer, text[i].x-gText.getWidth()/2-camx, text[i].y-camy,
+						gText.getWidth(), gText.getHeight());
 			}
 		}
 	}
@@ -1438,7 +1445,7 @@ void PlayGame::checkCollisionParticleTile()
 	{
 		if (particles[i].alive)
 		{
-			if (particles[i].type == -1 || particles[i].type == 0 || particles[i].type == 1)
+			if (particles[i].hurtType >= -1 && particles[i].hurtType <= 1)
 			{
 				for (int j = 0; j < tl.max; j++)
 				{
@@ -1460,25 +1467,10 @@ void PlayGame::checkCollisionParticleTile()
 							if (distance < tile[j].w/2 + particles[i].w/2)
 							{
 								// Spawn particle effect
-								for (double h=0.0; h< 180.0; h+=rand() % 10 + 40){
-									//for (double h=0.0; h< 360.0; h+=rand() % 10 + 10){
-									int rands = rand() % 3 + 8;
-									float newX = particles[i].x+particles[i].w/2;
-									float newY = particles[i].y+particles[i].h/2;
-
-									part.spawnParticleAngle(particles, 2,
-														newX-rands/2,
-														newY-rands/2,
-													   rands, rands,
-													   i, randDouble(2.1, 5.1),
-													   0.0, 0, 0,
-													   {210, 144, 40, 255}, 1,
-													   1, 1,
-													   rand() % 100 + 150, rand() % 2 + 5,
-													   rand() % 50 + 90, 0,
-													   true, randDouble(0.1, 0.7),
-													   100, 10);
-								}
+								part.spawnTileHitVFX(particles,
+										getCenter(particles[i].x, particles[i].w),
+										getCenter(particles[i].y, particles[i].h),
+										particles[i].w, particles[i].h);
 
 								// Remove particle
 								particles[i].time = 0;
@@ -1502,7 +1494,7 @@ void PlayGame::checkCollisionParticleBoss()
 	{
 		if (particles[j].alive)
 		{
-			if (particles[j].type == -1 || particles[j].type == 0)
+			if (particles[j].hurtType == -1 || particles[j].hurtType == 0)
 			{
 				for (int i = 0; i < bos.max; i++)
 				{
@@ -1542,6 +1534,9 @@ void PlayGame::checkCollisionParticleBoss()
 							// collision occurred
 							if (distance < boss[i].w/2 + particles[j].w/2)
 							{
+								// Shake camera
+								ShakeCamera();
+
 								// Flash Bosses sprite
 								boss[i].flash = true;
 
@@ -1565,18 +1560,19 @@ void PlayGame::checkCollisionParticleBoss()
 				                // Subtract boss health
 				                boss[i].health -= player.getCastDamage();
 
-				                // Increase player score
-				                if (particles[j].type == -1) {
+				                // Increase player score based on projectile that hit Boss
+				                if (particles[j].hurtType == -1) {
 					                player.IncreaseScore(10);
 				                }
-				                if (particles[j].type == 0) {
+				                if (particles[j].hurtType == 0) {
 					                player.IncreaseScore(5);
 				                }
 
 				                // Show damage text (it will print how much damage the player did to the boss)
 				    			std::stringstream tempss;
 				    			tempss << player.getCastDamage();
-				    			tex.spawn(text, boss[i].x+boss[i].w/2, boss[i].y+boss[i].w/2-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
+				    			tex.spawn(gRenderer, text, boss[i].x+boss[i].w/2, boss[i].y+boss[i].w/2-15, 0.0, -0.5, 150,
+				    					tempss.str().c_str(), 1, {255, 255, 0, 255});
 							}
 							//----------------------------- Collision Detection based on player-attack hit-box and Boss hit-box -----------------------------//
 							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1606,13 +1602,24 @@ void PlayGame::checkCollisionPlayerItem() {
 						item[i].promptSelf = true;
 
 						// If player is pressing equip
-						if (player.getEquipState()) {
-							// reduce enemy health
+						if (player.getEquipState())
+						{
+							// Drop old sword
+							int old_sword_id = player.getItemID();
+
+							// Equip new sword
 							player.EquipSword(item[i].id, item[i].damage, item[i].slashAtkSpe);
 
-							// Remove item
+							// Remove item from floor
 							item[i].alive = false;
 							ite.count--;
+
+							// Drop old sword
+							ite.SpawnAndThrowItem(item,
+									player.getCenterX()-ite.rSwords[old_sword_id].w/2,
+									player.getCenterY(),
+									old_sword_id,
+									0.0, 0.5);
 
 							// play sound effect
 							Mix_PlayChannel(-1, sCastHitBoss, 0);
@@ -1874,7 +1881,7 @@ void PlayGame::checkCollisionParticleMob()
 	{
 		if (particles[j].alive)
 		{
-			if (particles[j].type == -1 || particles[j].type == 0)
+			if (particles[j].hurtType == -1 || particles[j].hurtType == 0)
 			{
 				for (int i = 0; i < mb.max; i++)
 				{
@@ -1914,6 +1921,9 @@ void PlayGame::checkCollisionParticleMob()
 							// collision occurred
 							if (distance < mob[i].w/2 + particles[j].w/2)
 							{
+								// Shake camera
+								ShakeCamera();
+
 								// Flash Mobes sprite
 								mob[i].flash = true;
 
@@ -1940,18 +1950,19 @@ void PlayGame::checkCollisionParticleMob()
 				                // Subtract mob health
 				                mob[i].health -= player.getCastDamage();
 
-				                // Increase player score
-				                if (particles[j].type == -1) {
+				                // Increase player score based on projectile that hit Boss
+				                if (particles[j].hurtType == -1) {
 					                player.IncreaseScore(10);
 				                }
-				                if (particles[j].type == 0) {
+				                if (particles[j].hurtType == 0) {
 					                player.IncreaseScore(5);
 				                }
 
 				                // Show damage text (it will print how much damage the player did to the mob)
 				    			std::stringstream tempss;
 				    			tempss << player.getCastDamage();
-				    			tex.spawn(text, mob[i].x+mob[i].w/2, mob[i].y+mob[i].w/2-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
+				    			tex.spawn(gRenderer, text, mob[i].x+mob[i].w/2, mob[i].y+mob[i].w/2-15, 0.0, -0.5, 150,
+				    					tempss.str().c_str(), 1, {255, 255, 0, 255});
 							}
 							//----------------------------- Collision Detection based on player-attack hit-box and Mob hit-box -----------------------------//
 							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2183,6 +2194,11 @@ void PlayGame::checkPlayerAttacksCollisionMob() {
 								// Spawn blood VFX
 								part.spawnBloodVFX(particles, mob[i].x, mob[i].y-mob[i].h, mob[i].w, mob[i].h, {204,57,123});
 
+								// if difficulty: easy
+								{
+									mb.Stun(mob, i);
+								}
+
 								// Flash Bosses sprite
 								mob[i].flash = true;
 
@@ -2195,7 +2211,8 @@ void PlayGame::checkPlayerAttacksCollisionMob() {
 				                // Show damage text (it will print how much damage the player did to the mob)
 				    			std::stringstream tempss;
 				    			tempss << player.getDamage();
-				    			tex.spawn(text, mob[i].x+mob[i].w/2, mob[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
+				    			tex.spawn(gRenderer, text, mob[i].x+mob[i].w/2, mob[i].y-15, 0.0, -0.5, 150,
+				    					tempss.str().c_str(), 1, {255, 255, 0, 255});
 							}
 							//----------------------------- Collision Detection based on player-attack hit-box and Mob hit-box -----------------------------//
 							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2276,9 +2293,137 @@ void PlayGame::checkMobPlayerVision() {
 
 void PlayGame::checkBossTileCollision()
 {
+
+
+	for (int i = 0; i < bos.max; i++) {
+		if (boss[i].alive) {
+			bool MonsterIsColliding = false;
+
+			// Update collision with Tiles
+			// Player Velocity X Axis
+			boss[i].x += boss[i].vX;
+
+			// Move only in x-axis
+			//if (boss[i].targetDistanceX >= boss[i].targetDistanceY) {
+				if (boss[i].alert) {
+					// If Monster has vision of target
+					//if (boss[i].hasVision) {
+						//boss[i].x += boss[i].velX;
+					//}
+				}
+				SDL_Rect rectA;
+				rectA.x = boss[i].x;
+				rectA.y = boss[i].y;
+				rectA.w = boss[i].w;
+				rectA.h = boss[i].h;
+				bool moveBack;
+				moveBack = false;
+				for (int j = 0; j < tl.max; j++) {
+					if (tile[j].alive){
+						if (tile[j].collisionTile) {
+							SDL_Rect rectB;
+							rectB.x = tile[j].x;
+							rectB.y = tile[j].y;
+							rectB.w = tile[j].w;
+							rectB.h = tile[j].h;
+							if  ( checkCollisionRect( rectA, rectB )) {
+								// Continue handling collision
+								moveBack = true;
+
+								// If Boss's target Y is lower than Tile's Y
+								if (boss[i].bmy2 < tile[j].y+tile[j].h/2) {
+									// If colliding with a Tile, move in Y direction towards Player
+									boss[i].y -= 2;
+									//boss[i].vY -= 5;
+								} else {
+									// If colliding with a Tile, move in Y direction towards Player
+									boss[i].y += 2;
+								}
+							}
+						}
+					}
+				}
+				if (moveBack){
+					boss[i].x -= boss[i].vX;
+					//boss[i].x -= boss[i].velX;
+					MonsterIsColliding = true;
+				}
+			//}
+
+			// Move only in y-axis
+			else{
+				boss[i].y += boss[i].vY;
+				// Player Velocity Y Axis
+				if (boss[i].alert) {
+					// If Monster has vision of target
+					//if (boss[i].hasVision) {
+					//}
+				}
+				//boss[i].y += boss[i].velY;
+				SDL_Rect rectA;
+				rectA.x = boss[i].x;
+				rectA.y = boss[i].y;
+				rectA.w = boss[i].w;
+				rectA.h = boss[i].h;
+				bool moveBack;
+				moveBack = false;
+				for (int j = 0; j < tl.max; j++) {
+					if (tile[j].alive){
+						if (tile[j].collisionTile) {
+							SDL_Rect rectB;
+							rectB.x = tile[j].x;
+							rectB.y = tile[j].y;
+							rectB.w = tile[j].w;
+							rectB.h = tile[j].h;
+							if  ( checkCollisionRect( rectA, rectB )) {
+								// Continue handling collision
+								moveBack = true;
+
+								// If Boss's target Y is lower than Tile's Y
+								if (boss[i].bmx2 < tile[j].x+tile[j].w/2) {
+									// If colliding with a Tile, move in Y direction towards Player
+									boss[i].x -= 2;
+									//boss[i].vY -= 5;
+								} else {
+									// If colliding with a Tile, move in Y direction towards Player
+									boss[i].x += 2;
+								}
+							}
+						}
+					}
+				}
+				if (moveBack){
+					boss[i].y -= boss[i].vY;
+					//boss[i].y -= boss[i].velY;
+					MonsterIsColliding = true;
+				}
+			}
+
+			//-------------------------------------------------------------------------------------------//
+			//-------------------------------------------------------------------------------------------//
+			//-------------------------------------------------------------------------------------------//
+
+			// This is used to determine if we should find the shortest route to the Player
+			if (MonsterIsColliding) {
+				boss[i].collision = true;
+			}else{
+				boss[i].collision = false;
+			}
+
+			// Decrease knockback velocity each frame
+			boss[i].vX = boss[i].vX - boss[i].vX * 0.08;
+			boss[i].vY = boss[i].vY - boss[i].vY * 0.08;
+		}
+	}
+
+
+
+
+
+
 	// Boss and Tile Collision
 	// X Axis Collision
-
+/*
 	// Boss
 	for (int i = 0; i < bos.max; i++) {
 		if (boss[i].alive) {
@@ -2336,110 +2481,8 @@ void PlayGame::checkBossTileCollision()
 			//--------------------------------------------------------------------//
 			////////////////////////////////////////////////////////////////////////
 
-
-			// X Collision
-			{
-				// Player Velocity Y Axis
-				boss[i].x += boss[i].vX;
-				/*
-				// Correct boss position
-				SDL_Rect rectA;
-				rectA.x = boss[i].x;
-				rectA.y = boss[i].y;
-				rectA.w = boss[i].w;
-				rectA.h = boss[i].h;
-				bool moveBack;
-				moveBack = false;
-
-				// Handle normal collision
-				for (int j = 0; j < tl.max; j++) {
-					if (tile[j].alive){
-						if (tile[j].collisionTile) {
-							// Boss target center
-							float bmx = tile[j].x + tile[j].w/2;
-							float bmy = tile[j].y + tile[j].h/2;
-
-							// Boss center
-							float bmx2 = boss[i].x + boss[i].w/2;
-							float bmy2 = boss[i].y + boss[i].h/2;
-							float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
-												  (bmy - bmy2) * (bmy - bmy2));
-
-							// If distance of tile is less than 50 pixels
-							if (distance < 50) {
-								SDL_Rect rectB;
-								rectB.x = tile[j].x;
-								rectB.y = tile[j].y;
-								rectB.w = tile[j].w;
-								rectB.h = tile[j].h;
-								if  ( checkCollisionRect( rectA, rectB )) {
-									moveBack = true;
-									boss[i].collision = true;
-								}else{
-									boss[i].collision = false;
-								}
-							}
-						}
-					}
-				}
-				if (moveBack){
-					// Reverse Boss walking direction
-					boss[i].vX -= boss[i].vX;
-				}*/
-			}
-
-			// Y Collision
-			{
-				// Player Velocity Y Axis
-				boss[i].y += boss[i].vY;
-				/*
-				// Correct boss position
-				SDL_Rect rectA;
-				rectA.x = boss[i].x;
-				rectA.y = boss[i].y;
-				rectA.w = boss[i].w;
-				rectA.h = boss[i].h;
-				bool moveBack;
-				moveBack = false;
-
-				// Handle normal collision
-				for (int j = 0; j < tl.max; j++) {
-					if (tile[j].alive){
-						if (tile[j].collisionTile) {
-							// Boss target center
-							float bmx = tile[j].x + tile[j].w/2;
-							float bmy = tile[j].y + tile[j].h/2;
-
-							// Boss center
-							float bmx2 = boss[i].x + boss[i].w/2;
-							float bmy2 = boss[i].y + boss[i].h/2;
-							float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
-												  (bmy - bmy2) * (bmy - bmy2));
-
-							// If distance of tile is less than 50 pixels
-							if (distance < 50) {
-								SDL_Rect rectB;
-								rectB.x = tile[j].x;
-								rectB.y = tile[j].y;
-								rectB.w = tile[j].w;
-								rectB.h = tile[j].h;
-								if  ( checkCollisionRect( rectA, rectB )) {
-									moveBack = true;
-									boss[i].collision = true;
-								}else{
-									boss[i].collision = false;
-								}
-							}
-						}
-					}
-				}
-				if (moveBack){
-					// Reverse Boss walking direction
-					boss[i].vY -= boss[i].vY;
-				}*/
-			}
 		}
-	}
+	}*/
 }
 
 void PlayGame::checkPlayerAttacksCollisionBoss() {
@@ -2542,7 +2585,8 @@ void PlayGame::checkPlayerAttacksCollisionBoss() {
 				                // Show damage text (it will print how much damage the player did to the boss)
 				    			std::stringstream tempss;
 				    			tempss << player.getDamage();
-				    			tex.spawn(text, boss[i].x+boss[i].w/2, boss[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
+				    			tex.spawn(gRenderer, text, boss[i].x+boss[i].w/2, boss[i].y-15, 0.0, -0.5, 150,
+				    					tempss.str().c_str(), 1, {255, 255, 0, 255});
 							}
 							//----------------------------- Collision Detection based on player-attack hit-box and Boss hit-box -----------------------------//
 							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2561,102 +2605,74 @@ void PlayGame::checkPlayerAttacksTileCollision() {
 			for (int i = 0; i < tl.max; i++) {
 				if (tile[i].alive) {
 					if (tile[i].collisionTile) {
-						// Get ccenter of object's target
-						float bmx = tile[i].x+tile[i].w/2;
-						float bmy = tile[i].y+tile[i].h/2;
+						if (tile[i].id == 197 || tile[i].id == 229) {
+							// Get ccenter of object's target
+							float bmx = getCenter(tile[i].x, tile[i].w);
+							float bmy = getCenter(tile[i].y, tile[i].h);
 
-						// Get center of object
-						float bmx2 = object[j].x+object[j].w/2;
-						float bmy2 = object[j].y+object[j].h/2;
+							// Get center of object
+							float bmx2 = getCenter(object[j].x, object[j].w);
+							float bmy2 = getCenter(object[j].y, object[j].h);
 
-						// Distance of tile relative to attack-object
-						float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
-											  (bmy - bmy2) * (bmy - bmy2));
+							// Distance of tile relative to attack-object
+							float distance = getDistance(bmx, bmy, bmx2, bmy2);
 
-						// If it goes less than 0, the game crashes
-						if (distance <= 1) {
-							distance = 1;
-						}
-
-						// If distance is less than 50 pixels
-						if (distance < 50)
-						{
-							// Get angle of tile relative to attack-object
-							float angle = atan2(bmy - bmy2,bmx - bmx2);
-							angle = angle * (180 / 3.1416);
-							if (angle < 0) {
-								angle = 360 - (-angle);
-							}
-
-							// Handle radians, cos, sin
-							float radians = (3.1415926536/180)*(angle);
-							float Cos = floor(cos(radians)*10+0.5)/10;
-							float Sin = floor(sin(radians)*10+0.5)/10;
-
-							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							//--------------------------------------------------------------------------------------------------------------------------------//
-							//----------------------------- Collision Detection based on player-attack hit-box and tile hit-box ------------------------------//
-							// Check collision between object and tile
-							if (checkCollision(object[j].x, object[j].y, object[j].w, object[j].h, tile[i].x, tile[i].y, tile[i].w, tile[i].h))
+							// If distance is less than 50 pixels
+							if (distance < 50)
 							{
-								// Spawn particle effect when player-attack object collides with tile
-								for (double h=0.0; h< 180.0; h+=rand() % 10 + 40)
+								// Get angle of tile relative to attack-object
+								float angle = atan2(bmy - bmy2,bmx - bmx2);
+								angle = angle * (180 / 3.1416);
+								if (angle < 0) {
+									angle = 360 - (-angle);
+								}
+
+								// Handle radians, cos, sin
+								float radians = (3.1415926536/180)*(angle);
+								float Cos = floor(cos(radians)*10+0.5)/10;
+								float Sin = floor(sin(radians)*10+0.5)/10;
+
+								////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+								//--------------------------------------------------------------------------------------------------------------------------------//
+								//----------------------------- Collision Detection based on player-attack hit-box and tile hit-box ------------------------------//
+								// Check collision between object and tile
+								if (checkCollision(object[j].x, object[j].y, object[j].w, object[j].h, tile[i].x, tile[i].y, tile[i].w, tile[i].h))
 								{
+									// Shake camera
+									ShakeCamera();
+
 									//for (double h=0.0; h< 360.0; h+=rand() % 10 + 10){
 									int rands = rand() % 3 + 8;
 									float newX;
 									float newY;
+									newX = object[j].x+object[j].w/2;
+									newY = object[j].y+object[j].h/2;
 
-									// Slash attack
+									// Particle effect
+									part.spawnTileHitVFX(particles, newX-rands/2, newY-rands/2, rands, rands);
+
+									// Remove Object
+									//object[j].alive = false;
+									//obj.count--;
+
+									// If attack-type: Slash
 									if (player.attackType == 0)
 									{
-										newX = object[j].x+object[j].w/2;
-										newY = object[j].y+object[j].h/2;
+										// Play hit sound effect: Slash attack
+						                Mix_PlayChannel(-1, sSlashTilec, 0);
 									}
 
-									// Down-stab attack
+									// If attack-type: Down-stab
 									else if (player.attackType == 1)
 									{
-										newX = object[j].x+object[j].w/2;
-										newY = tile[i].y;
+										// Play hit sound effect: Down-stab attack
+						                Mix_PlayChannel(-1, sDownStabHitTilec, 0);
 									}
-
-									part.spawnParticleAngle(particles,
-													   3,									// Type
-													   newX-rands/2,						// X
-													   newY-rands/2,						// Y
-													   rands, rands,						// width, height
-													   -h, randDouble(0.1, 1.4),				// angle, speed
-													   0.0, 0, 0,									// damage
-													   {200, 144, 40, 255}, 1,				// color and layer
-													   1, 1,								// angleSpe, angleDir
-													   rand() % 100 + 150, rand() % 2 + 5,	// alpha, alphaSpeed
-													   rand() % 50 + 20, 0,					// deathtimer, deathtimerSpeed
-													   false, 0,							// size death, death speed
-													   rand() % 35 + 5);
 								}
-
-								// Remove Object
-								object[j].alive = false;
-								obj.count--;
-
-								// If attack-type: Slash
-								if (player.attackType == 0)
-								{
-									// Play hit sound effect: Slash attack
-					                Mix_PlayChannel(-1, sSlashTilec, 0);
-								}
-
-								// If attack-type: Down-stab
-								else if (player.attackType == 1)
-								{
-									// Play hit sound effect: Down-stab attack
-					                Mix_PlayChannel(-1, sDownStabHitTilec, 0);
-								}
+								//----------------------------- Collision Detection based on player-attack hit-box and tile hit-box ------------------------------//
+								//--------------------------------------------------------------------------------------------------------------------------------//
+								////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							}
-							//----------------------------- Collision Detection based on player-attack hit-box and tile hit-box ------------------------------//
-							//--------------------------------------------------------------------------------------------------------------------------------//
-							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						}
 					}
 				}
@@ -2665,13 +2681,19 @@ void PlayGame::checkPlayerAttacksTileCollision() {
 	}
 }
 
-void PlayGame::checkPlayerAttacksBossParticleCollision() {
-	for (int j = 0; j < obj.max; j++) {
-		if (object[j].alive) {
-			for (int i = 0; i < part.max; i++) {
-				if (particles[i].alive) {
-					if (particles[i].type == 1) {
-						// Get ccenter of object's target
+void PlayGame::checkPlayerAttacksBossParticleCollision()
+{
+	for (int j = 0; j < obj.max; j++)
+	{
+		if (object[j].alive)
+		{
+			for (int i = 0; i < part.max; i++)
+			{
+				if (particles[i].alive)
+				{
+					if (particles[i].hurtType == 1)
+					{
+						// Get center of object's target
 						float bmx = particles[i].x+particles[i].w/2;
 						float bmy = particles[i].y+particles[i].h/2;
 
@@ -2721,7 +2743,7 @@ void PlayGame::checkPlayerAttacksBossParticleCollision() {
 								if (player.getItemEqipped(0)) {
 
 									// Change Enemy bullet into a Player bullet!
-									particles[i].type = -1;
+									particles[i].hurtType = -1;
 
 									// Knock back enemy bullet particles
 									{
@@ -2743,12 +2765,13 @@ void PlayGame::checkPlayerAttacksBossParticleCollision() {
 								else {
 
 									// Reduce health of Enemey Particle
-									particles[i].health -= player.getDamage();;
+									particles[i].health -= player.getDamage();
 
-									// Show damage text (it will print how much damage the player did to the boss)
-									std::stringstream tempss;
-									tempss << player.getDamage();
-									tex.spawn(text, particles[i].x+particles[i].w/2, particles[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
+									// Particle effect
+									part.spawnTileHitVFX(particles,
+											getCenter(particles[i].x, particles[i].w),
+											getCenter(particles[i].y, particles[i].h),
+											particles[i].w, particles[i].h);
 
 									// Remove Object
 									//object[j].alive = false;
@@ -2810,24 +2833,8 @@ void PlayGame::checkBossAttacksCollisionPlayer() {
 						object[j].alive = false;
 						obj.count--;
 
-						// Spawn particle effect
-						for (double i=0.0; i< 360.0; i+=rand() % 10 + 40){
-							int rands = rand() % 11 + 3;
-							float newX = player.x+player.w/2;
-							float newY = player.y+player.h/2;
-							part.spawnParticleAngle(particles, 2,
-												newX-rands/2,
-												newY-rands/2,
-											   rands, rands,
-											   i, randDouble(2.1, 5.1),
-											   0.0, 0, 0,
-											   {144, 144, 144, 255}, 1,
-											   1, 1,
-											   rand() % 100 + 150, rand() % 2 + 5,
-											   rand() % 50 + 90, 0,
-											   true, randDouble(0.1, 0.7),
-											   100, 10);
-						}
+						// Spawn blood VFX
+						part.spawnParryVFX(particles, player.x, player.y, player.w, player.h);
 
 						// Reference to exact boss (this was stored in the object when it was created
 						int i = object[j].CreatorIndex;
@@ -2869,35 +2876,8 @@ void PlayGame::checkBossAttacksCollisionPlayer() {
 							player.SlashAttack();
 						}
 
-						// Spawn particle effect
-						for (double i=0.0; i< 360.0; i+=rand() % 10 + 40){
-							int rands = rand() % 11 + 3;
-							float newX = player.x+player.w/2;
-							float newY = player.y+player.h/2;
-							/*part.spawnParticleAngle(particles, 2,
-												newX-rands/2, newY-rands/2,
-											   rands, rands,
-											   i, randDouble(2.1, 5.1),
-											   0.0,
-											   {210, 144, 40, 255}, 1,
-											   1, 1,
-											   rand() % 100 + 150, rand() % 2 + 5,
-											   rand() % 50 + 90, 0,
-											   true, 0.1,
-											   rand() % 15 + 2, 1);*/
-							part.spawnParticleAngle(particles, 2,
-												newX-rands/2,
-												newY-rands/2,
-											   rands, rands,
-											   i, randDouble(2.1, 5.1),
-											   0.0, 0, 0,
-											   {210, 144, 40, 255}, 1,
-											   1, 1,
-											   rand() % 100 + 150, rand() % 2 + 5,
-											   rand() % 50 + 90, 0,
-											   true, randDouble(0.1, 0.7),
-											   100, 10);
-						}
+						// Spawn blood VFX
+						part.spawnBloodVFX(particles, player.x, player.y, player.w, player.h, {255,0,0});
 
 						// play sound effect
 						Mix_PlayChannel(-1, sParrySuccess, 0);
@@ -2927,37 +2907,8 @@ void PlayGame::checkBossAttacksCollisionPlayer() {
 						// Subtract player health
 						player.IncreaseHealth(-20);
 
-						// spawn blood particle effect
-						//for (double i=0.0; i< 360.0; i+=rand() % 10 + 25){
-							for (double i=0.0; i< 360.0; i+=rand() % 10 + 25){
-							int rands = rand() % 11 + 3;
-							float newX = player.x+player.w/2;
-							float newY = player.y+player.h/2;
-							/*part.spawnParticleAngle(particles, 2,
-												newX-rands/2,
-												newY-rands/2,
-											   rands, rands,
-											   i, randDouble(2.1, 5.1),
-											   0.0,
-											   {240, 0, 0, 255}, 1,
-											   1, 1,
-											   rand() % 100 + 150, rand() % 2 + 5,
-											   rand() % 50 + 90, 0,
-											   true, 0.1,
-											   rand() % 15 + 2, 1);*/
-							part.spawnParticleAngle(particles, 2,
-												newX-rands/2,
-												newY-rands/2,
-											   rands, rands,
-											   i, randDouble(2.1, 5.1),
-											   0.0, 0, 0,
-											   {240, 0, 0, 255}, 1,
-											   1, 1,
-											   rand() % 100 + 150, rand() % 2 + 5,
-											   rand() % 50 + 90, 0,
-											   true, randDouble(0.1, 0.7),
-											   100, 10);
-						}
+						// Spawn blood VFX
+						part.spawnBloodVFX(particles, player.x, player.y, player.w, player.h, {255,0,0});
 
 						// play sound effect
 						Mix_PlayChannel(-1, sSlashHitBoss, 0);
@@ -2965,11 +2916,15 @@ void PlayGame::checkBossAttacksCollisionPlayer() {
 						// Show damage text (it will print how much damage the player did to the boss)
 						std::stringstream tempss;
 						tempss << 20;
-						tex.spawn(text, player.x+player.w/2, player.y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
+						tex.spawn(gRenderer, text, player.x+player.w/2, player.y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1,
+								{255, 255, 0, 255});
 					}
 					//----------------------------- Collision Detection based on Boss-attack hit-box and Player hit-box -----------------------------//
 					////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					//--------------------------------------------------------------------------------------------------------------------------------//
+
+					// Shake camera
+					ShakeCamera();
 				}
 			}
 		}
@@ -3051,7 +3006,6 @@ void PlayGame::checkCollisionBossPlayer() {
 	}
 }
 
-// Check collision: Enemy Particle and Player
 void PlayGame::checkCollisionParticlePlayer() {
 	// Player
 	if (player.alive && !player.getDashStatus()){
@@ -3061,7 +3015,7 @@ void PlayGame::checkCollisionParticlePlayer() {
 			if (particles[i].alive)
 			{
 				// enemy particle hitting Player
-				if (particles[i].type == 1)
+				if (particles[i].hurtType == 1)
 				{
 					// particle collision with player using a CIRCLE
 					float bmx = player.x + player.w/2;
@@ -3083,10 +3037,14 @@ void PlayGame::checkCollisionParticlePlayer() {
 							particles[i].alive = false;
 							part.count--;
 
+							// Spawn Parry VFX
+							part.spawnParryVFX(particles, player.x, player.y, player.w, player.h);
+
 			                // Show damage text (it will print how much damage the player did to the boss)
 			    			std::stringstream tempss;
 			    			tempss << "0";
-			    			tex.spawn(text, player.x+player.w/2, player.y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {144, 144, 144, 255});
+			    			tex.spawn(gRenderer, text, player.x+player.w/2, player.y-24, 0.0, -0.5, 150,
+			    					tempss.str().c_str(), 1, {144, 144, 144, 255});
 
 							// play sound effect
 							Mix_PlayChannel(-1, sParrySuccess, 0);
@@ -3108,7 +3066,7 @@ void PlayGame::checkCollisionParticlePlayer() {
 							// Spawn Counter Attack: Slash Attack Wave
 							{
 								// Change Enemy bullet into a Player bullet!
-								particles[i].type = -1;
+								particles[i].hurtType = -1;
 
 								// Knock back enemy bullet particles
 								{
@@ -3165,24 +3123,8 @@ void PlayGame::checkCollisionParticlePlayer() {
 								}
 							}
 
-							// Spawn particle VFX
-							for (double i=0.0; i< 360.0; i+=rand() % 10 + 40){
-								int rands = rand() % 11 + 3;
-								float newX = player.x+player.w/2;
-								float newY = player.y+player.h/2;
-								part.spawnParticleAngle(particles, 2,
-													newX-rands/2,
-													newY-rands/2,
-												   rands, rands,
-												   i, randDouble(2.1, 5.1),
-												   0.0, 0, 0,
-												   {210, 144, 40, 255}, 1,
-												   1, 1,
-												   rand() % 100 + 150, rand() % 2 + 5,
-												   rand() % 50 + 90, 0,
-												   true, randDouble(0.1, 0.7),
-												   100, 10);
-							}
+							// Spawn Parry VFX
+							part.spawnParryVFX(particles, player.x, player.y, player.w, player.h);
 
 							// play sound effect
 							Mix_PlayChannel(-1, sParrySuccess, 0);
@@ -3206,24 +3148,8 @@ void PlayGame::checkCollisionParticlePlayer() {
 								player.vY += tempVY;
 							}
 
-							// spawn blood particle effect
-							for (double i=0.0; i< 360.0; i+=rand() % 10 + 10){
-								int rands = rand() % 11 + 3;
-								float newX = player.x+player.w/2;
-								float newY = player.y+player.h/2;
-								part.spawnParticleAngle(particles, 2,
-													newX-rands/2,
-													newY-rands/2,
-												   rands, rands,
-												   i, randDouble(2.1, 5.1),
-												   0.0, 0, 0,
-												   {255, 0, 0, 255}, 1,
-												   1, 1,
-												   rand() % 100 + 150, rand() % 2 + 5,
-												   rand() % 50 + 90, 0,
-												   true, 0.1,
-												   rand() % 15 + 2, 1);
-							}
+							// Spawn blood VFX
+							part.spawnBloodVFX(particles, player.x, player.y, player.w, player.h, {255,0,0});
 
 							// play sound effect
 							Mix_PlayChannel(-1, sSlashHitBoss, 0);
@@ -3234,7 +3160,8 @@ void PlayGame::checkCollisionParticlePlayer() {
 			                // Show damage text (it will print how much damage the player did to the boss)
 			    			std::stringstream tempss;
 			    			tempss << particles[i].damage;
-			    			tex.spawn(text, player.x+player.w/2, player.y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 20, 20, 255});
+			    			tex.spawn(gRenderer, text, player.x+player.w/2, player.y-15, 0.0, -0.5, 150,
+			    					tempss.str().c_str(), 1, {255, 20, 20, 255});
 
 							// remove particle
 							particles[i].alive = false;
@@ -3261,7 +3188,7 @@ void PlayGame::checkCollisionParticleParticle() {
 	{
 		if (particles[i].alive)
 		{
-			if (particles[i].type == 0)
+			if (particles[i].hurtType == 0)
 			{
 				for (int j = 0; j < part.max; j++)
 				{
@@ -3270,7 +3197,7 @@ void PlayGame::checkCollisionParticleParticle() {
 					{
 						if (particles[j].alive)
 						{
-							if (particles[j].type == 1)
+							if (particles[j].hurtType == 1)
 							{
 								// Particle target center
 								float bmx = particles[j].x + particles[j].w/2;
@@ -3288,34 +3215,13 @@ void PlayGame::checkCollisionParticleParticle() {
 									// Reduce health of Enemey Particle
 									particles[j].health -= particles[i].dmgToParticles;
 
-									// Show damage text (it will print how much damage the player did to the boss)
-									std::stringstream tempss;
-									tempss << particles[i].dmgToParticles;
-									tex.spawn(text, particles[j].x+particles[j].w/2, particles[j].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {0, 240, 240, 255});
-
 									// Remove Player particle next
 									particles[i].time = 0;
 									particles[i].alive = false;
 									part.count--;
 
-									// Spawn particle effect
-									for (double i=0.0; i< 360.0; i+=rand() % 10 + 40){
-										int rands = rand() % 11 + 3;
-										float newX = bmx;
-										float newY = bmy;
-										part.spawnParticleAngle(particles, 2,
-															newX-rands/2,
-															newY-rands/2,
-														   rands, rands,
-														   i, randDouble(2.1, 5.1),
-														   0.0, 0, 0,
-														   {210, 144, 40, 255}, 1,
-														   1, 1,
-														   rand() % 100 + 150, rand() % 2 + 5,
-														   rand() % 50 + 90, 0,
-														   true, randDouble(0.1, 0.7),
-														   100, 10);
-									}
+									// Spawn blood VFX
+									part.spawnBloodVFX(particles, particles[j].x, particles[j].y, particles[j].w, particles[j].h, {0, 240, 240});
 
 									// play sound effect
 									Mix_PlayChannel(-1, sParrySuccess, 0);
@@ -3901,7 +3807,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 			// Print message to screen
 			std::stringstream tempss;
 			tempss << "Loading Data...";
-			tex.spawn(text, 0, 0, 0.0, 0.0, 255, tempss.str().c_str(), 0);
+			tex.spawn(gRenderer, text, 0, 0, 0.0, 0.0, 255, tempss.str().c_str(), 0);
 
 			player.x = spawnX;
 			player.y = spawnY;
@@ -3957,7 +3863,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 			// Print message to screen
 			std::stringstream tempss;
 			tempss << "Saving data...";
-			tex.spawn(text, 0, 0, 0.0, 0.0, 255, tempss.str().c_str(), 0);
+			tex.spawn(gRenderer, text, 0, 0, 0.0, 0.0, 255, tempss.str().c_str(), 0);
 			break;
 		}
 	case SDLK_1:							// increase or decrease width of tile being placed

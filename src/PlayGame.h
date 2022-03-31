@@ -100,10 +100,10 @@ public:	// Scene textures
 		int count;
 		float x;
 		float y;
-		int w;
-		int h;
-		int alpha;
-		int timer;
+		float w;
+		float h;
+		float alpha;
+		float timer;
 		bool alive;
 		float vX;
 		float vY;
@@ -122,7 +122,9 @@ public:	// Scene textures
 				text[i].alive = false;
 			}
 		}
-		void spawn(Text text[], float x, float y, float vX, float vY, int alpha, std::string textfield, int type, SDL_Color color={244,144,40}) {
+		void spawn(SDL_Renderer *gRenderer, Text text[], float x, float y,
+				float vX, float vY, int alpha,
+				std::string textfield, int type, SDL_Color color={244,144,40}) {
 			for (int i=0; i<100; i++) {
 				if (!text[i].alive) {
 					//std::cout << "Spawning text object." << std::endl;
@@ -270,12 +272,18 @@ public:	// Core functions
 
 public:	// Functions mixed with other classes
 
+	/* Notes on some orders:
+	 *
+	 * 0. obj.Update()
+	 * 1. bos.GetDistanceOfPlayer()
+	 * 2. bos.Update()
+	 * 3. player.Update()
+	 *
+	 *
+	 */
+
 	// Check collision between Particle & Tile
 	void checkCollisionParticleTile();
-
-	//------------------ Hurts Boss
-	// Check collision between Particle & Boss
-	void checkCollisionParticleBoss();
 
 	//------------------ Collision
 
@@ -288,10 +296,21 @@ public:	// Functions mixed with other classes
 	// Check collision between Player & Tile
 	void checkPlayerTileCollision();
 
+	// Check collision between Mob & Tile
+	void checkCollisionTileMob();
+
+	// Check collision between Boss & Tile
+	void checkBossTileCollision();
+
+	//------------------ Mobs
+
 	//------------------ Collision
 
 
 	//------------------ Mobs
+
+
+
 
 	//------------------ Hurts Mobs
 	// Check collision between Mobs & Particle
@@ -301,39 +320,46 @@ public:	// Functions mixed with other classes
 	// Check collision between Mobs & Player attacks
 	void checkPlayerAttacksCollisionMob();
 
+
+
+
 	// Check if Mobs have vision of Player
 	void checkMobPlayerVision();
 
-	// Check collision between Mobs & Tile
-	// Checks collision with Tiles, while at the same
-	// time creates a path to go towards the Player while avoiding Tiles
-	void checkCollisionTileMob();
+	//------------------ Hurts Tiles
+	// Player attack objects & Tiles
+	void checkPlayerAttacksTileCollision();
 
-	//------------------ Mobs
 
-	// Check collision between Boss & Tile
-	void checkBossTileCollision();
+
 
 	//------------------ Hurts Boss
 	// Check collision between Player attacks & Boss
 	void checkPlayerAttacksCollisionBoss();
 
-	// Check collision between Player attacks & Tile
-	void checkPlayerAttacksTileCollision();
-
 	//------------------ Hurts Boss
-	// Check collision between Player attacks & Boss/Mob Particle
+	// Check collision between Particle & Boss
+	void checkCollisionParticleBoss();
+
+	//------------------ Hurts Boss projectiles
+	// Check collision between Player attacks & Boss/Mob projectiles
 	void checkPlayerAttacksBossParticleCollision();
 
-	// Check collision between Boss attacks & Player
+
+
+	//---------- Hurts Player
+	// Boss/Mob projectiles & Player
+	void checkCollisionParticlePlayer();
+
+	//---------- Hurts Player
+	// Boss attack objects & Player
 	void checkBossAttacksCollisionPlayer();
+
+
+
 
 	// Check collision between Boss & Player
 	void checkCollisionBossPlayer();
-
-	//---------- Hurts Player
-	// Check collision between Boos/Mob Particle & Player
-	void checkCollisionParticlePlayer();
 
 	// Check collision between Player Particle & Boss Particle
 	void checkCollisionParticleParticle();
@@ -362,6 +388,7 @@ private:	// Load level
 	// Load previous high-score for Level
 	void LoadHighScore();
 
+	SDL_Renderer *gRenderer;
 	unsigned int previousLevel = -1;
 	unsigned int LevelToLoad;
 	float lastKnownPositionX, lastKnownPositionY;

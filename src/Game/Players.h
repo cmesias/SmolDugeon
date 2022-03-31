@@ -91,7 +91,7 @@ public:	// resources
 	 * 0: Keyboard
 	 * 1: Keyboard + Mouse
 	 */
-	int ControlsPreference = 0;	// default: 0
+	int ControlsPreference = 1;	// default: 0
 
 public:	// variables
 	std::string name;
@@ -288,7 +288,7 @@ private:	// Save these player stats in a file. This will be the players save dat
 	float damage;			// Sword damage
 	float castDamage;		// Cast damage
 	float damageMultipler;	// Parrying will increase damage multiplier
-	float castAtkSpe;		// Cast atk speed
+	float castAtkSpe;		// Cast atk speed - deprecated, delete?
 
 	// Mana
 	float mana;				// Mana
@@ -309,14 +309,35 @@ private:	// Variables used in Textures
 	int shadowW = 44;
 
 	/* Sword Types (TODO [ ] (3-25-2022) - save this in player data)
-	 * 0: Fist
-	 * 1: Wooden sword
-	 * 2: Rusty sword
-	 * 3: Iron sword
-	 * 24: Heart
-	 * 25: Coin
-	 * 26: Silver key
-	 * 27: Gold key
+	 *
+	 * 0: Wooden Sword
+	 * 1: Rusty Sword
+	 * 2: Iron Sword
+	 *
+	 *
+	 * 10: Red Sword					10 x 21
+	 *
+	 *
+	 * 11: Tool? 						7 x 17
+	 * 12: Hammer 						10 x 21
+	 *
+	 * 13: Thicc Sword 					10 x 25
+	 * 14: Long Rapier 					8 x 27
+	 * 15: Golden Long Sword 			10 x 29
+	 * 16: Silver Sword 				6 x 27
+	 * 17: Silver Thicc Sword 			10 x 24
+	 * 18: Silver Thicc Sword w/ Gold 	10 x 24
+	 *
+	 * 19: Broken Iron sword short 		6 x 9
+	 * 20: Broken Iron sword 			6 x 12
+	 * 21: Broken Golden sword 			6 x 12
+	 * 22: Broken Silver sword 			6 x 12
+	 *
+	 * 23: Bomb							14 x 13
+	 * 24: Heart 						10 x 10
+	 * 25: Coin 						10 x 10
+	 * 26: Silver key 					5 x 10
+	 * 27: Gold key 					5 x 10
 	 */
 	int swordInHand_Index = 0;
 	int swordW = 20;
@@ -484,8 +505,11 @@ public:	// Accessor functions
 	// Get equip key state
 	bool getEquipState();
 
-	// Get item index in hand
+	// Check if item in hand is this index
 	int getItemEqipped(int checkThisIndex);
+
+	// Get item index in hand
+	int getItemID();
 
 	// Return number of Coins keys for Player
 	int getCoins();

@@ -301,7 +301,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 			if (mob[i].animState == -1)
 			{
 				// Start idle timer
-				mob[i].idleTimer += idleSpe;
+				mob[i].idleTimer += mob[i].idleSpe;
 
 				// Timer is done, go to next frame
 				if (mob[i].idleTimer > 60) {
@@ -340,7 +340,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 			else if (mob[i].animState == 0)
 			{
 				// Start idle timer
-				mob[i].idleTimer += idleSpe;
+				mob[i].idleTimer += mob[i].idleSpe;
 
 				// Timer is done, go to next frame
 				if (mob[i].idleTimer > 60) {
@@ -433,15 +433,15 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 				{
 					// Spawn bullet
 					int rands  = 24;
-					float speed  = 6;
+					float speed  = 7;
 					float tempX = mob[i].x + mob[i].w/2 - rands/2;
 					float tempY = mob[i].y + mob[i].h/2 - rands/2;
 
 					// If charge time at 16
-					if (mob[i].chargeTime == 16)
+					if (mob[i].chargeTime == mob[i].attackFrame)
 					{
 						// Spawn projectile
-						p_dummy.spawnRedAngelAttack(particle, tempX, tempY, rands, rands, mob[i].angleFacingTarget, speed, 20);
+						p_dummy.spawnRedProjectileAttack(particle, 1, tempX, tempY, rands, rands, mob[i].angleFacingTarget, 20, speed);
 
 						// Play SFX
 						Mix_PlayChannel(-1, sCast, 0);
@@ -475,7 +475,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 					if (mob[i].chargeTime > 0) {
 
 						// Start counting down charge-attack animation
-						mob[i].chargeTime -= 2;
+						mob[i].chargeTime -= mob[i].chargeTimeSpe;
 					}
 
 					// Countdown reached 0 seconds.
@@ -516,7 +516,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 							for (double h=0.0; h< 360.0; h+=rand() % 10 + 90){
 
 								// Spawn projectile
-								p_dummy.spawn360RedAttack(particle, tempX, tempY, rands, rands, h, speed, {255,255,255});
+								p_dummy.spawn360RedAttack(particle, 1, tempX, tempY, rands, rands, h, speed, {255,255,255});
 							}
 
 							// Play SFX
@@ -527,7 +527,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 					// Do idle anyways, but this will get ovverridden by the code below
 					{
 						// Start idle timer
-						mob[i].idleTimer += idleSpe;
+						mob[i].idleTimer += mob[i].idleSpe;
 
 						// Timer is done, go to next frame
 						if (mob[i].idleTimer > 60) {
@@ -552,7 +552,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 					if (mob[i].chargeTime > 0) {
 
 						// Start counting down charge-attack animation
-						mob[i].chargeTime--;
+						mob[i].chargeTime -= mob[i].chargeTimeSpe;
 					}
 
 					// Countdown reached 0 seconds.
@@ -591,7 +591,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 							float tempY = mob[i].y + mob[i].h/2 - rands/2;
 							for (double h=0.0; h< 360.0; h+=rand() % 10 + 50){
 
-								p_dummy.spawnQuick360BlueAttackPart1(particle, tempX, tempY, rands, rands, h, speed, {244,144,40});
+								p_dummy.spawnQuick360BlueAttackPart1(particle, 1, tempX, tempY, rands, rands, h, speed, {244,144,40});
 							}
 
 							// Play SFX
@@ -603,7 +603,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 					if (mob[i].chargeTime > 0) {
 
 						// Start counting down charge-attack animation
-						mob[i].chargeTime--;
+						mob[i].chargeTime -= mob[i].chargeTimeSpe;
 					}
 
 					// Countdown reached 0 seconds.
@@ -634,7 +634,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 				{
 					//for (int j=0; j<3; j++) {
 						//if (mob[i].chargeTime == j * 1) {
-						if (mob[i].chargeTime == 15) {
+						if (mob[i].chargeTime == mob[i].attackFrame) {
 
 							// Spawn particle effect
 							int rands = 16;
@@ -642,7 +642,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 							float tempY = mob[i].y + mob[i].h/2 - rands/2;
 							for (double h=0.0; h< 360.0; h+=20){
 
-								p_dummy.spawnQuick360BlueAttackPart2(particle, tempX, tempY, rands, rands, h, {255,255,255});
+								p_dummy.spawnQuick360BlueAttackPart2(particle, 1, tempX, tempY, rands, rands, h, {255,255,255});
 							}
 
 							// Play SFX
@@ -653,7 +653,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 					// Do idle anyways, but this will get ovverridden by the code below
 					{
 						// Start idle timer
-						mob[i].idleTimer += idleSpe;
+						mob[i].idleTimer += mob[i].idleSpe;
 
 						// Timer is done, go to next frame
 						if (mob[i].idleTimer > 60) {
@@ -678,7 +678,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 					if (mob[i].chargeTime > 0) {
 
 						// Start counting down charge-attack animation
-						mob[i].chargeTime--;
+						mob[i].chargeTime -= mob[i].chargeTimeSpe;
 					}
 
 					// Countdown reached 0 seconds.
@@ -933,6 +933,19 @@ void Mob::RenderHand(SDL_Renderer *gRenderer, Mob mob[], int newMx, int newMy, i
 	SDL_RenderDrawRect(gRenderer, &tempr);
 }
 
+void Mob::Stun(Mob mob[], int i) {
+
+	// Stop charge attack animation
+	mob[i].chargingAttack = false;
+
+	// Reset charge-attack count down
+	mob[i].chargeTime = this->chargeTimeStart;
+
+	// Set animation state to cooldown (-1)
+	mob[i].animState = -1;
+
+}
+
 // Functions that work with other classes
 void Mob::GetDistanceOfPlayer(Mob mob[], float targetX, float targetY, float targetW, float targetH, float *xFollow, float *yFollow) {
 	for (int i = 0; i < max; i++) {
@@ -1026,10 +1039,13 @@ void Mob::setStatsBasedOnType(Mob mob[], int i) {
 		mob[i].healthDecay 	= 100;
 		mob[i].yOffset = -20;
 		mob[i].moveSpe = 1.5;
+		mob[i].idleSpe = 10;
+		mob[i].chargeTimeSpe = 1;
+		mob[i].attackFrame = 16;
 		mob[i].setSightRange(64*10);
-		mob[i].setAtkRange(64*2);
-
-	} else {
+		mob[i].setAtkRange(64*4);
+	}
+	else if (mob[i].type == 1) {
 		mob[i].w 			= 14*2;
 		mob[i].h 			= 12*2;
 		mob[i].health 		= 200;
@@ -1037,6 +1053,23 @@ void Mob::setStatsBasedOnType(Mob mob[], int i) {
 		mob[i].healthDecay 	= 200;
 		mob[i].yOffset = 0;
 		mob[i].moveSpe = 5;
+		mob[i].idleSpe = 6.5;
+		mob[i].chargeTimeSpe = 2;
+		mob[i].attackFrame = 16;
+		mob[i].setSightRange(64*15);
+		mob[i].setAtkRange(64*2);
+	}
+	else {
+		mob[i].w 			= 14*2;
+		mob[i].h 			= 12*2;
+		mob[i].health 		= 200;
+		mob[i].maxHealth 	= 200;
+		mob[i].healthDecay 	= 200;
+		mob[i].yOffset = 0;
+		mob[i].moveSpe = 5;
+		mob[i].idleSpe = 6.5;
+		mob[i].chargeTimeSpe = 2;
+		mob[i].attackFrame = 16;
 		mob[i].setSightRange(64*15);
 		mob[i].setAtkRange(64*1);
 	}

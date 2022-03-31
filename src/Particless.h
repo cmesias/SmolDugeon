@@ -42,17 +42,26 @@ public:	// variables
 	double vX, vY;
 	double speed;
 	double angleSpe, angleDir;
+	float yOffsetShadow;
 	bool onScreen;
 	bool alive;
 	bool collide;
 	std::string side;
-	/* -1: damages enemies, counter attack from Player, does NOT damage enemy Particles
-	 * 0: damages enemies, damages enemy Particles
-	 * 1: damages player
+	/*
+	 * 0: Slash projectile
+	 * 1: Red projectile
 	 * 2: stars, no damage
 	 * 3: blue block bits, no damage
 	 */
-	int type;
+	int renderType;
+
+	/* -1: Damages enemies, counter attack from Player, does NOT damage enemy Particles
+	 * 0: Hurts Enemies and Enemy Particles
+	 * 1: Hurts Player
+	 * 2: Stars, none hurt
+	 * 3: Blue block bits, none hurt
+	 */
+	int hurtType;
 	int damage;
 	float dmgToParticles;	// this is for damage to other particles
 	float health;
@@ -75,7 +84,7 @@ public:	// basic functions
 public:	// functions
 
 	// Goes in one direction
-	void spawnParticleAngle(Particle particle[], int type,
+	void spawnParticleAngle(Particle particle[], int renderType, int hurtType,
 			float spawnX, float spawnY,
 			int spawnW, int spawnH,
 			double angle, double speed,
@@ -85,10 +94,11 @@ public:	// functions
 			float alpha, float alphaspeed,
 			float deathTimer, float deathTimerSpeed,
 			bool sizeDeath, float deathSpe,
-			double splatDistance = 1, double splatSpeed = 0.0);
+			double splatDistance = 1, double splatSpeed = 0.0,
+			float yOffetShadow = 16);
 
 	// Follows the target
-	void spawnParticleAngleFollow(Particle particle[], int type,
+	void spawnParticleAngleFollow(Particle particle[], int renderType, int hurtType,
 			float spawnX, float spawnY,
 			int spawnW, int spawnH,
 			double angle, double speed,
@@ -99,37 +109,51 @@ public:	// functions
 			int deathTimer, int deathTimerSpeed,
 			bool sizeDeath, float deathSpe,
 			double splatDistance = 1, double splatSpeed = 0.0,
-			bool follow=false, float *xFollow=NULL, float *yFollow=NULL);
+			bool follow=false, float *xFollow=NULL, float *yFollow=NULL,
+			float yOffetShadow = 16);
 
 	// Spawn blood VFX
 	void spawnBloodVFX(Particle particle[], float targetX, float targetY,
 					   	   	   	   	   	    float targetW, float targetH,
 											SDL_Color color);
 
+	// Spawn Parry VFX
+	void spawnParryVFX(Particle particle[], float targetX, float targetY,
+					   	   	   	   	   	    float targetW, float targetH);
+
+	// Spawn Tile hit VFX
+	void spawnTileHitVFX(Particle particle[], float targetX, float targetY,
+					   	   	   	   	   	    float targetW, float targetH);
+
 	// Spawn no more mana VFX
 	void spawnNoMoreManaVFX(Particle particle[], float centerX, float centerY);
 
 	// Spawn Slash Attack particle
-	void spawnSlashAttackProjectile(Particle particle[], float spawnX, float spawnY,
-			  float spawnW, float spawnH, float damage);
+	void spawnSlashAttackProjectile(Particle particle[], int hurtType, float spawnX, float spawnY,
+			  float spawnW, float spawnH, float damage, float angle);
 
 
-	// Spawn Red Angel (type: 0) Attack
-	void spawnRedAngelAttack(Particle particle[], float spawnX, float spawnY,
+	// Single red projectile, goes towards one direction
+	void spawnRedProjectileAttack(Particle particle[], int hurtType, float spawnX, float spawnY,
 			float spawnW, float spawnH,
 			float angle, float damage, float speed);
 
-	void spawn360RedAttack(Particle particle[], float spawnX, float spawnY,
+	// Single black projectile, goes towards one direction
+	void spawnBlackVoidProjectileAttack(Particle particle[], int hurtType, float spawnX, float spawnY,
+			float spawnW, float spawnH,
+			float angle, float damage, float speed);
+
+	void spawn360RedAttack(Particle particle[], int hurtType, float spawnX, float spawnY,
 			float spawnW, float spawnH,
 			float h, float speed, SDL_Color color);
 
 	// Spawn attack: Quick 360 burst of blue colored projectiles PART 1
-	void spawnQuick360BlueAttackPart1(Particle particle[], float spawnX, float spawnY,
+	void spawnQuick360BlueAttackPart1(Particle particle[], int hurtType, float spawnX, float spawnY,
 			float spawnW, float spawnH,
 			float h, float speed, SDL_Color color);
 
 	// Spawn attack: Quick 360 burst of blue colored projectiles PART 2
-	void spawnQuick360BlueAttackPart2(Particle particle[], float spawnX, float spawnY,
+	void spawnQuick360BlueAttackPart2(Particle particle[], int hurtType, float spawnX, float spawnY,
 			float spawnW, float spawnH,
 			float h, SDL_Color color);
 
@@ -148,16 +172,20 @@ public:	// functions
 											int deathTimer, int deathTimerSpeed,
 											double speed,
 											SDL_Color color, int layer);*/
-	void updateBulletParticles(Particle particle[], int mapX, int mapY, int mapW, int mapH);
 
-	void renderBulletParticle(Particle particle[], int camX, int camY, float playerZ, SDL_Renderer* gRenderer);
+	// Applies to all particles
+	void Update(Particle particle[], int mapX, int mapY, int mapW, int mapH);
 
-	void renderBulletParticleDebug(Particle particle[], int camX, int camY, SDL_Renderer* gRenderer);
+	void UpdateBullets(Particle particle[], int mapX, int mapY, int mapW, int mapH);
+
+	void RenderBullets(Particle particle[], int camX, int camY, float playerZ, SDL_Renderer* gRenderer);
+
+	void RenderBulletDebug(Particle particle[], int camX, int camY, SDL_Renderer* gRenderer);
 
 public:	// Star
 	void genStars(Particle particle[], int screnWidth, int screenHeight);
-	void updateStarParticles(Particle particle[], int mapX, int mapY, int mapW, int mapH);
-	void renderStarParticle(Particle particle[], int camX, int camY, float playerZ, SDL_Renderer* gRenderer);
+	void UpdateVFX(Particle particle[], int mapX, int mapY, int mapW, int mapH);
+	void RenderVFX(Particle particle[], int camX, int camY, float playerZ, SDL_Renderer* gRenderer);
 };
 
 #endif /* LOCAL_PARTICLESS_H_ */

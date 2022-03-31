@@ -53,16 +53,16 @@ public:
 	 */
 	int sprite_index;
 
-public: // variables
+	// Idle timer
+	float idleTimer;
+	float idleSpe;
 
 	// Walking timer
 	double walkTimer;
 	double walkSpeed;
 	double walkFrame;
 
-	// Idle timer
-	float idleTimer;
-	const float idleSpe = 10;
+public: // variables
 
 public:	// Core Functions
 	void Init(Mob mob[]);
@@ -95,15 +95,17 @@ public:	// Core Functions
 	void RenderHand(SDL_Renderer *gRenderer, Mob mob[], int newMx, int newMy,
 						  int mex, int mey, int camx, int camy);
 
+	void Stun(Mob mob[], int i);
+
+public:	// Setter functions
+
+	void setStatsBasedOnType(Mob mob[], int i);
+
 public:	// Functions that work with other classes
 
 	void GetDistanceOfPlayer(Mob mob[], float targetX, float targetY,
 				float targetW, float targetH,
 				float *xFollow, float *yFollow);
-
-public:	// Setter functions
-
-	void setStatsBasedOnType(Mob mob[], int i);
 
 public:	// Getter functions
 
@@ -156,7 +158,9 @@ public:	// Animations
 	 */
 	int animState;
 	bool chargingAttack;
-	float chargeTime;					// After 3 seconds, attack
+	float chargeTime;					// Count down to 0
+	float chargeTimeSpe;				// Speed of charge attack
+	int attackFrame;					// The frame index that the Mob will attack
 	const float chargeTimeStart = 60;	// Change this to change the charge-attack animation start time
 
 	float constantFiringTimer;

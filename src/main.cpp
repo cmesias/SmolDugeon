@@ -85,6 +85,7 @@ int main(int argc, char *argv[]) {
  * 			  a level, the positions of the next areas will be going off the x and y positions of the previous areas.
  * 			- For example if Area (0,0) start on (0,0) and ends in (500,500) pixels,
  * 			  then Area (0,1) will start on on (500,0) and ends in (1000,500);
+ * TODO [ ] - Mob.cpp, when getting hit by the player, set animState for Mob to 1 (this will give a "stunned" effect to the Mob)
  *
  *
  * TODO [x] (3-25-2022) - Change player texture with a character form the dungeon tileset

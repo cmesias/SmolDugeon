@@ -107,10 +107,11 @@ void Players::Init(float spawnX, float spawnY, std::string newName){
 	this->healthMax				= 100;
 
 	// Damage
-	this->damage				= 10;
-	this->castDamage			= 40;
+	this->castDamage			= 5;
 	this->damageMultipler		= 1;
 	this->castAtkSpe 			= 6.87;
+	// Set default sword: fists
+	this->EquipSword(0, 5, 5);
 
 	// Mana
 	this->maxMana				= 100;
@@ -144,7 +145,7 @@ void Players::ResetLivesAndPlayer() {
 	newName="AAA";
 
 	// Set default sword: fists
-	this->EquipSword(0, 10, 5);
+	this->EquipSword(0, 5, 5);
 
 	// Reset score and lives, and turn player alive
 	this->score 				= 0;
@@ -574,7 +575,7 @@ void Players::Update(Map &map,
 							float spawnY = this->y+this->h;
 
 							// Spawn particle effect at feet
-							p_dummy.spawnParticleAngle(particle, 2,
+							p_dummy.spawnParticleAngle(particle, 2, 2,
 												spawnX-randSize/2,
 												spawnY-randSize/2,
 												randSize, randSize,
@@ -629,7 +630,7 @@ void Players::Update(Map &map,
 				int rands = rand() % 9 + 2;
 				float newX = x+w/2;
 				float newY = y+h;
-				p_dummy.spawnParticleAngle(particle, 2,
+				p_dummy.spawnParticleAngle(particle, 2, 2,
 									newX-rands/2,
 									newY-rands/2,
 								   rands, rands,
@@ -640,7 +641,8 @@ void Players::Update(Map &map,
 								   rand() % 100 + 150, rand() % 2 + 5,
 								   rand() % 50 + 90, 0,
 								   true, 0.11,
-								   rand() % 9 + 2, 1);
+								   rand() % 9 + 2, 1,
+								   2);
 
 				// If dash counter is greater than 0
 				if (dashCounter > 0) {
@@ -717,9 +719,49 @@ void Players::Update(Map &map,
 							else
 								xOffsetTemp = getRightSide()-tempWidth;
 
-							// Spawn attack object (it will appear in the world for 1 frame then remove itself)
-							obj.spawn(object, xOffsetTemp, armY+16,
-											  tempWidth, tempHeight, 0);
+							// Spawn Player Attack Object
+							{
+								// Spawn attack object (it will appear in the world for 1 frame then remove itself)
+								obj.spawn(object, xOffsetTemp, armY+16,
+												  tempWidth, tempHeight, 0);
+							}
+
+							// Spawn swords attribute
+							{
+								// Black sword
+								if (swordInHand_Index == 8) {
+									// Spawn projectile
+									int rands  = 24;
+									float speed  = 21;
+									p_dummy.spawnBlackVoidProjectileAttack(particle, 0,
+											this->x + this->w/2 - rands/2,
+											this->y + this->h/2 - rands/2,
+											rands, rands, this->angle, this->castDamage, speed);
+								}
+
+								// Red sword
+								if (swordInHand_Index == 10) {
+									// Spawn projectile
+									int rands  = 24;
+									float speed  = 21;
+									p_dummy.spawnRedProjectileAttack(particle, 0,
+											this->x + this->w/2 - rands/2,
+											this->y + this->h/2 - rands/2,
+											rands, rands, this->angle, this->castDamage, speed);
+								}
+
+								// If we have a rapier or long rapier
+								if (swordInHand_Index == 11 || swordInHand_Index == 14) {
+
+									// Spawn Slash Attack particle
+									p_dummy.spawnSlashAttackProjectile(particle, 0, armX, armY,
+											this->particleW, this->particleH, this->castDamage, angle);
+
+								}
+
+								// play audio
+								Mix_PlayChannel(1, sCast, 0);
+							}
 						}
 						// Play slash sound effect
 						if (playSlash) {
@@ -1522,12 +1564,12 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 	// Text UI
 	{
 		// Highscore text
-		/*tempsi.str( std::string() );
-		tempsi << "Highscore: " << this->highscore;
+		tempsi.str( std::string() );
+		tempsi << this->damage << " - " << this->castDamage;
 		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {244, 144, 20}, gFont24);
 		gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*3, gText.getWidth(), gText.getHeight());
 
-		tempsi.str( std::string() );
+		/*tempsi.str( std::string() );
 		tempsi << "Score: " << this->score;
 		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
 		gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*4, gText.getWidth(), gText.getHeight());
@@ -2077,6 +2119,9 @@ int Players::getItemEqipped(int checkThisIndex) {
 	} else{
 		return false;
 	}
+}
+int Players::getItemID() {
+	return swordInHand_Index;
 }
 
 int Players::getCoins() {

@@ -736,20 +736,19 @@ void Tile::setStatsBasedOnType(Tile tile[], int i) {
 	// Specific Tiles
 	{
 
-		// Top of yellow box tile
-		if (tile[i].id == 197) {
-			tile[i].rectB.x = tile[i].x;
-			tile[i].rectB.y = tile[i].y+(11*this->expandH);
-			tile[i].rectB.w = tile[i].w;
-			tile[i].rectB.h = 2.5*this->expandH;
-		}
+		// Top and Bottom of yellow box tile will become 1 Tile
+		if (tile[i].id == 197 || tile[i].id == 229) {
+			// Set size
+			tile[i].w = 16*this->expandW;
+			tile[i].h = 21*this->expandH;
 
-		// Bottom of yellow box tile
-		if (tile[i].id == 229) {
 			tile[i].rectB.x = tile[i].x;
-			tile[i].rectB.y = tile[i].y;
+			tile[i].rectB.y = tile[i].y+tile[i].h/2;
 			tile[i].rectB.w = tile[i].w;
-			tile[i].rectB.h = 16*this->expandH;
+			tile[i].rectB.h = tile[i].h/2;
+
+			// Set clips for texture
+			tile[i].clip = {80, 107, 16, 21};
 		}
 
 		// Locked door

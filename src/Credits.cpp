@@ -302,8 +302,9 @@ void Credits::Show(LWindow &gWindow, SDL_Renderer *gRenderer, Credits::CreditsRe
 		}
 
 		// Update particle
-		part.updateStarParticles(particle, 0, 0, room.w, room.h);
-		part.updateBulletParticles(particle, 0, 0, room.w, room.h);
+		part.Update(particle, 0, 0, room.w, room.h);
+		part.UpdateVFX(particle, 0, 0, room.w, room.h);
+		part.UpdateBullets(particle, 0, 0, room.w, room.h);
 
 
 		if (poofs.size() < maxPoofs) {
@@ -345,8 +346,8 @@ void Credits::Show(LWindow &gWindow, SDL_Renderer *gRenderer, Credits::CreditsRe
 			//gTexture.render(gRenderer, 0, 0, 128, 128);
 
 			// Render particle
-			part.renderStarParticle(particle, 1, 1, 1, gRenderer);
-			part.renderBulletParticle(particle, 1, 1, 1, gRenderer);
+			part.RenderVFX(particle, 1, 1, 1, gRenderer);
+			part.RenderBullets(particle, 1, 1, 1, gRenderer);
 
 		//Reset render target
 		SDL_SetRenderTarget( gRenderer, NULL );

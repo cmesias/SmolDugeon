@@ -71,6 +71,8 @@ public:
 
 	float getDistance( float x, float y, float x2, float y2 );
 
+	float getCenter( float pos, float size);
+
 	// Doesnt work properly (3/17/2022)
 	void ChangeRenderResolution(SDL_Renderer *gRenderer, int changeTo);
 

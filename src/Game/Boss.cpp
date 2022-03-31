@@ -128,7 +128,6 @@ void Boss::Spawn(Boss boss[], float x, float y, float w, float h, float angle, f
 			boss[i].speed 			= speed;
 			boss[i].type 			= type;
 			boss[i].damage			= 5;
-			boss[i].alive 			= true;
 			boss[i].mouse 			= false;
 			boss[i].flash 			= false;
 
@@ -173,6 +172,8 @@ void Boss::Spawn(Boss boss[], float x, float y, float w, float h, float angle, f
 			boss[i].distance 			= 1;
 			boss[i].collision 			= false;
 			boss[i].onScreen 			= false;
+			setStatsBasedOnType(boss, i);
+			boss[i].alive 			= true;
 			count++;
 			break;
 		}
@@ -196,7 +197,7 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 
 			// Boss health decay
 			if (boss[i].healthDecay > boss[i].health) {
-				boss[i].healthDecay -= 3;
+				boss[i].healthDecay -= 1;
 			}
 
 			// boss circle collision check with other bosss
@@ -345,12 +346,12 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 							float tempX = boss[i].x + boss[i].w/2 - rands/2;
 							float tempY = boss[i].y + boss[i].h/2 - rands/2;
 							for (double h=0.0; h< 360.0; h+=rand() % 10 + 10){
-								p_dummy.spawnParticleAngle(particle, 1,
+								p_dummy.spawnParticleAngle(particle, 1, 1,
 												   tempX,
 												   tempY,
 												   rands, rands,
 												   h, randDouble(5, 5),
-												   10, 0, 20,
+												   10, 0, 1,
 												   {255, 255, 255, 255}, 1,
 												   1, 1,
 												   255, 0,
@@ -476,12 +477,12 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 
 								//int rands = rand() % 11 + 3;
 
-								p_dummy.spawnParticleAngle(particle, 1,
+								p_dummy.spawnParticleAngle(particle, 1, 1,
 												   tempX,
 												   tempY,
 												   rands, rands,
 												   h, 5,
-												   5, 0, 20,
+												   5, 0, 1,
 												   {0, 254, 254, 255}, 1,
 												   1, 1,
 												   255, 0,
@@ -539,12 +540,12 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 
 								//int rands = rand() % 11 + 3;
 
-								p_dummy.spawnParticleAngle(particle, 1,
+								p_dummy.spawnParticleAngle(particle, 1, 1,
 												   tempX,
 												   tempY,
 												   rands, rands,
 												   h, randDouble(14, 16),
-												   5, 0, 20,
+												   5, 0, 1,
 												   {0, 254, 254, 255}, 1,
 												   1, 1,
 												   255, 0,
@@ -604,12 +605,12 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 					tempY = boss[i].y + boss[i].h/2 - rands/2;
 					rands = 96;
 					speed = 2.57;
-					p_dummy.spawnParticleAngleFollow(particle, 1,
+					p_dummy.spawnParticleAngleFollow(particle, 1, 1,
 									   tempX,
 									   tempY,
 									   rands, rands,
 									   boss[i].angleFacingTarget, speed,
-									   25, 0, 100,
+									   25, 0, 4,
 									   {255, 255, 255, 255}, 1,
 									   1, 1,
 									   255, 0,
@@ -944,6 +945,27 @@ void Boss::RenderFront(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LT
 void Boss::RenderUI(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy) {
 	for (int i = 0; i < max; i++) {
 		if (boss[i].alive) {
+			const float yOffsetBar = 30;
+			const float barHeight = 12;
+			const float barWidth = boss[i].w*1.25;
+			float uiX = boss[i].x + boss[i].w/2 - barWidth/2;
+			float uiY = boss[i].y - barHeight - yOffsetBar;
+
+			// Health Decay bar on Bosses
+			{
+				// Health Decay bar, bg
+				RenderFillRect(gRenderer, uiX-camx, uiY-camy, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, barHeight, {0, 0, 0} );
+
+				// Render Decay health
+				RenderFillRect(gRenderer, uiX-camx, uiY-camy, (barWidth*boss[i].healthDecay)/boss[i].maxHealth, barHeight, {60, 30, 30} );
+			}
+
+			// Health bar on Bosses
+			{
+				// Render health
+				RenderFillRect(gRenderer, uiX-camx, uiY-camy, (barWidth*boss[i].health)/boss[i].maxHealth, barHeight, {200, 30, 30} );
+			}
+
 			// Boss UI
 			// Text
 			{
@@ -955,33 +977,6 @@ void Boss::RenderUI(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy) {
 				tempss << "THE FATTEST BOSS FIGHT EVER";
 				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255, 255, 255}, gFont36);
 				gText.render(gRenderer, uiX, uiY, gText.getWidth(), gText.getHeight());
-			}
-
-			// Health Decay bar on Bosses
-			{
-				// Render health Decay
-				float barWidth = boss[i].w;
-
-				float uiX = boss[i].x + boss[i].w/2 - barWidth/2;
-				float uiY = boss[i].y - 35 - 18;
-
-				// Health Decay bar, bg
-				RenderFillRect(gRenderer, uiX-camx, uiY-camy, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, 35, {0, 0, 0} );
-
-				// Render Decay health
-				RenderFillRect(gRenderer, uiX-camx, uiY-camy, (barWidth*boss[i].healthDecay)/boss[i].maxHealth, 35, {60, 30, 30} );
-			}
-
-			// Health bar on Bosses
-			{
-				// Render health
-				float barWidth = boss[i].w;
-
-				float uiX = boss[i].x + boss[i].w/2 - barWidth/2;
-				float uiY = boss[i].y - 35 - 18;
-
-				// Render health
-				RenderFillRect(gRenderer, uiX-camx, uiY-camy, (barWidth*boss[i].health)/boss[i].maxHealth, 35, {200, 30, 30} );
 			}
 
 			// Health Decay top of screen
@@ -1051,7 +1046,8 @@ void Boss::RenderDebug(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LT
 
 			// Render Text
 			std::stringstream tempss;
-			tempss << "D: " << boss[i].distance << ", AS: " << boss[i].animState << ", AL: " << boss[i].alert << ", CH: " <<  boss[i].chargingAttack;
+			//tempss << "D: " << boss[i].distance << ", AS: " << boss[i].animState << ", AL: " << boss[i].alert << ", CH: " <<  boss[i].chargingAttack;
+			tempss << boss[i].health;
 			gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255, 255, 255}, gFont);
 			gText.render(gRenderer, boss[i].x-camx, boss[i].y-gText.getHeight()-camy, gText.getWidth(), gText.getHeight());
 
@@ -1068,6 +1064,22 @@ void Boss::RenderHand(SDL_Renderer *gRenderer, Boss boss[], int newMx, int newMy
 	SDL_Rect tempr = {newMx, newMy, 384, 384};
 	SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
 	SDL_RenderDrawRect(gRenderer, &tempr);
+}
+
+
+
+void Boss::setStatsBasedOnType(Boss boss[], int i) {
+	// Set defeault parameters depending on what mobs were spawning
+	if (boss[i].type == 0) {
+		boss[i].w 			= 128*2;
+		boss[i].h 			= 128*2;
+		boss[i].health 		= 500;
+		boss[i].maxHealth 	= 500;
+		boss[i].healthDecay = 500;
+		//boss[i].setSightRange(64*10);
+		//boss[i].setAtkRange(64*4);
+	}
+
 }
 
 // Functions that work with other classes
@@ -1176,6 +1188,11 @@ void Boss::LoadData(Boss boss[], std::fstream &fileTileDataL)
 
 			// When we load bosss, spawn them 1 pixel from the ground so that we dont have glitches or problems
 			boss[h].y-=2;
+
+			// Defaults on loading
+			{
+				setStatsBasedOnType(boss, h);
+			}
 		}
 		//break;
 	}
