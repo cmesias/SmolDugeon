@@ -35,10 +35,6 @@ public:	// Exclusive for this game
 	// Mouse cursor
 	LTexture gCursor;
 
-	// Textures
-	LTexture gParticles;
-	SDL_Rect cParticles = {32, 0, 8, 8};
-
 	// Audio
 	Mix_Music *sAmbientMusic 		= NULL;
 	Mix_Chunk *sRockBreak 			= NULL;

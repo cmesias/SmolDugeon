@@ -156,7 +156,6 @@ public: // Attack variables
 	int stunTimer;
 	bool attack;
 	bool stunned;
-	bool playSlash;
 	bool clash;
 	bool spawnAttack;
 
@@ -196,7 +195,7 @@ public:	// functions
 				LWindow gWindow, SDL_Renderer* gRenderer,
 				LTexture gText, TTF_Font *gFont, SDL_Color color,
 				Mix_Chunk *sAtariBoom, bool &RestartLevel,
-				int LevelWeLoaded);
+				int LevelWeLoaded, bool &ShakeCamera);
 
 	void Render(int mx, int my, int camX, int camY, LWindow gWindow,
 				SDL_Renderer* gRenderer,

@@ -77,6 +77,7 @@ public:
     bool camshake;
 
 	void ShakeCamera();
+	bool playerCallingToShakeCamera = false;
 
 public: // System variables
 	enum Result { Back, Nothing, StartGame, ShowingMenu, Exit };
@@ -91,6 +92,8 @@ public:	// Scene textures
 	LTexture gTargetTexture;
 	LTexture gCircle;
 	LTexture gShadow;
+	LTexture gTileBreak;
+	SDL_Rect rTileBreak[10];
 
 	// Mouse cursor
 	LTexture gCursor;
@@ -327,7 +330,7 @@ public:	// Functions mixed with other classes
 	void checkMobPlayerVision();
 
 	//------------------ Hurts Tiles
-	// Player attack objects & Tiles
+	// Player Attack Objects & Tiles
 	void checkPlayerAttacksTileCollision();
 
 
@@ -366,6 +369,10 @@ public:	// Functions mixed with other classes
 
 	//---------- Boss deafeated? Update levelsCompleted.mp
 	void checkBossOrMobDied();
+
+	// Renders
+	void RenderTileBreakingBehind();
+	void RenderTileBreakingFront();
 
 public:	// Controls
 	// Editor controls

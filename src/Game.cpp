@@ -75,10 +75,6 @@ void Game::Init() {
 
 // Load
 void Game::Load() {
-	// load particle textures
-	setClips(cParticles, 32, 0, 8, 8);
-	gParticles.loadFromFile(gRenderer, "resource/gfx/particles.png");
-	gParticles.setBlendMode(SDL_BLENDMODE_ADD);
 
 	// Load Audio settings from file
 	loadAudioCFG();
@@ -95,7 +91,6 @@ void Game::Load() {
 
 // Free
 void Game::Free() {
-	gParticles.free();
 	// Other classes Fonts
 	FreeFonts();
 }

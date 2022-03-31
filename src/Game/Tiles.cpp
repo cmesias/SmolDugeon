@@ -25,12 +25,14 @@
 
 void Tile::load(SDL_Renderer *gRenderer) {
 	gTiles.loadFromFile(gRenderer, "resource/gfx/author_0x72/0x72_16x16DungeonTileset_v4Walls_v2.png");
+
 	gFont12 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 12);
 	gFont24 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 24);
 }
 
 void Tile::free() {
 	gTiles.free();
+	//gTileBreak.free();
 	gText.free();
 	TTF_CloseFont(gFont12);
 	TTF_CloseFont(gFont24);
@@ -64,6 +66,7 @@ void Tile::initTile(Tile tile[]) {
 		tile[i].PlayerBehindTile = false;
 		tile[i].promptSelf = false;
 		tile[i].alive = false;
+		tile[i].destructible = false;
 	}
 }
 
@@ -89,6 +92,7 @@ void Tile::placeTile(Tile tile[], float x, float y,
 			tile[i].screen 	= false;
 			tile[i].player = false;
 			tile[i].side = "right";
+			tile[i].destructible = false;
 			tile[i].alive 	= true;
 
 			// Set default parameters
@@ -192,6 +196,8 @@ void Tile::updateTile(Tile tile[], LWindow &gWindow,
 	{
 		if (tile[i].alive)
 		{
+			// Tile destruction if its a destructible
+			// destruction code is inside PlayGame.cpp
 
 			// If Tile is not a Floor Tile
 			if (tile[i].layer == 1 || tile[i].layer == 2) {
@@ -469,6 +475,37 @@ void Tile::renderTile(SDL_Renderer *gRenderer, Tile tile[], int layer_dummy, int
 						gTiles.setAlpha(tile[i].alpha);
 						gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
 					}
+
+					// If destructible, render destructible Texture on Tiles
+					{
+						/*if (tile[i].destructible) {
+							int sprite_index = 9;
+
+							if (tile[i].health >= 45 && tile[i].health <= 50) {
+								sprite_index = 9;
+							} else if (tile[i].health >= 40 && tile[i].health <= 44) {
+								sprite_index = 8;
+							} else if (tile[i].health >= 35 && tile[i].health <= 39) {
+								sprite_index = 7;
+							} else if (tile[i].health >= 30 && tile[i].health <= 34) {
+								sprite_index = 6;
+							} else if (tile[i].health >= 25 && tile[i].health <= 29) {
+								sprite_index = 5;
+							} else if (tile[i].health >= 20 && tile[i].health <= 24) {
+								sprite_index = 4;
+							} else if (tile[i].health >= 15 && tile[i].health <= 19) {
+								sprite_index = 3;
+							} else if (tile[i].health >= 10 && tile[i].health <= 14) {
+								sprite_index = 2;
+							} else if (tile[i].health >= 5 && tile[i].health <= 9) {
+								sprite_index = 1;
+							} else if (tile[i].health >= 0 && tile[i].health <= 4) {
+								sprite_index = 0;
+							}
+
+							gTileBreak.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &rTileBreak[sprite_index]);
+						}*/
+					}
 				}
 			}
 		}
@@ -534,6 +571,37 @@ void Tile::RenderBehindPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerToR
 								// Render tile
 								gTiles.setAlpha(tile[i].alpha);
 								gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
+
+								// If destructible, render destructible Texture on Tiles
+								/*{
+									if (tile[i].destructible) {
+										int sprite_index = 9;
+
+										if (tile[i].health >= 45 && tile[i].health <= 50) {
+											sprite_index = 9;
+										} else if (tile[i].health >= 40 && tile[i].health <= 44) {
+											sprite_index = 8;
+										} else if (tile[i].health >= 35 && tile[i].health <= 39) {
+											sprite_index = 7;
+										} else if (tile[i].health >= 30 && tile[i].health <= 34) {
+											sprite_index = 6;
+										} else if (tile[i].health >= 25 && tile[i].health <= 29) {
+											sprite_index = 5;
+										} else if (tile[i].health >= 20 && tile[i].health <= 24) {
+											sprite_index = 4;
+										} else if (tile[i].health >= 15 && tile[i].health <= 19) {
+											sprite_index = 3;
+										} else if (tile[i].health >= 10 && tile[i].health <= 14) {
+											sprite_index = 2;
+										} else if (tile[i].health >= 5 && tile[i].health <= 9) {
+											sprite_index = 1;
+										} else if (tile[i].health >= 0 && tile[i].health <= 4) {
+											sprite_index = 0;
+										}
+
+										gTileBreak.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &rTileBreak[sprite_index]);
+									}
+								}*/
 							}
 							// -----------------------------------------------------------------------//
 							// ---------------- This will render all other Tiles ---------------------//
@@ -598,6 +666,37 @@ void Tile::RenderOnTopOfPlayer(SDL_Renderer *gRenderer, Tile tile[], int layerTo
 								// Render tile
 								gTiles.setAlpha(tile[i].alpha);
 								gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
+
+								// If destructible, render destructible Texture on Tiles
+								/*{
+									if (tile[i].destructible) {
+										int sprite_index = 9;
+
+										if (tile[i].health >= 45 && tile[i].health <= 50) {
+											sprite_index = 9;
+										} else if (tile[i].health >= 40 && tile[i].health <= 44) {
+											sprite_index = 8;
+										} else if (tile[i].health >= 35 && tile[i].health <= 39) {
+											sprite_index = 7;
+										} else if (tile[i].health >= 30 && tile[i].health <= 34) {
+											sprite_index = 6;
+										} else if (tile[i].health >= 25 && tile[i].health <= 29) {
+											sprite_index = 5;
+										} else if (tile[i].health >= 20 && tile[i].health <= 24) {
+											sprite_index = 4;
+										} else if (tile[i].health >= 15 && tile[i].health <= 19) {
+											sprite_index = 3;
+										} else if (tile[i].health >= 10 && tile[i].health <= 14) {
+											sprite_index = 2;
+										} else if (tile[i].health >= 5 && tile[i].health <= 9) {
+											sprite_index = 1;
+										} else if (tile[i].health >= 0 && tile[i].health <= 4) {
+											sprite_index = 0;
+										}
+
+										gTileBreak.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &rTileBreak[sprite_index]);
+									}
+								}*/
 							}
 							// -----------------------------------------------------------------------//
 							// ---------------- This will render all other Tiles ---------------------//
@@ -738,10 +837,15 @@ void Tile::setStatsBasedOnType(Tile tile[], int i) {
 
 		// Top and Bottom of yellow box tile will become 1 Tile
 		if (tile[i].id == 197 || tile[i].id == 229) {
+			// Set health and destructible
+			tile[i].health = 50;
+			tile[i].destructible = true;
+
 			// Set size
 			tile[i].w = 16*this->expandW;
 			tile[i].h = 21*this->expandH;
 
+			// Set collision box around Tile
 			tile[i].rectB.x = tile[i].x;
 			tile[i].rectB.y = tile[i].y+tile[i].h/2;
 			tile[i].rectB.w = tile[i].w;

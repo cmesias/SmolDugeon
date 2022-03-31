@@ -375,7 +375,7 @@ void Item::RenderUI(SDL_Renderer *gRenderer, Item item[], int camx, int camy) {
 		if (item[i].alive) {
 			if (item[i].promptSelf) {
 				std::stringstream tempsi;
-				tempsi << "E: ";
+				tempsi << "E";
 				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
 				gText.render(gRenderer, item[i].x+item[i].w/2-gText.getWidth()/2-camx,
 									    item[i].y+item[i].hoverAmount*0.6-gText.getHeight()-camy,
@@ -428,7 +428,7 @@ void Item::setStatsBasedOnType(Item item[], int i) {
 		// TODO do damage for all swords
 		if (item[i].id == 0) {
 			item[i].slashAtkSpe 	= 5;
-			item[i].damage 			= 5;
+			item[i].damage 			= 10;
 		}
 		// Wood sword
 		if (item[i].id == 1) {

@@ -31,7 +31,6 @@ void Players::Init(float spawnX, float spawnY, std::string newName){
 	this->name				= newName;
 
 	this->sprite_index 		= 0;
-	this->playSlash 		= false;
 	this->clash 			= false;
 	this->score 			= 0;
 
@@ -110,8 +109,9 @@ void Players::Init(float spawnX, float spawnY, std::string newName){
 	this->castDamage			= 5;
 	this->damageMultipler		= 1;
 	this->castAtkSpe 			= 6.87;
+
 	// Set default sword: fists
-	this->EquipSword(0, 5, 5);
+	ResetLivesAndPlayer();
 
 	// Mana
 	this->maxMana				= 100;
@@ -145,7 +145,7 @@ void Players::ResetLivesAndPlayer() {
 	newName="AAA";
 
 	// Set default sword: fists
-	this->EquipSword(0, 5, 5);
+	this->EquipSword(0, 10, 5);
 
 	// Reset score and lives, and turn player alive
 	this->score 				= 0;
@@ -356,7 +356,7 @@ void Players::Update(Map &map,
 					LWindow gWindow, SDL_Renderer* gRenderer,
 					LTexture gText, TTF_Font *gFont, SDL_Color color,
 					Mix_Chunk *sAtariBoom, bool &RestartLevel,
-					int LevelWeLoaded)
+					int LevelWeLoaded, bool &ShakeCamera)
 {
 	// Player center
 	this->x2 = this->x+this->w/2;
@@ -587,6 +587,7 @@ void Players::Update(Map &map,
 											   rand() % 50 + 90, 0,
 											   true, randDouble(0.1, 0.7),
 											   100, 10);
+
 							// Play sound effect
 							Mix_PlayChannel(-1, sStep, 0);
 						}
@@ -710,7 +711,8 @@ void Players::Update(Map &map,
 							int xOffsetTemp;
 
 							// Attack-object's width and height
-							int tempHeight = 16*2;
+							//int tempHeight = 16*2;
+							int tempHeight = 32*2;
 							int tempWidth = getW() + 32 + swordW;
 
 							// Player facing direction
@@ -722,8 +724,11 @@ void Players::Update(Map &map,
 							// Spawn Player Attack Object
 							{
 								// Spawn attack object (it will appear in the world for 1 frame then remove itself)
-								obj.spawn(object, xOffsetTemp, armY+16,
+								obj.spawn(object, xOffsetTemp, armY,
 												  tempWidth, tempHeight, 0);
+
+								// Play slash sound effect
+								Mix_PlayChannel(-1, sSlash, 0);
 							}
 
 							// Spawn swords attribute
@@ -737,6 +742,9 @@ void Players::Update(Map &map,
 											this->x + this->w/2 - rands/2,
 											this->y + this->h/2 - rands/2,
 											rands, rands, this->angle, this->castDamage, speed);
+
+									// play audio
+									Mix_PlayChannel(1, sCast, 0);
 								}
 
 								// Red sword
@@ -748,6 +756,9 @@ void Players::Update(Map &map,
 											this->x + this->w/2 - rands/2,
 											this->y + this->h/2 - rands/2,
 											rands, rands, this->angle, this->castDamage, speed);
+
+									// play audio
+									Mix_PlayChannel(1, sCast, 0);
 								}
 
 								// If we have a rapier or long rapier
@@ -757,16 +768,14 @@ void Players::Update(Map &map,
 									p_dummy.spawnSlashAttackProjectile(particle, 0, armX, armY,
 											this->particleW, this->particleH, this->castDamage, angle);
 
+									// play audio
+									Mix_PlayChannel(1, sCast, 0);
+
 								}
 
-								// play audio
-								Mix_PlayChannel(1, sCast, 0);
+								// Shake camera
+								//ShakeCamera = true;
 							}
-						}
-						// Play slash sound effect
-						if (playSlash) {
-							playSlash = false;
-							Mix_PlayChannel(-1, sSlash, 0);
 						}
 					}
 					// Attack over
@@ -1796,7 +1805,6 @@ void Players::SlashAttack() {
 		}
 
 		// Set attack parameters
-		this->playSlash = true;
 		this->clash = false;
 		this->attack = true;
 		this->spawnAttack = true;

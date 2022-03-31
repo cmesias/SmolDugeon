@@ -348,19 +348,18 @@ void Particle::spawnRedProjectileAttack(Particle particle[], int hurtType, float
 void Particle::spawnBlackVoidProjectileAttack(Particle particle[], int hurtType, float spawnX, float spawnY,
 		float spawnW, float spawnH,
 		float angle, float damage, float speed) {
-
-	spawnParticleAngle(particle, 3, hurtType,
+	spawnParticleAngle(particle, 1, hurtType,
 			spawnX,
 			spawnY,
 			spawnW, spawnH,
 			angle, speed,
-			damage, damage, 1,
-			   {106, 13, 173, 255}, 1,
-			   1, 1,
-			   255, 0,
-			   60*6, 1,
-			   false, 0,
-			   100, 10);
+		   10, 0, 1,
+		   {106, 13, 173, 255}, 1,
+		   1, 1,
+		   255, 0,
+		   rand() % 50 + 90, 0,
+		   false, 0,
+		   100, 10);
 }
 
 void Particle::spawn360RedAttack(Particle particle[], int hurtType, float spawnX, float spawnY,
@@ -377,7 +376,7 @@ void Particle::spawn360RedAttack(Particle particle[], int hurtType, float spawnX
 		   1, 1,
 		   255, 0,
 		   rand() % 50 + 90, 0,
-		   true, randDouble(0.1, 0.7),
+		   false, 0,
 		   100, 10);
 }
 

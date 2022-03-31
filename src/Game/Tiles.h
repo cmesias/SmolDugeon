@@ -67,6 +67,10 @@ public:
 	std::string side;		// collision with player
 	bool collisionTile;		// If true, this Tile is considered a collision tile
 
+	// Health of Tile, and if destructible
+	float health;
+	bool destructible;
+
 public:	// animation for light Tile
 
 	// 296 - 303:	top of light tile

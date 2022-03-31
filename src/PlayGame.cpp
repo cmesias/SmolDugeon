@@ -154,6 +154,17 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	gCircle.loadFromFile(gRenderer, 	"resource/gfx/circle.png");
 	gShadow.loadFromFile(gRenderer, 	"resource/gfx/shadow.png");
 	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
+	gTileBreak.loadFromFile(gRenderer, "resource/gfx/tile-break.png");
+	gTileBreak.setBlendMode(SDL_BLENDMODE_ADD);
+	// Tile break clips
+	int j = 0;
+		for (int w = 0; w < 10; w++) {
+			rTileBreak[j].x = 0 + w * 16;
+			rTileBreak[j].y = 0;
+			rTileBreak[j].w = 16;
+			rTileBreak[j].h = 16;
+			j++;
+		}
 
 	// load audio
 	sAmbientMusic 		= Mix_LoadMUS("sounds/music.mp3");
@@ -164,10 +175,6 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	sCastHitBoss		= Mix_LoadWAV("sounds/bfxr/snd_castHitBoss.wav");
 	sSlashTilec			= Mix_LoadWAV("sounds/bfxr/snd_slashTilec.wav");
 	sParrySuccess		= Mix_LoadWAV("sounds/bfxr/snd_parrySuccess.wav");
-
-	// load particle textures
-	gParticles.loadFromFile(gRenderer, "resource/gfx/particles.png");
-	gParticles.setBlendMode(SDL_BLENDMODE_ADD);
 
 	//Load texture target
 	gTargetTexture.createBlank( gRenderer, screenWidth, screenHeight, SDL_TEXTUREACCESS_TARGET );
@@ -189,12 +196,12 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 
 void PlayGame::Free() {
 	// free textures
-	gParticles.free();
 	gBG.free();
 	gBG2.free();
 	gCircle.free();
 	gShadow.free();
 	gCursor.free();
+	gTileBreak.free();
 
 	// free audio
 	Mix_FreeChunk(sRockBreak);
@@ -232,6 +239,7 @@ void PlayGame::Free() {
 
 void PlayGame::ShakeCamera()
 {
+	playerCallingToShakeCamera = false;
 	camshake = true;
 	rustleW = 5;
 	rustleSpe = 1;
@@ -848,7 +856,12 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 					  gWindow, gRenderer,
 					  gText, gFont26, {255,255,255},
 					  sAtariBoom, RestartLevel,
-					  LevelToLoad);
+					  LevelToLoad, playerCallingToShakeCamera);
+
+		// Shake camera if player wants to, but right not not used
+		if (playerCallingToShakeCamera) {
+			ShakeCamera();
+		}
 
 		// If we get a true from Player.cpp that we should restart the levelm then restart the level
 		if (RestartLevel) {
@@ -1167,6 +1180,9 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 		// Render Tile in behind player sprite
 		tl.RenderBehindPlayer(gRenderer, tile, 2, camx, camy, &rTiles[0]);
 
+			// Render Tile breaking
+			RenderTileBreakingBehind();
+
 			// Render Mob
 			mb.RenderBack(gRenderer, mob, gFont13, gText, camx, camy);
 
@@ -1176,7 +1192,6 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 			// Render our player
 			player.Render(mex, mey, camx, camy, gWindow,
 					  gRenderer, {255,255,255}, part.count, gText);
-
 
 			// Render Mob
 			mb.RenderFront(gRenderer, mob, gFont13, gText, camx, camy);
@@ -1192,6 +1207,9 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 
 		// Render Tile on top of player
 		tl.RenderOnTopOfPlayer(gRenderer, tile, 2, camx, camy, &rTiles[0]);
+
+		// Render Tile breaking
+		RenderTileBreakingFront();
 
 			// Render Star particles
 			part.RenderVFX(particles, camx, camy, 1, gRenderer);
@@ -2605,73 +2623,112 @@ void PlayGame::checkPlayerAttacksTileCollision() {
 			for (int i = 0; i < tl.max; i++) {
 				if (tile[i].alive) {
 					if (tile[i].collisionTile) {
-						if (tile[i].id == 197 || tile[i].id == 229) {
-							// Get ccenter of object's target
-							float bmx = getCenter(tile[i].x, tile[i].w);
-							float bmy = getCenter(tile[i].y, tile[i].h);
+						// Tile destruction if its a destructible
+						if (tile[i].destructible)
+						{
+							if (tile[i].id == 197 || tile[i].id == 229) {
+								// Get ccenter of object's target
+								float bmx = getCenter(tile[i].x, tile[i].w);
+								float bmy = getCenter(tile[i].y, tile[i].h);
 
-							// Get center of object
-							float bmx2 = getCenter(object[j].x, object[j].w);
-							float bmy2 = getCenter(object[j].y, object[j].h);
+								// Get center of object
+								float bmx2 = getCenter(object[j].x, object[j].w);
+								float bmy2 = getCenter(object[j].y, object[j].h);
 
-							// Distance of tile relative to attack-object
-							float distance = getDistance(bmx, bmy, bmx2, bmy2);
+								// Distance of tile relative to attack-object
+								float distance = getDistance(bmx, bmy, bmx2, bmy2);
 
-							// If distance is less than 50 pixels
-							if (distance < 50)
-							{
-								// Get angle of tile relative to attack-object
-								float angle = atan2(bmy - bmy2,bmx - bmx2);
-								angle = angle * (180 / 3.1416);
-								if (angle < 0) {
-									angle = 360 - (-angle);
-								}
-
-								// Handle radians, cos, sin
-								float radians = (3.1415926536/180)*(angle);
-								float Cos = floor(cos(radians)*10+0.5)/10;
-								float Sin = floor(sin(radians)*10+0.5)/10;
-
-								////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-								//--------------------------------------------------------------------------------------------------------------------------------//
-								//----------------------------- Collision Detection based on player-attack hit-box and tile hit-box ------------------------------//
-								// Check collision between object and tile
-								if (checkCollision(object[j].x, object[j].y, object[j].w, object[j].h, tile[i].x, tile[i].y, tile[i].w, tile[i].h))
+								// If distance is less than 128 pixels
+								if (distance < 128)
 								{
-									// Shake camera
-									ShakeCamera();
-
-									//for (double h=0.0; h< 360.0; h+=rand() % 10 + 10){
-									int rands = rand() % 3 + 8;
-									float newX;
-									float newY;
-									newX = object[j].x+object[j].w/2;
-									newY = object[j].y+object[j].h/2;
-
-									// Particle effect
-									part.spawnTileHitVFX(particles, newX-rands/2, newY-rands/2, rands, rands);
-
-									// Remove Object
-									//object[j].alive = false;
-									//obj.count--;
-
-									// If attack-type: Slash
-									if (player.attackType == 0)
-									{
-										// Play hit sound effect: Slash attack
-						                Mix_PlayChannel(-1, sSlashTilec, 0);
+									// Get angle of tile relative to attack-object
+									float angle = atan2(bmy - bmy2,bmx - bmx2);
+									angle = angle * (180 / 3.1416);
+									if (angle < 0) {
+										angle = 360 - (-angle);
 									}
 
-									// If attack-type: Down-stab
-									else if (player.attackType == 1)
+									// Handle radians, cos, sin
+									float radians = (3.1415926536/180)*(angle);
+									float Cos = floor(cos(radians)*10+0.5)/10;
+									float Sin = floor(sin(radians)*10+0.5)/10;
+
+									////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+									//--------------------------------------------------------------------------------------------------------------------------------//
+									//----------------------------- Collision Detection based on player-attack hit-box and tile hit-box ------------------------------//
+									// Check collision between object and tile
+									if (checkCollision(object[j].x, object[j].y, object[j].w, object[j].h, tile[i].x, tile[i].y, tile[i].w, tile[i].h))
 									{
-										// Play hit sound effect: Down-stab attack
-						                Mix_PlayChannel(-1, sDownStabHitTilec, 0);
+										// Shake camera
+										ShakeCamera();
+
+										// Reduce Tile health
+										tile[i].health -= player.getDamage();
+
+										// Tile destruction if its a destructible
+										if (tile[i].destructible)
+										{
+											// Health reached 0
+											if (tile[i].health <= 0)
+											{
+												// If 1 then choose a random sword
+												int randChoice = rand() % 2;
+
+												// If 2 then choose a random item
+												int randItemID;
+
+												// Handle each output
+												if (randChoice) {
+													randItemID = rand() % 18;
+												} else {
+													randItemID = rand() % 3 + 24;
+												}
+
+												// Spawn random item on floor
+												ite.SpawnAndThrowItem(item,
+														bmx-ite.rSwords[randItemID].w/2,
+														tile[i].y+tile[i].h,
+														randItemID,
+														0.0, randDouble(0.4, 0.6));
+
+												// Remove Tile
+												tile[i].alive = false;
+												tl.tileCount--;
+											}
+										}
+
+										//for (double h=0.0; h< 360.0; h+=rand() % 10 + 10){
+										int rands = rand() % 3 + 8;
+										float newX;
+										float newY;
+										newX = object[j].x+object[j].w/2;
+										newY = object[j].y+object[j].h/2;
+
+										// Particle effect
+										part.spawnTileHitVFX(particles, newX-rands/2, newY-rands/2, rands, rands);
+
+										// Remove Object
+										//object[j].alive = false;
+										//obj.count--;
+
+										// If attack-type: Slash
+										if (player.attackType == 0)
+										{
+											// Play hit sound effect: Slash attack
+							                Mix_PlayChannel(-1, sSlashTilec, 0);
+										}
+
+										// If attack-type: Down-stab
+										else if (player.attackType == 1)
+										{
+											// Play hit sound effect: Down-stab attack
+							                Mix_PlayChannel(-1, sDownStabHitTilec, 0);
+										}
 									}
+									//----------------------------- Collision Detection based on player-attack hit-box and tile hit-box ------------------------------//
+									//--------------------------------------------------------------------------------------------------------------------------------//
+									////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 								}
-								//----------------------------- Collision Detection based on player-attack hit-box and tile hit-box ------------------------------//
-								//--------------------------------------------------------------------------------------------------------------------------------//
-								////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							}
 						}
 					}
@@ -3263,6 +3320,122 @@ void PlayGame::checkBossOrMobDied() {
 
 				// Update levelsCompleted
 		    	//SaveLevelsCompleted();
+			}
+		}
+	}
+}
+
+void PlayGame::RenderTileBreakingBehind() {
+
+	// Render Tile break
+	{
+		// Bottom of Player
+		float bmy = player.getBottomSide();
+
+		for (int i = 0; i < tl.max; i++) {
+			if (tile[i].alive) {
+
+				// Yellow box tiles
+				if (tile[i].id == 197 || tile[i].id == 229) {
+					// If destructible, render destructible Texture on Tiles
+					{
+						if (tile[i].destructible) {
+
+							// if player's y position is lower than Tile's y position
+							if (bmy > tile[i].y + tile[i].h) {
+
+								int sprite_index = 9;
+
+								if (tile[i].health == 50) {
+									sprite_index = -1;
+								} else if (tile[i].health >= 45 && tile[i].health <= 49) {
+									sprite_index = 1;
+								} else if (tile[i].health >= 40 && tile[i].health <= 44) {
+									sprite_index = 1;
+								} else if (tile[i].health >= 35 && tile[i].health <= 39) {
+									sprite_index = 2;
+								} else if (tile[i].health >= 30 && tile[i].health <= 34) {
+									sprite_index = 3;
+								} else if (tile[i].health >= 25 && tile[i].health <= 29) {
+									sprite_index = 4;
+								} else if (tile[i].health >= 20 && tile[i].health <= 24) {
+									sprite_index = 5;
+								} else if (tile[i].health >= 15 && tile[i].health <= 19) {
+									sprite_index = 6;
+								} else if (tile[i].health >= 10 && tile[i].health <= 14) {
+									sprite_index = 7;
+								} else if (tile[i].health >= 5 && tile[i].health <= 9) {
+									sprite_index = 8;
+								} else if (tile[i].health >= 0 && tile[i].health <= 4) {
+									sprite_index = 9;
+								}
+
+								if (sprite_index != -1) {
+									gTileBreak.setAlpha(255);
+									gTileBreak.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &rTileBreak[sprite_index]);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void PlayGame::RenderTileBreakingFront() {
+
+	// Render Tile break
+	{
+		// Bottom of Player
+		float bmy = player.getBottomSide();
+
+		for (int i = 0; i < tl.max; i++) {
+			if (tile[i].alive) {
+
+				// Yellow box tiles
+				if (tile[i].id == 197 || tile[i].id == 229) {
+					// If destructible, render destructible Texture on Tiles
+					{
+						if (tile[i].destructible) {
+
+							// if player's y position is lower than Tile's y position
+							if (bmy < tile[i].y + tile[i].h) {
+
+								int sprite_index = 9;
+
+								if (tile[i].health == 50) {
+									sprite_index = -1;
+								} else if (tile[i].health >= 45 && tile[i].health <= 49) {
+									sprite_index = 1;
+								} else if (tile[i].health >= 40 && tile[i].health <= 44) {
+									sprite_index = 1;
+								} else if (tile[i].health >= 35 && tile[i].health <= 39) {
+									sprite_index = 2;
+								} else if (tile[i].health >= 30 && tile[i].health <= 34) {
+									sprite_index = 3;
+								} else if (tile[i].health >= 25 && tile[i].health <= 29) {
+									sprite_index = 4;
+								} else if (tile[i].health >= 20 && tile[i].health <= 24) {
+									sprite_index = 5;
+								} else if (tile[i].health >= 15 && tile[i].health <= 19) {
+									sprite_index = 6;
+								} else if (tile[i].health >= 10 && tile[i].health <= 14) {
+									sprite_index = 7;
+								} else if (tile[i].health >= 5 && tile[i].health <= 9) {
+									sprite_index = 8;
+								} else if (tile[i].health >= 0 && tile[i].health <= 4) {
+									sprite_index = 9;
+								}
+
+								if (sprite_index != -1) {
+									gTileBreak.setAlpha(255);
+									gTileBreak.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &rTileBreak[sprite_index]);
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
