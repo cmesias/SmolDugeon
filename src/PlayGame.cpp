@@ -1484,6 +1484,54 @@ void PlayGame::checkCollisionParticleTile()
 							// Circle Collision
 							if (distance < tile[j].w/2 + particles[i].w/2)
 							{
+								// If tile destructible, lower health
+								if (tile[j].destructible) {
+									if (tile[j].id == 197 || tile[j].id == 229) {
+
+										// Shake camera
+										ShakeCamera();
+
+										// Damage health of Tile
+										tile[j].health -= particles[i].damage;
+
+										// Damage Tile
+										if (tile[j].health <= 0) {
+											// Spawn random item
+											{
+												// If 1 then choose a random sword
+												int randChoice = rand() % 3;
+
+												// If 2 then choose a random item
+												int randItemID;
+
+												// If 3 Green health
+
+												// Handle each output
+												if (randChoice == 0) {
+													randItemID = rand() % 12;
+												} else if (randChoice == 1) {
+													randItemID = rand() % 6 + 16;
+												} else if (randChoice == 2) {
+													randItemID = 28;
+												}
+
+												// Spawn random item on floor
+												ite.SpawnAndThrowItem(item,
+														bmx-ite.rSwords[randItemID].w/2,
+														tile[j].y+tile[j].h,
+														randItemID,
+														0.0, randDouble(0.4, 0.6));
+											}
+
+											// Remove tile
+											tile[j].alive = false;
+											tl.tileCount--;
+										}
+
+										// Play hit sound effect
+						                Mix_PlayChannel(-1, sParrySuccess, 0);
+									}
+								}
 								// Spawn particle effect
 								part.spawnTileHitVFX(particles,
 										getCenter(particles[i].x, particles[i].w),
@@ -1715,6 +1763,20 @@ void PlayGame::checkCollisionPlayerItem() {
 						// play sound effect
 						Mix_PlayChannel(-1, sCastHitBoss, 0);
 					}
+
+					// Green health
+					else if (item[i].id == 28) {
+
+						// Remove item
+						item[i].alive = false;
+						ite.count--;
+
+						// Increase player Gold keys
+						player.IncreaseHealth(25);
+
+						// play sound effect
+						Mix_PlayChannel(-1, sCastHitBoss, 0);
+					}
 				}
 
 				// No collision
@@ -1872,9 +1934,22 @@ void PlayGame::checkPlayerTileCollision()
 								tile[i].clip = rTiles[399];
 
 								// Spawn random item out form chest
-								int randItem = rand() % 5 + 13;
+								int randChoice = rand() % 50 + 1;
+								int randItem;
+
+								// If 50, spawn heart! Very rare.
+								if (randChoice == 50) {
+									randItem = 24;
+								}
+
+								// Else spawn a random great sword
+								else {
+									randItem = rand() % 5 + 13;
+								}
+
+								// Spawn item
 								ite.SpawnAndThrowItem(item, tile[i].x+tile[i].w/2-ite.rSwords[randItem].w/2, tile[i].y+tile[i].h,
-										rand() % 5 + 13,
+										randItem,
 										0.0, randDouble(4, 5));
 
 								// play sound effect
@@ -2208,6 +2283,12 @@ void PlayGame::checkPlayerAttacksCollisionMob() {
 
 								// Shake camera
 								ShakeCamera();
+
+
+								// Broken swords have lifesteal? // TODO delete this lol
+								if (player.getItemID() >= 19 && player.getItemID() <= 22) {
+									player.IncreaseHealth(5);
+								}
 
 								// Spawn blood VFX
 								part.spawnBloodVFX(particles, mob[i].x, mob[i].y-mob[i].h, mob[i].w, mob[i].h, {204,57,123});
@@ -2671,25 +2752,32 @@ void PlayGame::checkPlayerAttacksTileCollision() {
 											// Health reached 0
 											if (tile[i].health <= 0)
 											{
-												// If 1 then choose a random sword
-												int randChoice = rand() % 2;
+												// Spawn random item
+												{
+													// If 1 then choose a random sword
+													int randChoice = rand() % 3;
 
-												// If 2 then choose a random item
-												int randItemID;
+													// If 2 then choose a random item
+													int randItemID;
 
-												// Handle each output
-												if (randChoice) {
-													randItemID = rand() % 18;
-												} else {
-													randItemID = rand() % 3 + 24;
+													// If 3 Green health
+
+													// Handle each output
+													if (randChoice == 0) {
+														randItemID = rand() % 12;
+													} else if (randChoice == 1) {
+														randItemID = rand() % 6 + 16;
+													} else if (randChoice == 2) {
+														randItemID = 28;
+													}
+
+													// Spawn random item on floor
+													ite.SpawnAndThrowItem(item,
+															bmx-ite.rSwords[randItemID].w/2,
+															tile[i].y+tile[i].h,
+															randItemID,
+															0.0, randDouble(0.4, 0.6));
 												}
-
-												// Spawn random item on floor
-												ite.SpawnAndThrowItem(item,
-														bmx-ite.rSwords[randItemID].w/2,
-														tile[i].y+tile[i].h,
-														randItemID,
-														0.0, randDouble(0.4, 0.6));
 
 												// Remove Tile
 												tile[i].alive = false;
@@ -3315,6 +3403,22 @@ void PlayGame::checkBossOrMobDied() {
 		{
 			// If boss health goes lower than 0, remove boss
 			if (mob[i].health <= 0) {
+
+				// Spawn health or coin
+				int randNum = rand() % 2;
+				int tempID;
+				if (randNum)
+					tempID = 25;
+				else
+					tempID = 28;
+
+				// Spawn health or coin
+				ite.SpawnAndThrowItem(item,
+						mob[i].x+mob[i].w/2-ite.rSwords[tempID].w/2,
+						mob[i].y+mob[i].h,
+						tempID, 0.0, randDouble(4, 5));
+
+				// Remove mob
 				mob[i].alive = false;
 				mb.count--;
 

@@ -60,6 +60,9 @@ void Item::Load(SDL_Renderer* gRenderer){
 
 		// Golden key
 		rSwords[27] = {87,45,7,15};
+
+		// Golden key
+		rSwords[28] = {96,48,8,7};
 	}
 
 	// Other fonts
@@ -478,7 +481,7 @@ void Item::setStatsBasedOnType(Item item[], int i) {
 		// Broken swords
 		if (item[i].id >= 19 && item[i].id <= 22) {
 			item[i].slashAtkSpe 	= 10;
-			item[i].damage 			= 1;
+			item[i].damage 			= 5;
 		}
 		// Bomb
 		if (item[i].id == 23) {
@@ -563,8 +566,8 @@ void Item::setStatsBasedOnType(Item item[], int i) {
 
 		// Heart
 		if (item[i].id == 24) {
-			item[i].w = 10*2;
-			item[i].h = 10*2;
+			item[i].w = 10*4;
+			item[i].h = 10*4;
 		}
 
 		// Coin
@@ -583,6 +586,12 @@ void Item::setStatsBasedOnType(Item item[], int i) {
 		if (item[i].id == 27) {
 			item[i].w = 5*2;
 			item[i].h = 10*2;
+		}
+
+		// Green health key
+		if (item[i].id == 28) {
+			item[i].w = 8*4;
+			item[i].h = 7*4;
 		}
 
 		// Set size for Keys when loaded

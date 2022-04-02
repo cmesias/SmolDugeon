@@ -441,7 +441,7 @@ void Mob::Update(Mob mob[], Object &obj, Object object[],
 					if (mob[i].chargeTime == mob[i].attackFrame)
 					{
 						// Spawn projectile
-						p_dummy.spawnRedProjectileAttack(particle, 1, tempX, tempY, rands, rands, mob[i].angleFacingTarget, 20, speed);
+						p_dummy.spawnRedProjectileAttack(particle, 1, tempX, tempY, rands, rands, mob[i].angleFacingTarget, 5, speed);
 
 						// Play SFX
 						Mix_PlayChannel(-1, sCast, 0);

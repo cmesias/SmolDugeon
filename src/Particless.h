@@ -133,6 +133,13 @@ public:	// functions
 			  float spawnW, float spawnH, float damage, float angle);
 
 
+	// Single COLORED projectile, goes towards one direction
+	void spawnProjectileAttack(Particle particle[], int hurtType, float spawnX, float spawnY,
+			float spawnW, float spawnH,
+			float angle, float damage, float speed,
+			SDL_Color color);
+
+
 	// Single red projectile, goes towards one direction
 	void spawnRedProjectileAttack(Particle particle[], int hurtType, float spawnX, float spawnY,
 			float spawnW, float spawnH,

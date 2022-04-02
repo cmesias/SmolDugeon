@@ -106,8 +106,7 @@ int main(int argc, char *argv[]) {
  * 						  but if the Player wants to play on hard then enemies will not get stunned when hit regularly.
  *
  *
- *
- *
+ * TODO [ ] *** create a cast damage for each sword, create this new variable in Itms.cpp
  * TODO [ ] (3-28-2022) - Create an autosave when the player goes to a new area autosave.
  * 						  [ ] Create autosave tiles that will save a checkpoint.
  * 						  [ ] Figure out if we should spawn back monsters or keep them dead.

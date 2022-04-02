@@ -106,7 +106,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName){
 	this->healthMax				= 100;
 
 	// Damage
-	this->castDamage			= 5;
+	this->castDamage			= 15;
 	this->damageMultipler		= 1;
 	this->castAtkSpe 			= 6.87;
 
@@ -373,6 +373,9 @@ void Players::Update(Map &map,
 		// Player health decay
 		if (this->healthDecay > this->health) {
 			this->healthDecay -= 0.25;
+		}
+		if (this->healthDecay < this->health) {
+			this->healthDecay += 0.25;
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////
@@ -733,6 +736,141 @@ void Players::Update(Map &map,
 
 							// Spawn swords attribute
 							{
+								// Wood Sword
+								if (swordInHand_Index == 1) {
+
+									// Spawn projectile
+									int rands  = 24;
+									float speed  = 21;
+
+									for (double j=0.0; j< 45.0; j+=9){
+										p_dummy.spawnProjectileAttack(particle, 0,
+												this->x + this->w/2 - rands/2,
+												this->y + this->h/2 - rands/2,
+												rands, rands, this->angle-22.5+j, this->castDamage, speed,
+												{102, 71, 31});
+									}
+
+									// play audio
+									Mix_PlayChannel(1, sCast, 0);
+								}
+								// Rusty Sword
+								if (swordInHand_Index == 2) {
+
+									// Spawn projectile
+									int rands  = 24;
+									float speed  = 21;
+
+									for (double j=0.0; j< 45.0; j+=9){
+										p_dummy.spawnProjectileAttack(particle, 0,
+												this->x + this->w/2 - rands/2,
+												this->y + this->h/2 - rands/2,
+												rands, rands, this->angle-22.5+j, this->castDamage, speed,
+												{72, 112, 133});
+									}
+
+									// play audio
+									Mix_PlayChannel(1, sCast, 0);
+								}
+								// Iron Sword
+								if (swordInHand_Index == 3) {
+
+									// Spawn projectile
+									int rands  = 24;
+									float speed  = 21;
+
+									for (double j=0.0; j< 45.0; j+=5){
+										p_dummy.spawnProjectileAttack(particle, 0,
+												this->x + this->w/2 - rands/2,
+												this->y + this->h/2 - rands/2,
+												rands, rands, this->angle-22.5+j, this->castDamage, speed,
+												{120, 110, 121});
+									}
+
+									// play audio
+									Mix_PlayChannel(1, sCast, 0);
+								}
+
+								// Iron Sword w/ Red in center
+								if (swordInHand_Index == 4) {
+
+									// Spawn projectile
+									int rands  = 24;
+									float speed  = 21;
+
+									for (double j=0.0; j< 45.0; j+=5){
+										p_dummy.spawnProjectileAttack(particle, 0,
+												this->x + this->w/2 - rands/2,
+												this->y + this->h/2 - rands/2,
+												rands, rands, this->angle-22.5+j, this->castDamage, speed,
+												{200, 95, 101});
+									}
+
+									// play audio
+									Mix_PlayChannel(1, sCast, 0);
+								}
+
+								// Silver Sword
+								if (swordInHand_Index == 5) {
+
+									// Spawn projectile
+									int rands  = 24;
+									float speed  = 21;
+
+									for (double j=0.0; j< 45.0; j+=5){
+										p_dummy.spawnProjectileAttack(particle, 0,
+												this->x + this->w/2 - rands/2,
+												this->y + this->h/2 - rands/2,
+												rands, rands, this->angle-22.5+j, this->castDamage, speed,
+												{106, 95, 101});
+									}
+
+									// play audio
+									Mix_PlayChannel(1, sCast, 0);
+								}
+
+								// Yellow Sword
+								if (swordInHand_Index == 6) {
+
+									// Spawn projectile
+									int rands  = 24;
+									float speed  = 21;
+
+									for (double j=0.0; j< 45.0; j+=5){
+										p_dummy.spawnProjectileAttack(particle, 0,
+												this->x + this->w/2 - rands/2,
+												this->y + this->h/2 - rands/2,
+												rands, rands, this->angle-22.5+j, this->castDamage, speed,
+												{244, 144, 25});
+									}
+
+
+
+									// play audio
+									Mix_PlayChannel(1, sCast, 0);
+								}
+
+								// Yellow Sword
+								if (swordInHand_Index == 7) {
+
+									// Spawn projectile
+									int rands  = 24;
+									float speed  = 21;
+
+									for (double j=0.0; j< 45.0; j+=5){
+										p_dummy.spawnProjectileAttack(particle, 0,
+												this->x + this->w/2 - rands/2,
+												this->y + this->h/2 - rands/2,
+												rands, rands, this->angle-22.5+j, this->castDamage, speed,
+												{255, 188, 120});
+									}
+
+
+
+									// play audio
+									Mix_PlayChannel(1, sCast, 0);
+								}
+
 								// Black sword
 								if (swordInHand_Index == 8) {
 									// Spawn projectile
@@ -745,6 +883,28 @@ void Players::Update(Map &map,
 
 									// play audio
 									Mix_PlayChannel(1, sCast, 0);
+								}
+
+								// Green sword
+								if (swordInHand_Index == 9) {
+
+									// Spawn projectile
+									int rands  = 24;
+									float speed  = 21;
+
+									for (double j=0.0; j< 45.0; j+=9){
+										p_dummy.spawnProjectileAttack(particle, 0,
+												this->x + this->w/2 - rands/2,
+												this->y + this->h/2 - rands/2,
+												rands, rands, this->angle-22.5+j, this->castDamage, speed,
+												{20, 200, 20});
+									}
+
+
+
+									// play audio
+									Mix_PlayChannel(1, sCast, 0);
+
 								}
 
 								// Red sword
@@ -1574,9 +1734,9 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 	{
 		// Highscore text
 		tempsi.str( std::string() );
-		tempsi << this->damage << " - " << this->castDamage;
+		tempsi << this->damage << " - " << this->slashAtkSpe << " - " << this->castDamage;
 		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {244, 144, 20}, gFont24);
-		gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*3, gText.getWidth(), gText.getHeight());
+		gText.render(gRenderer, screenWidth-gText.getWidth()*2-15, 75+28*3, gText.getWidth(), gText.getHeight());
 
 		/*tempsi.str( std::string() );
 		tempsi << "Score: " << this->score;

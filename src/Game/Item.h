@@ -41,6 +41,7 @@ public:	// Parent object Variables
 	 * 25: 		Coin
 	 * 26: 		Silver key
 	 * 27: 		Gold key
+	 * 28: 		Green health
 	 */
 	int id;			// id of instances
 
@@ -89,8 +90,9 @@ public:	// Resources
 	 * 25: Coin 						10 x 10
 	 * 26: Silver key 					5 x 10
 	 * 27: Gold key 					5 x 10
+	 * 28: Green health					8 x 7
 	 */
-	SDL_Rect rSwords[28];
+	SDL_Rect rSwords[29];
 
 public:	// Variables
 	float hoverAmount;

@@ -327,6 +327,25 @@ void Particle::spawnSlashAttackProjectile(Particle particle[], int hurtType, flo
 		   false, 0);
 }
 
+void Particle::spawnProjectileAttack(Particle particle[], int hurtType, float spawnX, float spawnY,
+		float spawnW, float spawnH,
+		float angle, float damage, float speed,
+		SDL_Color color) {
+
+	spawnParticleAngle(particle, 1, hurtType,
+			spawnX,
+			spawnY,
+			spawnW, spawnH,
+			angle, speed,
+			damage, damage, 1,
+			color, 1,
+			   1, 1,
+			   255, 0,
+			   60*6, 1,
+			   false, 0,
+			   100, 10);
+}
+
 void Particle::spawnRedProjectileAttack(Particle particle[], int hurtType, float spawnX, float spawnY,
 		float spawnW, float spawnH,
 		float angle, float damage, float speed) {
@@ -353,7 +372,7 @@ void Particle::spawnBlackVoidProjectileAttack(Particle particle[], int hurtType,
 			spawnY,
 			spawnW, spawnH,
 			angle, speed,
-		   10, 0, 1,
+			damage, damage, 1,
 		   {106, 13, 173, 255}, 1,
 		   1, 1,
 		   255, 0,
