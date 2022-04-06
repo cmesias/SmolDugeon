@@ -20,8 +20,10 @@
 #include "Object.h"
 #include "TextNFont.h"
 
+#include "../AudioManager.h"
+
 //Player
-class Players: public Helper, public TextNFont {
+class Players: public Helper, public TextNFont, public AudioManager {
 public:
 	enum Result { QUIT, LOADMENU, PLAYGAME, QUITPLAYGAME };
 public:
@@ -55,14 +57,6 @@ public:	// resources
 	 * 27: 		Gold key
 	 */
 	SDL_Rect rSwords[28];
-
-	// Audio
-	Mix_Chunk *sCast 			= NULL;
-	Mix_Chunk *sSlash 			= NULL;
-	Mix_Chunk *sDownStab		= NULL;
-	Mix_Chunk *sParry			= NULL;
-	Mix_Chunk *sStep			= NULL;
-	Mix_Chunk *sDash			= NULL;
 
 	/*
 	 * 0-3: Walk
@@ -529,6 +523,11 @@ public:
 
 	// Save current highs-core for current Level
 	void SaveHighScore(int LevelToLoad);
+
+
+public:	// Change volume
+
+	void changeVolume(float newVolume);
 
 };
 

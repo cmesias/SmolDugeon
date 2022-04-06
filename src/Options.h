@@ -13,8 +13,6 @@
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
 
-#include "Game/Players.h"
-
 #include "Helper.h"
 
 #include "LTexture.h"
@@ -95,9 +93,9 @@ public:	// Bar variables
 public:	// Settings that can be changed by user
 
 	// Audio, Video Settings
-	int MASTER_VOL;
-	int MUSIC_VOL;
-	int SFX_VOL;
+	float MASTER_VOL;
+	float MUSIC_VOL;
+	float SFX_VOL;
 	int RESOLUTION;
 	int ANTI_ALIAS;
 	int VSYNC;
@@ -160,7 +158,7 @@ public: // Bar sliders and text
 		bool mouse;
 		bool alive;
 		bool highlight;
-		int value;
+		float value;
 		std::string name;
 
 		void init(Bar bar[]){
@@ -358,7 +356,7 @@ public:	// functions
 	void applyVideoCFG(LWindow &gWindow);
 
 	// Apply audio configurations
-	void applyCustomAudioCFG(int MUSIC_VOL, int SFX_VOL);
+	void applyCustomAudioCFG(float MUSIC_VOL, float SFX_VOL);
 	void applyOldAudioCFG();
 	void applyMasterAudioCFG();
 
@@ -377,9 +375,6 @@ public:	// functions
 				   std::string TileSaveData,
 				   std::string ItemSaveData,
 				   std::string MonsterSaveData);*/
-
-	// Return a string the user has entered (hint is used to give the Editor an idea of what to write)
-	std::string GetInput(LWindow &gWindow, SDL_Renderer *gRenderer, bool &mainLoop, std::string hint);
 
 	// User input
 	void OnKeyDown(SDL_Keycode sysm);

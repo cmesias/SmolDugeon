@@ -8,11 +8,22 @@
 #include "Button.h"
 
 
-void Button::Init(std::string textField, std::string resultText) {
-	this->textField 	= textField;
-	this->resultText 	= resultText;
-	this->hover 		= false;
-	this->pressed 		= false;
+void Button::Init(std::string textField, std::string resultText, bool sameSizeAsText) {
+	this->textField 		= textField;
+	this->resultText 		= resultText;
+	this->hover 			= false;
+	this->pressed 			= false;
+	this->sameSizeAsText 	= sameSizeAsText;
+}
+
+void Button::Init(std::string textField, std::string resultText, float w, float h) {
+	this->textField 		= textField;
+	this->resultText 		= resultText;
+	this->w 				= w;
+	this->h 				= h;
+	this->hover 			= false;
+	this->pressed 			= false;
+	this->sameSizeAsText 	= false;
 }
 
 void Button::Load() {
@@ -65,35 +76,62 @@ void Button::Render(SDL_Renderer *gRenderer)
 	// Button hovered by mouse
 	if (this->hover) {
 		SDL_Rect tempr = {this->x-20, this->y-15, this->w+40, this->h+30};
-		SDL_SetRenderDrawColor(gRenderer, 180, 120, 40, 255);
-		SDL_RenderFillRect(gRenderer, &tempr);
+		SDL_SetRenderDrawColor(gRenderer, 180, 180, 180, 255);
+		SDL_RenderDrawRect(gRenderer, &tempr);
 	}
 
 	// Button pressed by mouse
 	if (this->pressed) {
 		SDL_Rect tempr = {this->x-20, this->y-15, this->w+40, this->h+30};
-		SDL_SetRenderDrawColor(gRenderer, 220, 144, 80, 255);
-		SDL_RenderFillRect(gRenderer, &tempr);
+		SDL_SetRenderDrawColor(gRenderer, 120, 120, 120, 255);
+		SDL_RenderDrawRect(gRenderer, &tempr);
 	}
 
 	// Text
 	gText.loadFromRenderedText(gRenderer, this->textField, {255,255,255}, gFont13);
-	this->w = gText.getWidth();
-	this->h = gText.getHeight();
+
+	if (this->sameSizeAsText) {
+		this->w = gText.getWidth();
+		this->h = gText.getHeight();
+	}
 
 	// Render bg for text
-	SDL_Rect tempr = {this->x-10, this->y-7, this->w+20, this->h+14};
-	SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-	SDL_RenderFillRect(gRenderer, &tempr);
+	//DL_Rect tempr = {this->x-10, this->y-7, this->w+20, this->h+14};
+	//SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+	//SDL_RenderFillRect(gRenderer, &tempr);
 
 	// Render border for text
-	tempr = {this->x-10, this->y-7, this->w+20, this->h+14};
-	SDL_SetRenderDrawColor(gRenderer, 210, 144, 80, 255);
-	SDL_RenderDrawRect(gRenderer, &tempr);
+	//tempr = {this->x-10, this->y-7, this->w+20, this->h+14};
+	//SDL_SetRenderDrawColor(gRenderer, 210, 144, 80, 255);
+	//SDL_RenderDrawRect(gRenderer, &tempr);
 
 	// Render text
 	gText.setAlpha(255);
-	gText.setColor(0,0,0);
+	gText.setColor(255,255,255);
 	gText.render(gRenderer, this->x, this->y, gText.getWidth(), gText.getHeight());
+}
 
+void Button::Render(SDL_Renderer *gRenderer, float xOffset, float yOffset)
+{
+	// Button hovered by mouse
+	if (this->hover) {
+		SDL_Rect tempr = {this->x-20, this->y-10, this->w+40, this->h+20};
+		SDL_SetRenderDrawColor(gRenderer, 180, 180, 180, 255);
+		SDL_RenderDrawRect(gRenderer, &tempr);
+	}
+
+	// Button pressed by mouse
+	if (this->pressed) {
+		SDL_Rect tempr = {this->x-20, this->y-10, this->w+40, this->h+20};
+		SDL_SetRenderDrawColor(gRenderer, 120, 120, 120, 255);
+		SDL_RenderDrawRect(gRenderer, &tempr);
+	}
+
+	// Text
+	gText.loadFromRenderedText(gRenderer, this->textField, {255,255,255}, gFont13);
+
+	// Render text
+	gText.setAlpha(255);
+	gText.setColor(255,255,255);
+	gText.render(gRenderer, this->x+xOffset, this->y+yOffset, gText.getWidth(), gText.getHeight());
 }

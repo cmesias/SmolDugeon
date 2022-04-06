@@ -330,7 +330,9 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 							debug = (!debug);
 							break;
 						case SDLK_ESCAPE:	// pause menu
-							start(gWindow, gRenderer);
+							//start(gWindow, gRenderer);
+
+							audioM.start(gWindow, gRenderer);
 							break;
 						case SDLK_F1:							// Set render size 1
 							//SDL_RenderSetLogicalSize(gRenderer,1920,1080);
@@ -428,7 +430,7 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 				// Mouse Released
 				//result = mouseReleased(event);
 
-				// Customize Character results
+				// Handle exit on Options.cpp
 				switch (optionsResult)  {
 				case Options::Back:				// Back (to Main Menu)
 					quit = true;
@@ -440,6 +442,20 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 					return;
 					break;
 				}
+
+				// Handle exit on AudioManager.cpp
+				switch (audioM.audioManagerResult)  {
+				case AudioManager::Back:				// Back (to Main Menu)
+					// Do nothing
+					break;
+				case AudioManager::Exit:				// Back (to Main Menu)
+					result = Exit;
+					quit = true;
+					Free();
+					return;
+					break;
+				}
+
 			}
 		}
 

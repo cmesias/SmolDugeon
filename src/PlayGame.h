@@ -21,6 +21,7 @@
 #include "Game/TextNFont.h"
 #include "Helper.h"
 #include "Options.h"
+#include "AudioManager.h"
 
 #include <cassert>
 #include <cstdio>
@@ -31,6 +32,9 @@
 
 
 class PlayGame : public Helper, public Options, public TextNFont {
+
+public:
+	AudioManager audioM;
 
 public:	// Global World Variables
 	double gravity = 0.6;

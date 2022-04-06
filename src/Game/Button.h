@@ -17,12 +17,14 @@ struct Button: public TextNFont, public Helper {
 public:
 	float x, y;
 	float w, h;
+	bool sameSizeAsText;
 	bool hover;
 	bool pressed;
 	std::string textField;
 	std::string resultText;
 
-	void Init(std::string textField, std::string resultText);
+	void Init(std::string textField, std::string resultText, bool sameSizeAsText = true);
+	void Init(std::string textField, std::string resultText, float w, float h);
 
 	void Load();
 
@@ -33,6 +35,8 @@ public:
 	std::string CheckMouseReleased(float mex, float mey);
 
 	void Render(SDL_Renderer *gRenderer);
+
+	void Render(SDL_Renderer *gRenderer, float xOffset, float yOffset);
 };
 
 #endif /* BUTTON_H_ */

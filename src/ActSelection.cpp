@@ -366,21 +366,21 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 
 		// Set position of button: Start Game Button
 		StartGameBtn.Update(mex, mey,
-							screenWidth * 0.90 - StartGameBtn.w,
-							screenHeight * 0.90 - StartGameBtn.h,
+							screenWidth * 0.90 - StartGameBtn.gText.getWidth(),
+							screenHeight * 0.90 - StartGameBtn.gText.getHeight(),
 							leftClick);
 
 		// Set position of button: Erase Data Button
 		EraseDataBtn.Update(mex, mey,
-							screenWidth * 0.5 - EraseDataBtn.w/2,
-							screenHeight * 0.90 - EraseDataBtn.h,
+							screenWidth * 0.5 - EraseDataBtn.gText.getWidth()/2,
+							screenHeight * 0.90 - EraseDataBtn.gText.getHeight(),
 							leftClick);
 
 
 		// Set position of button: Back Button
 		BackBtn.Update(mex, mey,
 							screenWidth * 0.10,
-							screenHeight * 0.90 - StartGameBtn.h,
+							screenHeight * 0.90 - StartGameBtn.gText.getHeight(),
 							leftClick);
 
 

@@ -228,16 +228,9 @@ void Players::Load(SDL_Renderer* gRenderer){
 		rSwords[27] = {87,45,7,15};
 	}
 
-	// Load audio
-	sCast 			= Mix_LoadWAV("sounds/bfxr/snd_cast.wav");
-	sDownStab		= Mix_LoadWAV("sounds/bfxr/snd_downStab.wav");
-	sParry			= Mix_LoadWAV("sounds/bfxr/snd_parry.wav");
-	sStep			= Mix_LoadWAV("sounds/cmesias/snd_step.wav");
-	sSlash 			= Mix_LoadWAV("sounds/cmesias/snd_slash.wav");
-	sDash			= Mix_LoadWAV("sounds/cmesias/snd_dash.wav");
-
 	// Other classes
 	LoadFonts();
+	LoadAudio();
 }
 
 // Free asteroid resources
@@ -249,22 +242,9 @@ void Players::Free(){
     gShield.free();
     gSwords.free();
 
-    // Free audio
-	Mix_FreeChunk(sCast);
-	Mix_FreeChunk(sSlash);
-	Mix_FreeChunk(sDownStab);
-	Mix_FreeChunk(sParry);
-	Mix_FreeChunk(sStep);
-	Mix_FreeChunk(sDash);
-	sCast 			= NULL;
-	sSlash 			= NULL;
-	sDownStab		= NULL;
-	sParry			= NULL;
-	sStep			= NULL;
-	sDash			= NULL;
-
 	// Other classes
 	FreeFonts();
+	FreeAudio();
 }
 
 // Player shoot
@@ -2383,6 +2363,10 @@ void Players::SaveHighScore(int LevelWeLoaded) {
 	}
 }
 
+
+void Players::changeVolume(float newVolume) {
+	Mix_VolumeChunk(sSlash, newVolume);
+}
 
 
 
