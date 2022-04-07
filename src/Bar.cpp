@@ -119,7 +119,7 @@ void Bar::render(SDL_Renderer *gRenderer) {
 	// Render text, RGB bar name
 	std::stringstream tempss;
 	tempss << name;
-	gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont21);
+	gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont24);
 	gText.setAlpha(255);
 	gText.render(gRenderer, x, y-21, gText.getWidth(), gText.getHeight());
 }
@@ -127,13 +127,10 @@ void Bar::render(SDL_Renderer *gRenderer) {
 
 
 void Bar::load() {
-	gFont12 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 15);
-	gFont21 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 21);
+	LoadFonts();
 }
 
 
 void Bar::free() {
-	gText.free();
-	TTF_CloseFont(gFont12);
-	TTF_CloseFont(gFont21);
+	FreeFonts();
 }

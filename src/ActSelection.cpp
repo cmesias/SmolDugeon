@@ -466,7 +466,7 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 						std::stringstream tempss;
 						tempss << "_gameState: Act Selection Scene.";
 						gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
-												   {255,255,255}, gFont13);
+												   {255,255,255}, gFont12);
 						gText.setAlpha(255);
 						gText.render(gRenderer, gWindow.getWidth() - gText.getWidth(),
 												0,
@@ -479,7 +479,7 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 						std::stringstream tempss;
 						tempss << "Completed Levels: " << LevelsCompleted;
 						gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
-												   {255,255,255}, gFont13);
+												   {255,255,255}, gFont12);
 						gText.setAlpha(255);
 						gText.render(gRenderer, gWindow.getWidth()/2 - gText.getWidth(),
 												gWindow.getHeight() * 0.90 - gText.getHeight(),
@@ -492,7 +492,7 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 						std::stringstream tempss;
 						tempss << "Level hovered: " << levelIndex;
 						gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
-												   {255,255,255}, gFont13);
+												   {255,255,255}, gFont12);
 						gText.setAlpha(255);
 						gText.render(gRenderer, gWindow.getWidth()/2 - gText.getWidth(),
 												gWindow.getHeight() * 0.90 - gText.getHeight() + 14,
@@ -502,7 +502,7 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 						tempss.str(std::string());
 						tempss << "selectedLevel: " << selectedLevel;
 						gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
-												   {255,255,255}, gFont13);
+												   {255,255,255}, gFont12);
 						gText.setAlpha(255);
 						gText.render(gRenderer, gWindow.getWidth()/2 - gText.getWidth(),
 												gWindow.getHeight() * 0.90 - gText.getHeight() + 28,

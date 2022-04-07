@@ -8,16 +8,20 @@
 #ifndef MAINMENU_H_
 #define MAINMENU_H_
 
+#include <SDL2/SDL_ttf.h>
+
 // Include other headers
 #include "Helper.h"
 
 // Native for this header only
-#include "Options.h"
 #include "LTexture.h"
+#include "LWindow.h"
 #include "Game/TextNFont.h"
+#include "Settings.h"
 
-class MainMenu : public Helper, public Options, public TextNFont  {
+class MainMenu : public Helper, public TextNFont  {
 public:	// Resources
+	Settings settings;
 	LTexture gMenu;
 	LTexture gText;
 
@@ -28,6 +32,11 @@ public:
 	void Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuResult &result);
 	MainMenu::MenuResult mousePressed(SDL_Event event);
 	MainMenu::MenuResult mouseReleased(LWindow gWindow, SDL_Renderer *gRenderer, SDL_Event event);
+
+public:	// Variables
+
+	int mex, mey;
+
 public:
 
 	// Initialize

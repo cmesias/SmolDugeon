@@ -20,12 +20,14 @@
 #include "Object.h"
 #include "TextNFont.h"
 
-#include "../AudioManager.h"
+#include "../Settings.h"
 
 //Player
-class Players: public Helper, public TextNFont, public AudioManager {
+class Players: public Helper, public TextNFont {
 public:
 	enum Result { QUIT, LOADMENU, PLAYGAME, QUITPLAYGAME };
+	Settings settings;
+
 public:
 	// Joystick Sensitivity
 	const int JOYSTICK_DEAD_ZONE = 8000;
@@ -188,7 +190,7 @@ public:	// functions
 				float spawnX, float spawnY,
 				LWindow gWindow, SDL_Renderer* gRenderer,
 				LTexture gText, TTF_Font *gFont, SDL_Color color,
-				Mix_Chunk *sAtariBoom, bool &RestartLevel,
+				bool &RestartLevel,
 				int LevelWeLoaded, bool &ShakeCamera);
 
 	void Render(int mx, int my, int camX, int camY, LWindow gWindow,

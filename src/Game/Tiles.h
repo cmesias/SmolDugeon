@@ -12,8 +12,9 @@
 #include "../LTexture.h"
 
 #include "../Helper.h"
+#include "TextNFont.h"
 
-class Tile: public Helper {
+class Tile: public Helper, public TextNFont {
 public:
 	/* Tilec Variables */
 	const int max = 5000;
@@ -26,9 +27,6 @@ public:
 	const int expandH = 4;	// 4 times larger than original texture size
 	bool hideOtherLayers = false;
 	LTexture gTiles;
-	LTexture gText;
-	TTF_Font *gFont12 = NULL;
-	TTF_Font *gFont24 = NULL;
 
 public:
 	float x;

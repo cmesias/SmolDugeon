@@ -493,7 +493,7 @@ void Tilec::RenderDebug(SDL_Renderer *gRenderer, Tilec tilec[], int camx, int ca
 
 			std::stringstream tempss;
 			tempss << tilec[i].LevelToLoad;
-			gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {244,144,30}, gFont13);
+			gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {244,144,30}, gFont12);
 			gText.setAlpha(255);
 			gText.render(gRenderer, tilec[i].x-camx,
 									tilec[i].y+tilec[i].h-gText.getHeight()-gText.getHeight()-camy,

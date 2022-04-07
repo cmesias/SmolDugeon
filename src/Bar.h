@@ -8,10 +8,13 @@
 #ifndef BAR_H_
 #define BAR_H_
 
-#include "LTexture.h"
 #include <sstream>
 
-struct Bar {
+#include <SDL2/SDL_ttf.h>
+#include "Game/TextNFont.h"
+#include "LTexture.h"
+
+struct Bar: public TextNFont {
 public:
 	int x;				// x position of bar
 	int y;				// y position of bar
@@ -21,9 +24,6 @@ public:
 	int maxColor;
 	std::string name;
 	SDL_Rect bar[3];
-	LTexture gText;			// Font texture
-	TTF_Font *gFont12;		// Font
-	TTF_Font *gFont21;		// Font
 
 	// Get value from a bar relative to mouse
 	int getValueFromBar(int mx, int barX, int widthOnScreen, int maxValue);

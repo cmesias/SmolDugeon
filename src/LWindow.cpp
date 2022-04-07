@@ -56,11 +56,7 @@ bool LWindow::create(std::string newName, int RESOLUTION, int ANTI_ALIS, int FUL
 	}
 
 	// Vsync
-	if (VSYNC==1){
-		// On
-	}else{
-		// Off
-	}
+	// Handled in Game.cpp when creating a renderer
 
 	//Create window
 	name = newName.c_str();
@@ -103,8 +99,8 @@ bool LWindow::init(std::string newName, int screenWidth, int screenHeight, Uint3
 	return mWindow != NULL;
 }
 
-SDL_Renderer* LWindow::createRenderer() {
-	return SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED);
+SDL_Renderer* LWindow::createRenderer(Uint32 flags) {
+	return SDL_CreateRenderer(mWindow, -1, flags);
 }
 
 void LWindow::handleEvent(SDL_Renderer *gRenderer, SDL_Event& e) {
@@ -191,11 +187,9 @@ void LWindow::handleEvent(SDL_Renderer *gRenderer, SDL_Event& e) {
 	}
 }
 
-
-
 // Apply new window settings
 void LWindow::applySettings(int RESOLUTION, int ANTI_ALIS, int FULLSCREEN, int VSYNC){
-	SDL_SetWindowFullscreen(mWindow, SDL_FALSE);
+	//SDL_SetWindowFullscreen(mWindow, SDL_FALSE);
 
 	/*  WARNING
 	 *  Do not start the program and immediately Fullscreen,
@@ -220,20 +214,23 @@ void LWindow::applySettings(int RESOLUTION, int ANTI_ALIS, int FULLSCREEN, int V
 	}
 
 	// Vsync
-	if (VSYNC==1){
-		// On
-	}else{
-		// Off
-	}
+	// Handled in Game.cpp when creating a renderer
 
 	// Center screen
 	SDL_SetWindowPosition(mWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
 	// FullScreen
 	if (FULLSCREEN==1){
-		SDL_SetWindowFullscreen(mWindow, SDL_TRUE);
+
+
+		//SDL_SetWindowFullscreen(mWindow, SDL_TRUE);
+		///mFullScreen = true;
+		//mMinimized = false;
+		//SDL_MaximizeWindow(mWindow);
 	}else{
-		SDL_SetWindowFullscreen(mWindow, SDL_FALSE);
+		//SDL_SetWindowFullscreen(mWindow, SDL_FALSE);
+		//mFullScreen = false;
+		//SDL_MaximizeWindow(mWindow);
 	}
 }
 
@@ -271,3 +268,5 @@ bool LWindow::hasKeyboardFocus() {
 bool LWindow::isMinimized() {
 	return mMinimized;
 }
+
+

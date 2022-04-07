@@ -230,7 +230,9 @@ void Players::Load(SDL_Renderer* gRenderer){
 
 	// Other classes
 	LoadFonts();
-	LoadAudio();
+	settings.LoadAudio();
+	settings.LoadAudioCFG();
+	settings.ApplyAudioCfgToSFX(settings);
 }
 
 // Free asteroid resources
@@ -244,11 +246,11 @@ void Players::Free(){
 
 	// Other classes
 	FreeFonts();
-	FreeAudio();
+	settings.FreeAudio();
 }
 
 // Player shoot
-void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, int mx, int my){
+void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk *sCastSFX, int mx, int my){
 
 	// Determine controls
 	trigger = initialshot;
@@ -277,7 +279,7 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 				shootDelay = true;
 
 				// play audio
-				/*Mix_PlayChannel(1, sCastSFX, 0);
+				/*Mix_PlayChannel(1,settings.sCastSFX, 0);
 
 				// Offset to spawn the Slash Attack
 				int offSetX =0;
@@ -335,7 +337,7 @@ void Players::Update(Map &map,
 					float spawnX, float spawnY,
 					LWindow gWindow, SDL_Renderer* gRenderer,
 					LTexture gText, TTF_Font *gFont, SDL_Color color,
-					Mix_Chunk *sAtariBoom, bool &RestartLevel,
+					bool &RestartLevel,
 					int LevelWeLoaded, bool &ShakeCamera)
 {
 	// Player center
@@ -572,7 +574,7 @@ void Players::Update(Map &map,
 											   100, 10);
 
 							// Play sound effect
-							Mix_PlayChannel(-1, sStep, 0);
+							Mix_PlayChannel(-1, settings.sStep, 0);
 						}
 					}
 
@@ -711,7 +713,7 @@ void Players::Update(Map &map,
 												  tempWidth, tempHeight, 0);
 
 								// Play slash sound effect
-								Mix_PlayChannel(-1, sSlash, 0);
+								Mix_PlayChannel(-1, settings.sSlash, 0);
 							}
 
 							// Spawn swords attribute
@@ -732,7 +734,7 @@ void Players::Update(Map &map,
 									}
 
 									// play audio
-									Mix_PlayChannel(1, sCast, 0);
+									Mix_PlayChannel(1, settings.sCast, 0);
 								}
 								// Rusty Sword
 								if (swordInHand_Index == 2) {
@@ -750,7 +752,7 @@ void Players::Update(Map &map,
 									}
 
 									// play audio
-									Mix_PlayChannel(1, sCast, 0);
+									Mix_PlayChannel(1, settings.sCast, 0);
 								}
 								// Iron Sword
 								if (swordInHand_Index == 3) {
@@ -768,7 +770,7 @@ void Players::Update(Map &map,
 									}
 
 									// play audio
-									Mix_PlayChannel(1, sCast, 0);
+									Mix_PlayChannel(1, settings.sCast, 0);
 								}
 
 								// Iron Sword w/ Red in center
@@ -787,7 +789,7 @@ void Players::Update(Map &map,
 									}
 
 									// play audio
-									Mix_PlayChannel(1, sCast, 0);
+									Mix_PlayChannel(1, settings.sCast, 0);
 								}
 
 								// Silver Sword
@@ -806,7 +808,7 @@ void Players::Update(Map &map,
 									}
 
 									// play audio
-									Mix_PlayChannel(1, sCast, 0);
+									Mix_PlayChannel(1,settings.sCast, 0);
 								}
 
 								// Yellow Sword
@@ -827,7 +829,7 @@ void Players::Update(Map &map,
 
 
 									// play audio
-									Mix_PlayChannel(1, sCast, 0);
+									Mix_PlayChannel(1, settings.sCast, 0);
 								}
 
 								// Yellow Sword
@@ -848,7 +850,7 @@ void Players::Update(Map &map,
 
 
 									// play audio
-									Mix_PlayChannel(1, sCast, 0);
+									Mix_PlayChannel(1, settings.sCast, 0);
 								}
 
 								// Black sword
@@ -862,7 +864,7 @@ void Players::Update(Map &map,
 											rands, rands, this->angle, this->castDamage, speed);
 
 									// play audio
-									Mix_PlayChannel(1, sCast, 0);
+									Mix_PlayChannel(1,settings.sCast, 0);
 								}
 
 								// Green sword
@@ -883,7 +885,7 @@ void Players::Update(Map &map,
 
 
 									// play audio
-									Mix_PlayChannel(1, sCast, 0);
+									Mix_PlayChannel(1,settings.sCast, 0);
 
 								}
 
@@ -898,7 +900,7 @@ void Players::Update(Map &map,
 											rands, rands, this->angle, this->castDamage, speed);
 
 									// play audio
-									Mix_PlayChannel(1, sCast, 0);
+									Mix_PlayChannel(1,settings.sCast, 0);
 								}
 
 								// If we have a rapier or long rapier
@@ -909,7 +911,7 @@ void Players::Update(Map &map,
 											this->particleW, this->particleH, this->castDamage, angle);
 
 									// play audio
-									Mix_PlayChannel(1, sCast, 0);
+									Mix_PlayChannel(1,settings.sCast, 0);
 
 								}
 
@@ -1088,7 +1090,7 @@ void Players::Update(Map &map,
 		////////////////////////////////////////////////////////////////////////////////////
 
 		// Player shoot
-		this->fire(particle, p_dummy, this->sCast, mex+camx, mey+camy);
+		this->fire(particle, p_dummy, settings.sCast, mex+camx, mey+camy);
 
 		// Player shield
 		if (this->invurnerable){
@@ -1984,7 +1986,7 @@ void Players::ActivateParry() {
     	this->parryCDTimer = this->parryCDMax;
 
     	// Play sound effect
-    	Mix_PlayChannel(-1, sParry, 0);
+    	Mix_PlayChannel(-1, settings.sParry, 0);
     }
 }
 
@@ -2017,7 +2019,7 @@ void Players::ActivateDash() {
 			this->dashCounter = this->dashLength;
 
 			// Play dash sound effect
-			Mix_PlayChannel(-1, sDash, 0);
+			Mix_PlayChannel(-1, settings.sDash, 0);
 		}
 	}
 }
@@ -2365,7 +2367,7 @@ void Players::SaveHighScore(int LevelWeLoaded) {
 
 
 void Players::changeVolume(float newVolume) {
-	Mix_VolumeChunk(sSlash, newVolume);
+	Mix_VolumeChunk(settings.sSlash, newVolume);
 }
 
 

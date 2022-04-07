@@ -8,15 +8,17 @@
 #ifndef LOCAL_SPAWNERS_H_
 #define LOCAL_SPAWNERS_H_
 
+#include <SDL2/SDL_ttf.h>
+
 #include "../Helper.h"
 #include "../LTexture.h"
+#include "TextNFont.h"
 
-class Spawner: public Helper {
+class Spawner: public Helper, public TextNFont {
 public:
 	int count = 0;
 	LTexture gSpawner;
 	LTexture gText;
-	TTF_Font *gFont = NULL;
 
 public:
 	// Spawner variables

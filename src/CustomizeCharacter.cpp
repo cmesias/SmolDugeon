@@ -245,7 +245,7 @@ void CustomizeCharacter::Show(LWindow &gWindow, SDL_Renderer *gRenderer, Customi
 				tempS[1] = "Body";
 				tempS[2] = "Hair";
 				tempss << tempS[index];
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont21);
+				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont24);
 				gText.setAlpha(255);
 			gText.render(gRenderer, 10 , 10, gText.getWidth(), gText.getHeight());
 
@@ -364,9 +364,7 @@ void CustomizeCharacter::load(SDL_Renderer *gRenderer) {
 			i++;
 		}
 	}
-
-	// Load Font
-	gFont21 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 35);
+	LoadFonts();
 
 	//initTexture(gTileBorder, 32, 32, white, 110);
 	// Load Menu starting coordinates
@@ -399,10 +397,9 @@ void CustomizeCharacter::free() {
 	// Free resources
 	gBlank.free();
 	gBG.free();
-	gText.free();
 	gButtons.free();
 	gPlayer[0].free();
 	gPlayer[1].free();
 	gPlayer[2].free();
-	TTF_CloseFont(gFont21);
+	FreeFonts();
 }

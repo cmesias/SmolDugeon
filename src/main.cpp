@@ -11,6 +11,9 @@ int main(int argc, char *argv[]) {
 // Notes
 
 /*
+ * Common problems:
+ * loadFromRenderedText -> need "#include <SDL2/SDL_ttf.h>"
+ *
  * ShowSplashScreen() -> ShowMenu()
  * 						 -> mainMenu.Show(gWindow, gRenderer, result);
  *						 -> mainMenu.Render() - its crashing here, why?
@@ -87,6 +90,11 @@ int main(int argc, char *argv[]) {
  * 			  then Area (0,1) will start on on (500,0) and ends in (1000,500);
  * TODO [ ] - Mob.cpp, when getting hit by the player, set animState for Mob to 1 (this will give a "stunned" effect to the Mob)
  *
+ *
+ * TODO [x] - PlayGame.cpp: fix this: The audio just stops playing for the audio that we load in this class.
+ *  		  After coming back Settings, even if we don't change
+ * 		 	  anything and just come back, the bug still happens. Fixed, for some reason,
+ * 		 	  after coming back from the Settings menu, we have to load the audio files again.
  *
  * TODO [x] (3-25-2022) - Change player texture with a character form the dungeon tileset
  * TODO [x] (3-25-2022) - Create simple pathfinding for Mobs to follow Player

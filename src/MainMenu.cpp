@@ -19,17 +19,11 @@ void MainMenu::Init() {
 
 void MainMenu::Load(SDL_Renderer *gRenderer)
 {
-	// Load Video settings from file
-	loadVideoCFG();
+	// Load Video CFG
+	settings.LoadVideoCFG();
 
-	// Load Audio settings from file
-	loadAudioCFG();
-
-	// Load audio files
-	LoadAudioFiles();
-
-	// Apply audio configurations
-	applyMasterAudioCFG();
+	// Load Audio CFG
+	settings.LoadAudioCFG();
 
 	// Textures
 	gMenu.loadFromFile(gRenderer, "resource/gfx/menu.png");
@@ -48,15 +42,10 @@ void MainMenu::Load(SDL_Renderer *gRenderer)
 }
 
 void MainMenu::Free() {
-	// Free audio files
-	FreeAudioFiles();
 	gMenu.free();
 	gCursor.free();
     SDL_JoystickClose(joy);
 	joy = NULL;
-
-	// Other classes Fonts
-	FreeFonts();
 }
 
 void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuResult &result) {
@@ -91,17 +80,8 @@ void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuRes
 		// Get mouse position
 		SDL_GetMouseState(&mx, &my);
 
-		// get new mouse coordinates based on render size, and actual screen size
-		int renderW = 0;
-		int renderHDummy = 0;
-		SDL_GetRendererOutputSize(gRenderer,&renderW,&renderHDummy);
-		int en = renderW * 0.4375;
-		int renderH = renderW - en;
-		//mx = (screenWidth*mx)/renderW;	// New mouse coordinates, no relation to camera
-		//my = (screenHeight*my)/renderH;	// New mouse coordinates, no relation to camera
-
-		mex = (helper.screenWidth*mx)/gWindow.getWidth();				// New mouse coordinates, no relation to camera
-		mey = (helper.screenHeight*my)/gWindow.getHeight();				// New mouse coordinates, no relation to camera
+		mex = (screenWidth*mx)/gWindow.getWidth();				// New mouse coordinates, no relation to camera
+		mey = (screenHeight*my)/gWindow.getHeight();				// New mouse coordinates, no relation to camera
 
 		// Handle Events
 		while (SDL_PollEvent(&event)) {
@@ -188,8 +168,13 @@ void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuRes
 						} else if (menuIndex == 2) {
 							result = Credits;
 						} else if (menuIndex == 3) {
-						//	result = Options;
-							start(gWindow,gRenderer);
+							// Other classes Fonts
+							FreeFonts();
+
+							settings.start(gWindow,gRenderer);
+
+							// Other classes Fonts
+							LoadFonts();
 						} else if (menuIndex == 4) {
 							result = Exit;
 						}
@@ -203,8 +188,13 @@ void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuRes
 						} else if (menuIndex == 2) {
 							result = Credits;
 						} else if (menuIndex == 3) {
-							//	result = Options;
-							start(gWindow,gRenderer);
+							// Other classes Fonts
+							FreeFonts();
+
+							settings.start(gWindow,gRenderer);
+
+							// Other classes Fonts
+							LoadFonts();
 						} else if (menuIndex == 4) {
 							result = Exit;
 						}
@@ -257,27 +247,27 @@ void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuRes
 		// Set menuIndex equal to where ever the mouse is, else let the keyboard decide what index it is
 		if (key == 1) {
 			for (int i=0; i<5; i++) {
-				if (checkCollision(mx, my, 1, 1, levelsBox[i].x, levelsBox[i].y, levelsBox[i].w, levelsBox[i].h)) {
+				if (checkCollision(mex, mey, 1, 1, levelsBox[i].x, levelsBox[i].y, levelsBox[i].w, levelsBox[i].h)) {
 					menuIndex = i;
 				}
 			}
 		}
 
 		// Customize Character results
-		switch (optionsResult)  {
-		case Options::Back:				// Exit to Main Menu
+		switch (settings.settingsResult)  {
+		case Settings::Back:				// Exit to Main Menu
 			quit = true;
 			break;
-		case Options::Nothing:
+		case Settings::Nothing:
 			//
 			break;
-		case Options::StartGame:
+		case Settings::StartGame:
 			//
 			break;
-		case Options::ShowingMenu:
+		case Settings::ShowingMenu:
 			//
 			break;
-		case Options::Exit:				// Exit Desktop
+		case Settings::Exit:				// Exit Desktop
 			result = MainMenu::Exit;
 			quit = true;
 			break;
@@ -330,7 +320,7 @@ void MainMenu::Render(SDL_Renderer *gRenderer)
 
 		// Mouse and keyboard stuff
 		else{
-			if (checkCollision(mx, my, 1, 1, levelsBox[i].x, levelsBox[i].y, levelsBox[i].w, levelsBox[i].h)) {
+			if (checkCollision(mex, mey, 1, 1, levelsBox[i].x, levelsBox[i].y, levelsBox[i].w, levelsBox[i].h)) {
 				if (leftClick) {
 					//SDL_Rect tempr = {levelsBox[i].x+1, levelsBox[i].y+1, levelsBox[i].w-2, levelsBox[i].h-2};
 					//SDL_SetRenderDrawColor(gRenderer, 0, 200, 0, 255);
@@ -369,7 +359,7 @@ void MainMenu::Render(SDL_Renderer *gRenderer)
 		//Render text input
 		std::stringstream tempSS;
 		tempSS << buttonName[i];
-		gText.loadFromRenderedText(gRenderer, tempSS.str().c_str(), {255,255,255}, gFont13);
+		gText.loadFromRenderedText(gRenderer, tempSS.str().c_str(), {255,255,255}, gFont12);
 			int newWidth = gText.getWidth();
 			int newHeight = gText.getHeight();
 		gText.render(gRenderer, levelsBox[i].x+5,
@@ -379,7 +369,7 @@ void MainMenu::Render(SDL_Renderer *gRenderer)
 		//Render text input
 		tempSS.str(std::string());
 		tempSS << GameName.c_str();
-		gText.loadFromRenderedText(gRenderer, tempSS.str().c_str(), {255,255,255}, gFont13);
+		gText.loadFromRenderedText(gRenderer, tempSS.str().c_str(), {255,255,255}, gFont12);
 		gText.render(gRenderer, screenWidth-gText.getWidth(), screenHeight-gText.getHeight(), gText.getWidth(), gText.getHeight());
 	}
 }
@@ -391,7 +381,7 @@ MainMenu::MenuResult MainMenu::mousePressed(SDL_Event event){
 		if (event.button.button == SDL_BUTTON_LEFT) {
 			leftClick = true;
 			for (int i=0; i<5; i++) {
-				if (checkCollision(mx, my, 1, 1, levelsBox[i].x, levelsBox[i].y, levelsBox[i].w, levelsBox[i].h)) {
+				if (checkCollision(mex, mey, 1, 1, levelsBox[i].x, levelsBox[i].y, levelsBox[i].w, levelsBox[i].h)) {
 					menuIndex = i;
 				}
 			}
@@ -412,7 +402,7 @@ MainMenu::MenuResult MainMenu::mouseReleased(LWindow gWindow, SDL_Renderer *gRen
 			// Perform actions
 			for (int i=0; i<5; i++) {
 				// If mouse is hovering over menu item then render specifically
-				if (checkCollision(mx, my, 1, 1, levelsBox[i].x, levelsBox[i].y, levelsBox[i].w, levelsBox[i].h)) {
+				if (checkCollision(mex, mey, 1, 1, levelsBox[i].x, levelsBox[i].y, levelsBox[i].w, levelsBox[i].h)) {
 					if (i == 0) {
 						result = NewGame;
 					} else if (i == 1) {
@@ -420,8 +410,15 @@ MainMenu::MenuResult MainMenu::mouseReleased(LWindow gWindow, SDL_Renderer *gRen
 					} else if (i == 2) {
 						result = Credits;
 					} else if (i == 3) {
-					//	result = Options;
-						start(gWindow,gRenderer);
+
+						// TODO [ ] - find out why it keeps crashing when freeing a font that is used in that class
+						// Other classes Fonts
+						FreeFonts();
+
+						settings.start(gWindow,gRenderer);
+
+						// Other classes Fonts
+						LoadFonts();
 					} else if (i == 4) {
 						result = Exit;
 					}
@@ -603,8 +600,11 @@ void MainMenu::updateJoystick(SDL_Renderer *gRenderer, LWindow &gWindow, SDL_Eve
 			} else if (menuIndex == 2) {
 				result = Credits;
 			} else if (menuIndex == 3) {
-			//	result = Options;
-				start(gWindow,gRenderer);
+				// Other classes Fonts
+				FreeFonts();
+				settings.start(gWindow,gRenderer);
+				// Other classes Fonts
+				LoadFonts();
 			} else if (menuIndex == 4) {
 				result = Exit;
 			}

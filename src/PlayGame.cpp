@@ -158,23 +158,13 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	gTileBreak.setBlendMode(SDL_BLENDMODE_ADD);
 	// Tile break clips
 	int j = 0;
-		for (int w = 0; w < 10; w++) {
-			rTileBreak[j].x = 0 + w * 16;
-			rTileBreak[j].y = 0;
-			rTileBreak[j].w = 16;
-			rTileBreak[j].h = 16;
-			j++;
-		}
-
-	// load audio
-	sAmbientMusic 		= Mix_LoadMUS("sounds/music.mp3");
-	sRockBreak 			= Mix_LoadWAV("sounds/bfxr/rock_break.wav");
-	sAtariBoom 			= Mix_LoadWAV("sounds/bfxr/atari_boom.wav");
-	sDownStabHitTilec	= Mix_LoadWAV("sounds/bfxr/snd_downStabHitTilec.wav");
-	sSlashHitBoss		= Mix_LoadWAV("sounds/bfxr/snd_slashHitBoss.wav");
-	sCastHitBoss		= Mix_LoadWAV("sounds/bfxr/snd_castHitBoss.wav");
-	sSlashTilec			= Mix_LoadWAV("sounds/bfxr/snd_slashTilec.wav");
-	sParrySuccess		= Mix_LoadWAV("sounds/bfxr/snd_parrySuccess.wav");
+	for (int w = 0; w < 10; w++) {
+		rTileBreak[j].x = 0 + w * 16;
+		rTileBreak[j].y = 0;
+		rTileBreak[j].w = 16;
+		rTileBreak[j].h = 16;
+		j++;
+	}
 
 	//Load texture target
 	gTargetTexture.createBlank( gRenderer, screenWidth, screenHeight, SDL_TEXTUREACCESS_TARGET );
@@ -192,6 +182,7 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 
 	// Other classes Fonts
 	LoadFonts();
+	//settings.LoadAudio();
 }
 
 void PlayGame::Free() {
@@ -202,25 +193,6 @@ void PlayGame::Free() {
 	gShadow.free();
 	gCursor.free();
 	gTileBreak.free();
-
-	// free audio
-	Mix_FreeChunk(sRockBreak);
-	Mix_FreeMusic(sAmbientMusic);
-	Mix_FreeChunk(sAtariBoom);
-	Mix_FreeChunk(sDownStabHitTilec);
-	Mix_FreeChunk(sSlashHitBoss);
-	Mix_FreeChunk(sCastHitBoss);
-	Mix_FreeChunk(sSlashTilec);
-	Mix_FreeChunk(sParrySuccess);
-
-	sRockBreak 			= NULL;
-	sAmbientMusic 		= NULL;
-	sAtariBoom 			= NULL;
-	sDownStabHitTilec	= NULL;
-	sSlashHitBoss		= NULL;
-	sCastHitBoss		= NULL;
-	sSlashTilec			= NULL;
-	sParrySuccess		= NULL;
 
 	// free media from other classes
 	bos.Free();
@@ -235,6 +207,7 @@ void PlayGame::Free() {
 
 	// Other classes Fonts
 	FreeFonts();
+	settings.FreeAudio();
 }
 
 void PlayGame::ShakeCamera()
@@ -282,6 +255,9 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 	//Mix_PlayMusic( sAmbientMusic, -1);
 
 	//SDL_ShowCursor(false);
+
+	// Load Audio CFG here (This needs to be loaded here)
+	//LoadAudioSettings();
 
 	// While loop
 	while (!quit) {
@@ -332,7 +308,14 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 						case SDLK_ESCAPE:	// pause menu
 							//start(gWindow, gRenderer);
 
-							audioM.start(gWindow, gRenderer);
+							// Leaving PlayGame.cpp, free these
+							settings.FreeAudio();
+
+							// Load Settings.cpp
+							settings.start(gWindow, gRenderer);
+
+							// Returning to PlayGame.cpp, load these
+							LoadAudioSettings();
 							break;
 						case SDLK_F1:							// Set render size 1
 							//SDL_RenderSetLogicalSize(gRenderer,1920,1080);
@@ -430,25 +413,15 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 				// Mouse Released
 				//result = mouseReleased(event);
 
-				// Handle exit on Options.cpp
-				switch (optionsResult)  {
-				case Options::Back:				// Back (to Main Menu)
-					quit = true;
-					break;
-				case Options::Exit:				// Back (to Main Menu)
-					result = Exit;
-					quit = true;
-					Free();
-					return;
-					break;
-				}
-
-				// Handle exit on AudioManager.cpp
-				switch (audioM.audioManagerResult)  {
-				case AudioManager::Back:				// Back (to Main Menu)
+				// Handle exit on Settings.cpp
+				switch (settings.settingsResult)  {
+				case Settings::Back:				// Back (to Main Menu)
 					// Do nothing
 					break;
-				case AudioManager::Exit:				// Back (to Main Menu)
+				case Settings::ShowingMenu:				// Back (to Main Menu)
+					quit = true;
+					break;
+				case Settings::Exit:				// Back (to Main Menu)
 					result = Exit;
 					quit = true;
 					Free();
@@ -871,7 +844,7 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 					  spawnX, spawnY,
 					  gWindow, gRenderer,
 					  gText, gFont26, {255,255,255},
-					  sAtariBoom, RestartLevel,
+					  RestartLevel,
 					  LevelToLoad, playerCallingToShakeCamera);
 
 		// Shake camera if player wants to, but right not not used
@@ -1200,20 +1173,20 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 			RenderTileBreakingBehind();
 
 			// Render Mob
-			mb.RenderBack(gRenderer, mob, gFont13, gText, camx, camy);
+			mb.RenderBack(gRenderer, mob, gFont12, gText, camx, camy);
 
 			// Render Boss
-			bos.RenderBack(gRenderer, boss, gFont13, gText, camx, camy);
+			bos.RenderBack(gRenderer, boss, gFont12, gText, camx, camy);
 
 			// Render our player
 			player.Render(mex, mey, camx, camy, gWindow,
 					  gRenderer, {255,255,255}, part.count, gText);
 
 			// Render Mob
-			mb.RenderFront(gRenderer, mob, gFont13, gText, camx, camy);
+			mb.RenderFront(gRenderer, mob, gFont12, gText, camx, camy);
 
 			// Render Boss
-			bos.RenderFront(gRenderer, boss, gFont13, gText, camx, camy);
+			bos.RenderFront(gRenderer, boss, gFont12, gText, camx, camy);
 
 		// Render items
 		ite.RenderOnTopOfPlayer(gRenderer, item, camx, camy);
@@ -1291,10 +1264,10 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 		tlc.Render(gRenderer, tilec, 0, camx, camy);
 
 		// Render Boss text
-		bos.RenderDebug(gRenderer, boss, gFont13, gText, camx, camy);
+		bos.RenderDebug(gRenderer, boss, gFont12, gText, camx, camy);
 
 		// Render Mob text
-		mb.RenderDebug(gRenderer, mob, gFont13, gText, camx, camy);
+		mb.RenderDebug(gRenderer, mob, gFont12, gText, camx, camy);
 
 		// Render Item text
 		ite.RenderDebug(gRenderer, item, camx, camy);
@@ -1307,7 +1280,7 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 				// Render text
 				std::stringstream tempss;
 				tempss << "id: " << item[i].id << ", d: " << item[i].damage;
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont13);
+				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont12);
 				gText.setAlpha(255);
 				gText.render(gRenderer, item[i].x-camx, item[i].y-gText.getHeight()-camy, gText.getWidth(), gText.getHeight());
 
@@ -1381,7 +1354,7 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 				/*	   << ", layer: " 		<< tl.layer<< ", tlc.layer: " << tlc.layer << ", editor: " << editor
 			   << ", tl.multiW: " 	<< tl.multiW << ", tl.multiH: " << tl.multiH << ", tl.count: " << tl.tileCount;
 		tempss << ", tlc.multiW: " 	<< tlc.multiW << ", tlc.multiH: " << tlc.multiH << ", tlc.count: " << tlc.count;*/
-		gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont13, 250);
+		gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont12, 250);
 		gText.setAlpha(255);
 		gText.render(gRenderer, 0+screenWidth-gText.getWidth(), 50, gText.getWidth(), gText.getHeight());
 	}
@@ -1545,7 +1518,7 @@ void PlayGame::checkCollisionParticleTile()
 										}
 
 										// Play hit sound effect
-						                Mix_PlayChannel(-1, sParrySuccess, 0);
+						                Mix_PlayChannel(-1, settings.sParrySuccess, 0);
 									}
 								}
 								// Spawn particle effect
@@ -1637,7 +1610,7 @@ void PlayGame::checkCollisionParticleBoss()
 								//boss[i].vX += player.getKnockBackPower()/2 * xDir;
 
 								// Play hit sound effect
-				                Mix_PlayChannel(-1, sCastHitBoss, 0);
+				                Mix_PlayChannel(-1, settings.sCastHitBoss, 0);
 
 				                // Subtract boss health
 				                boss[i].health -= player.getCastDamage();
@@ -1704,7 +1677,7 @@ void PlayGame::checkCollisionPlayerItem() {
 									0.0, 0.5);
 
 							// play sound effect
-							Mix_PlayChannel(-1, sCastHitBoss, 0);
+							Mix_PlayChannel(-1, settings.sCastHitBoss, 0);
 						}
 					}
 
@@ -1719,7 +1692,7 @@ void PlayGame::checkCollisionPlayerItem() {
 						player.IncreaseBombs();
 
 						// play sound effect
-						Mix_PlayChannel(-1, sCastHitBoss, 0);
+						Mix_PlayChannel(-1, settings.sCastHitBoss, 0);
 
 					}
 
@@ -1734,7 +1707,7 @@ void PlayGame::checkCollisionPlayerItem() {
 						player.IncreaseHearts();
 
 						// play sound effect
-						Mix_PlayChannel(-1, sCastHitBoss, 0);
+						Mix_PlayChannel(-1, settings.sCastHitBoss, 0);
 
 					}
 
@@ -1749,7 +1722,7 @@ void PlayGame::checkCollisionPlayerItem() {
 						player.IncreaseCoins();
 
 						// play sound effect
-						Mix_PlayChannel(-1, sCastHitBoss, 0);
+						Mix_PlayChannel(-1, settings.sCastHitBoss, 0);
 					}
 
 					// Silver keys
@@ -1763,7 +1736,7 @@ void PlayGame::checkCollisionPlayerItem() {
 						player.IncreaseSilverKeys();
 
 						// play sound effect
-						Mix_PlayChannel(-1, sCastHitBoss, 0);
+						Mix_PlayChannel(-1, settings.sCastHitBoss, 0);
 					}
 
 					// Gold keys
@@ -1777,7 +1750,7 @@ void PlayGame::checkCollisionPlayerItem() {
 						player.IncreaseGoldKeys();
 
 						// play sound effect
-						Mix_PlayChannel(-1, sCastHitBoss, 0);
+						Mix_PlayChannel(-1, settings.sCastHitBoss, 0);
 					}
 
 					// Green health
@@ -1791,7 +1764,7 @@ void PlayGame::checkCollisionPlayerItem() {
 						player.IncreaseHealth(25);
 
 						// play sound effect
-						Mix_PlayChannel(-1, sCastHitBoss, 0);
+						Mix_PlayChannel(-1, settings.sCastHitBoss, 0);
 					}
 				}
 
@@ -1834,7 +1807,7 @@ void PlayGame::checkPlayerTilceCollision() {
 							LoadLevel();
 
 							// play sound effect
-							Mix_PlayChannel(-1, sCastHitBoss, 0);
+							Mix_PlayChannel(-1, settings.sCastHitBoss, 0);
 						}
 					}
 				} else {
@@ -1878,7 +1851,7 @@ void PlayGame::checkPlayerTileCollision()
 								tile[i].collisionTile = false;
 
 								// play sound effect
-								Mix_PlayChannel(-1, sCastHitBoss, 0);
+								Mix_PlayChannel(-1, settings.sCastHitBoss, 0);
 							}
 						}
 					} else {
@@ -1917,7 +1890,7 @@ void PlayGame::checkPlayerTileCollision()
 										0.0, randDouble(4, 5));
 
 								// play sound effect
-								Mix_PlayChannel(-1, sCastHitBoss, 0);
+								Mix_PlayChannel(-1, settings.sCastHitBoss, 0);
 							}
 						}
 					} else {
@@ -1969,7 +1942,7 @@ void PlayGame::checkPlayerTileCollision()
 										0.0, randDouble(4, 5));
 
 								// play sound effect
-								Mix_PlayChannel(-1, sCastHitBoss, 0);
+								Mix_PlayChannel(-1, settings.sCastHitBoss, 0);
 							}
 						}
 					} else {
@@ -2054,7 +2027,7 @@ void PlayGame::checkCollisionParticleMob()
 								//mob[i].vX += player.getKnockBackPower()/2 * xDir;
 
 								// Play hit sound effect
-				                Mix_PlayChannel(-1, sCastHitBoss, 0);
+				                Mix_PlayChannel(-1, settings.sCastHitBoss, 0);
 
 				                // Subtract mob health
 				                mob[i].health -= player.getCastDamage();
@@ -2248,14 +2221,14 @@ void PlayGame::checkPlayerAttacksCollisionMob() {
 								if (player.attackType == 0)
 								{
 									// Play hit sound effect: Slash attack
-					                Mix_PlayChannel(-1, sSlashHitBoss, 0);
+					                Mix_PlayChannel(-1, settings.sSlashHitBoss, 0);
 								}
 
 								// If attack-type: Down-stab
 								else if (player.attackType == 1)
 								{
 									// Play hit sound effect: Down-stab attack
-					                Mix_PlayChannel(-1, sDownStabHitTilec, 0);
+					                Mix_PlayChannel(-1, settings.sDownStabHitTilec, 0);
 
 									// Knockback player back in the air (only if doing down-stab)
 									//player.y -= 10;
@@ -2642,14 +2615,14 @@ void PlayGame::checkPlayerAttacksCollisionBoss() {
 								{
 
 									// Play hit sound effect: Slash attack
-					                Mix_PlayChannel(-1, sSlashHitBoss, 0);
+					                Mix_PlayChannel(-1, settings.sSlashHitBoss, 0);
 								}
 
 								// If attack-type: Down-stab
 								else if (player.attackType == 1)
 								{
 									// Play hit sound effect: Down-stab attack
-					                Mix_PlayChannel(-1, sDownStabHitTilec, 0);
+					                Mix_PlayChannel(-1, settings.sDownStabHitTilec, 0);
 
 									// Knockback player back in the air (only if doing down-stab)
 									//player.y -= 10;
@@ -2819,14 +2792,14 @@ void PlayGame::checkPlayerAttacksTileCollision() {
 										if (player.attackType == 0)
 										{
 											// Play hit sound effect: Slash attack
-							                Mix_PlayChannel(-1, sSlashTilec, 0);
+							                Mix_PlayChannel(-1, settings.sSlashTilec, 0);
 										}
 
 										// If attack-type: Down-stab
 										else if (player.attackType == 1)
 										{
 											// Play hit sound effect: Down-stab attack
-							                Mix_PlayChannel(-1, sDownStabHitTilec, 0);
+							                Mix_PlayChannel(-1, settings.sDownStabHitTilec, 0);
 										}
 									}
 									//----------------------------- Collision Detection based on player-attack hit-box and tile hit-box ------------------------------//
@@ -2942,11 +2915,11 @@ void PlayGame::checkPlayerAttacksBossParticleCollision()
 									if (player.attackType == 0)
 									{
 										// Play hit sound effect: Slash attack
-						                Mix_PlayChannel(-1, sSlashHitBoss, 0);
+						                Mix_PlayChannel(-1, settings.sSlashHitBoss, 0);
 									}
 								}
 								// Play hit sound effect: Slash attack
-				                Mix_PlayChannel(-1, sSlashHitBoss, 0);
+				                Mix_PlayChannel(-1, settings.sSlashHitBoss, 0);
 							}
 							//----------------------------- Collision Detection based on player-attack hit-box and particles hit-box ------------------------------//
 							//--------------------------------------------------------------------------------------------------------------------------------//
@@ -3014,7 +2987,7 @@ void PlayGame::checkBossAttacksCollisionPlayer() {
 							boss[i].vY = -4;
 
 							// play sound effect
-							Mix_PlayChannel(-1, sParrySuccess, 0);
+							Mix_PlayChannel(-1, settings.sParrySuccess, 0);
 						}
 					}
 
@@ -3041,7 +3014,7 @@ void PlayGame::checkBossAttacksCollisionPlayer() {
 						part.spawnBloodVFX(particles, player.x, player.y, player.w, player.h, {255,0,0});
 
 						// play sound effect
-						Mix_PlayChannel(-1, sParrySuccess, 0);
+						Mix_PlayChannel(-1, settings.sParrySuccess, 0);
 					}
 
 					////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3072,7 +3045,7 @@ void PlayGame::checkBossAttacksCollisionPlayer() {
 						part.spawnBloodVFX(particles, player.x, player.y, player.w, player.h, {255,0,0});
 
 						// play sound effect
-						Mix_PlayChannel(-1, sSlashHitBoss, 0);
+						Mix_PlayChannel(-1, settings.sSlashHitBoss, 0);
 
 						// Show damage text (it will print how much damage the player did to the boss)
 						std::stringstream tempss;
@@ -3208,7 +3181,7 @@ void PlayGame::checkCollisionParticlePlayer() {
 			    					tempss.str().c_str(), 1, {144, 144, 144, 255});
 
 							// play sound effect
-							Mix_PlayChannel(-1, sParrySuccess, 0);
+							Mix_PlayChannel(-1, settings.sParrySuccess, 0);
 						}
 						//------------- Invulnerability is up Successful ----------------//
 						//---------------------------------------------------------------//
@@ -3288,7 +3261,7 @@ void PlayGame::checkCollisionParticlePlayer() {
 							part.spawnParryVFX(particles, player.x, player.y, player.w, player.h);
 
 							// play sound effect
-							Mix_PlayChannel(-1, sParrySuccess, 0);
+							Mix_PlayChannel(-1, settings.sParrySuccess, 0);
 						}
 						//------------------------ Parry Successful ---------------------//
 						//---------------------------------------------------------------//
@@ -3313,7 +3286,7 @@ void PlayGame::checkCollisionParticlePlayer() {
 							part.spawnBloodVFX(particles, player.x, player.y, player.w, player.h, {255,0,0});
 
 							// play sound effect
-							Mix_PlayChannel(-1, sSlashHitBoss, 0);
+							Mix_PlayChannel(-1, settings.sSlashHitBoss, 0);
 
 							// Subtract player health
 							player.IncreaseHealth(-particles[i].damage);
@@ -3385,7 +3358,7 @@ void PlayGame::checkCollisionParticleParticle() {
 									part.spawnBloodVFX(particles, particles[j].x, particles[j].y, particles[j].w, particles[j].h, {0, 240, 240});
 
 									// play sound effect
-									Mix_PlayChannel(-1, sParrySuccess, 0);
+									Mix_PlayChannel(-1, settings.sParrySuccess, 0);
 								}
 							}
 						}
@@ -4268,17 +4241,10 @@ bool PlayGame::checkCollisionRect( SDL_Rect a, SDL_Rect b )
 void PlayGame::LoadCFG() {
 
 	// Load Video settings from file
-	loadVideoCFG();
+	settings.LoadVideoCFG();
 
 	// Load Audio settings from file
-	loadAudioCFG();
-
-	// Apply audio configurations
-	loadAudioCFG();						// Load Audio settings from file
-	applyMasterAudioCFG();				// Apply audio configurations
-
-	// Apply video configurations
-	//applyVideoCFG(gWindow);
+	//settings.LoadAudioCFG();
 }
 
 void PlayGame::LoadHighScore() {
@@ -4454,4 +4420,10 @@ void PlayGame::LoadLevel()
 	// Spawn on right side of level
 	//player.x		= 1200;
 	//player.y		= 320;
+}
+
+void PlayGame::LoadAudioSettings() {
+	settings.LoadAudio();
+	settings.LoadAudioCFG();
+	settings.ApplyAudioCfgToSFX();
 }

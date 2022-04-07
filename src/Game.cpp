@@ -30,23 +30,33 @@ void Game::Init() {
 	// Default, load level 1
 	LevelToLoad = 1;
 
-	// Load Video settings from file
-	loadVideoCFG();
+	// Load Video CFG
+	settings.LoadVideoCFG();
 
-	// Load Audio settings from file
-	loadAudioCFG();
+	// Load Audio CFG
+	settings.LoadAudioCFG();
 
 	// Initialize Video
 	SDL_Init( SDL_INIT_VIDEO);
 
 	// Create window
 	//gWindow.create("CEngine V2", RESOLUTION, ANTI_ALIAS, FULLSCREEN, VSYNC | SDL_WINDOW_RESIZABLE );
-	gWindow.create(GameName.c_str(), RESOLUTION, ANTI_ALIAS, FULLSCREEN, VSYNC);
+	gWindow.create(GameName.c_str(),
+			settings.getResolutionValue(),
+			settings.getAntiAliasValue(),
+			settings.getFullscreenValue(),
+			settings.getVsyncValue());
 
-	//SDL_SetWindowFullscreen(mWindow, SDL_TRUE);
-	//SDL_SetWindowPosition(mWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	// Determine if we should have vsync on
+	Uint32 gRendererFlags = SDL_RENDERER_ACCELERATED;
+	if (settings.getVsyncValue()) {
+		gRendererFlags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+	} else {
+		gRendererFlags = SDL_RENDERER_ACCELERATED;
+	}
+
 	// Create renderer for window
-	gRenderer = gWindow.createRenderer();
+	gRenderer = gWindow.createRenderer(gRendererFlags);
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
 	// Set render size
@@ -76,14 +86,11 @@ void Game::Init() {
 // Load
 void Game::Load() {
 
-	// Load Audio settings from file
-	loadAudioCFG();
+	// Load Video CFG
+	settings.LoadVideoCFG();
 
-	// load audio
-	LoadAudioFiles();
-
-	// Apply audio configurations
-	applyMasterAudioCFG();
+	// Load Audio CFG
+	settings.LoadAudioCFG();
 
 	// Other classes Fonts
 	LoadFonts();

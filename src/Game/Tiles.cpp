@@ -26,18 +26,13 @@
 void Tile::load(SDL_Renderer *gRenderer) {
 	gTiles.loadFromFile(gRenderer, "resource/gfx/author_0x72/0x72_16x16DungeonTileset_v4Walls_v2.png");
 
-	gFont12 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 12);
-	gFont24 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 24);
+	LoadFonts();
 }
 
 void Tile::free() {
 	gTiles.free();
 	//gTileBreak.free();
-	gText.free();
-	TTF_CloseFont(gFont12);
-	TTF_CloseFont(gFont24);
-	gFont12 = NULL;
-	gFont24 = NULL;
+	FreeFonts();
 }
 
 

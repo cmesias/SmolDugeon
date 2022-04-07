@@ -130,11 +130,11 @@ std::string GetInput::PromptInput(LWindow &gWindow, SDL_Renderer *gRenderer, boo
 		SDL_RenderClear(gRenderer);
 
 			//Render text tip
-			textNFont.gText.loadFromRenderedText(gRenderer, hint.c_str(), {255,255,255}, textNFont.gFont13);
+			textNFont.gText.loadFromRenderedText(gRenderer, hint.c_str(), {255,255,255}, textNFont.gFont12);
 			textNFont.gText.render(gRenderer, 5, 5,textNFont.gText.getWidth(), textNFont.gText.getHeight());
 
 			//Render text input
-			textNFont.gText.loadFromRenderedText(gRenderer, tempSS.str().c_str(), {0,255,0}, textNFont.gFont13);
+			textNFont.gText.loadFromRenderedText(gRenderer, tempSS.str().c_str(), {0,255,0}, textNFont.gFont12);
 			customRect.x = 10;
 			customRect.y = 20;
 			textNFont.gText.render(gRenderer, customRect.x+4, customRect.y,textNFont.gText.getWidth(), textNFont.gText.getHeight());

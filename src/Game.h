@@ -17,12 +17,13 @@
 #include "Options.h"
 #include "Helper.h"
 #include "Game/TextNFont.h"
+#include "Settings.h"
 
 class Game : public Options, public Helper, public TextNFont {
 public:	// globals
 	LWindow gWindow;
 	SDL_Renderer *gRenderer;
-
+	Settings settings;
 	int LevelToLoad;
 
 private:

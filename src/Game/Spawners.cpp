@@ -37,14 +37,15 @@ void Spawner::load(SDL_Renderer* gRenderer){
 	/*for (int i=0; i<5; i++){
 		setClips(rSpawner[i], i*128, 0, 128, 128);
 	}*/
+	LoadFonts();
 }
 
 // Free
 void Spawner::free(){
-	TTF_CloseFont(gFont);
 	gFont = NULL;
 	gSpawner.free();
 	gText.free();
+	FreeFonts();
 }
 
 // Initialize Spawner

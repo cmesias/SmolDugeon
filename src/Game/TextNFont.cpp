@@ -12,9 +12,8 @@
 void TextNFont::LoadFonts() {
 
 	// Load fonts
-	gFont12 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 12);
-	gFont13 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 13);
 	gFont = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 18);
+	gFont12 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 12);
 	gFont20 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 20);
 	gFont24 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 24);
 	gFont26 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 26);
@@ -27,16 +26,14 @@ void TextNFont::FreeFonts() {
 	gText.free();
 
 	// Free fonts
-	TTF_CloseFont(gFont12);
-	TTF_CloseFont(gFont13);
 	TTF_CloseFont(gFont);
+	TTF_CloseFont(gFont12);
 	TTF_CloseFont(gFont20);
 	TTF_CloseFont(gFont24);
 	TTF_CloseFont(gFont26);
 	TTF_CloseFont(gFont36);
-	gFont12 = NULL;
-	gFont13 = NULL;
 	gFont = NULL;
+	gFont12 = NULL;
 	gFont20 = NULL;
 	gFont24 = NULL;
 	gFont26 = NULL;
@@ -45,7 +42,7 @@ void TextNFont::FreeFonts() {
 
 void TextNFont::RenderText(SDL_Renderer *gRenderer, float x, float y, std::string textField, float alpha, SDL_Color color)
 {
-	gText.loadFromRenderedText(gRenderer, textField, color, gFont13);
+	gText.loadFromRenderedText(gRenderer, textField, color, gFont12);
 	gText.setAlpha(alpha);
 	gText.render(gRenderer, x, y, gText.getWidth(), gText.getHeight());
 }
@@ -54,7 +51,7 @@ void TextNFont::RenderText(SDL_Renderer *gRenderer, float x, float y, float valu
 {
 	std::stringstream tempss;
 	tempss << valueTextField;
-	gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), color, gFont13);
+	gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), color, gFont12);
 	gText.setAlpha(alpha);
 
 	float xPos = x;
@@ -82,7 +79,7 @@ void TextNFont::RenderText(SDL_Renderer *gRenderer, float x, float y, float valu
 
 void TextNFont::RenderText(SDL_Renderer *gRenderer, float x, float y, std::string textField, float alpha, SDL_Color color, std::string alignment)
 {
-	gText.loadFromRenderedText(gRenderer, textField.c_str(), color, gFont13);
+	gText.loadFromRenderedText(gRenderer, textField.c_str(), color, gFont12);
 	gText.setAlpha(alpha);
 
 	float xPos = x;

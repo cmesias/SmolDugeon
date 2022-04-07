@@ -11,10 +11,12 @@
 #include <fstream>
 #include <limits>
 #include <sstream>
+#include <SDL2/SDL_ttf.h>
 
 #include "LTexture.h"
 #include "Bar.h"
 #include "Helper.h"
+#include "Game/TextNFont.h"
 
 class CustomizeCharacter : public Bar, public Helper {
 public:
@@ -33,10 +35,8 @@ private:
 	 */
 	LTexture gPlayer[3];	// Load textures
 	LTexture gBlank;		// New player.png texture file
-	LTexture gText;			// Font texture
 	LTexture gBG;			// Background texture
 	LTexture gButtons;	// Buttons texture
-	TTF_Font *gFont21;		// Font
 	SDL_Event event;		// Events
 	int x, y;				// Button start position
 	int w, h;				// Button button size

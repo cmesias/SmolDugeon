@@ -402,7 +402,7 @@ void Credits::Show(LWindow &gWindow, SDL_Renderer *gRenderer, Credits::CreditsRe
 			// Render credits text
 			int CreditsTxtLines = 5;
 			for (unsigned int i=0+slideIndex; i<45+slideIndex; i++) {
-		    	gText.loadFromRenderedText(gRenderer, wholeText[i].c_str(), {255,255,255}, gFont13, 400);
+		    	gText.loadFromRenderedText(gRenderer, wholeText[i].c_str(), {255,255,255}, gFont12, 400);
 				int newWidth = gText.getWidth();
 				int newHeight = gText.getHeight();
 		    	gText.render(gRenderer, 32,

@@ -25,7 +25,7 @@ public:
 	bool init(std::string newName, int screenWidth, int screenHeight, Uint32 flags);
 
 	//Creates renderer from internal window
-	SDL_Renderer* createRenderer();
+	SDL_Renderer* createRenderer(Uint32 flags);
 
 	//Handles window events
 	void handleEvent(SDL_Renderer *gRenderer, SDL_Event& e);

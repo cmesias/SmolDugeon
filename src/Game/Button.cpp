@@ -88,7 +88,7 @@ void Button::Render(SDL_Renderer *gRenderer)
 	}
 
 	// Text
-	gText.loadFromRenderedText(gRenderer, this->textField, {255,255,255}, gFont13);
+	gText.loadFromRenderedText(gRenderer, this->textField, {255,255,255}, gFont12);
 
 	if (this->sameSizeAsText) {
 		this->w = gText.getWidth();
@@ -128,7 +128,7 @@ void Button::Render(SDL_Renderer *gRenderer, float xOffset, float yOffset)
 	}
 
 	// Text
-	gText.loadFromRenderedText(gRenderer, this->textField, {255,255,255}, gFont13);
+	gText.loadFromRenderedText(gRenderer, this->textField, {255,255,255}, gFont12);
 
 	// Render text
 	gText.setAlpha(255);
