@@ -24,6 +24,7 @@ public:
 	TTF_Font *gFont = NULL;
 	TTF_Font *gFont12 = NULL;
 	TTF_Font *gFont20 = NULL;
+
 	TTF_Font *gFont24 = NULL;
 	TTF_Font *gFont26 = NULL;
 	TTF_Font *gFont36 = NULL;

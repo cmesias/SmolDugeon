@@ -12,9 +12,10 @@
 void TextNFont::LoadFonts() {
 
 	// Load fonts
-	gFont = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 18);
+	gFont =   TTF_OpenFont("resource/fonts/PressStart2P.ttf", 18);
 	gFont12 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 12);
 	gFont20 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 20);
+
 	gFont24 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 24);
 	gFont26 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 26);
 	gFont36 = TTF_OpenFont("resource/fonts/PressStart2P.ttf", 36);
@@ -29,12 +30,15 @@ void TextNFont::FreeFonts() {
 	TTF_CloseFont(gFont);
 	TTF_CloseFont(gFont12);
 	TTF_CloseFont(gFont20);
+
 	TTF_CloseFont(gFont24);
 	TTF_CloseFont(gFont26);
 	TTF_CloseFont(gFont36);
+
 	gFont = NULL;
 	gFont12 = NULL;
 	gFont20 = NULL;
+
 	gFont24 = NULL;
 	gFont26 = NULL;
 	gFont36 = NULL;

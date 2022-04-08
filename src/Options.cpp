@@ -6,15 +6,6 @@
  */
 
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <math.h>
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-
 #include "Options.h"
 
 /*

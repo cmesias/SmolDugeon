@@ -95,6 +95,8 @@ int main(int argc, char *argv[]) {
  *  		  After coming back Settings, even if we don't change
  * 		 	  anything and just come back, the bug still happens. Fixed, for some reason,
  * 		 	  after coming back from the Settings menu, we have to load the audio files again.
+
+// TODO [x]  - get rid of old options thing, and put this in PlayGame
  *
  * TODO [x] (3-25-2022) - Change player texture with a character form the dungeon tileset
  * TODO [x] (3-25-2022) - Create simple pathfinding for Mobs to follow Player

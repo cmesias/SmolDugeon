@@ -9,19 +9,9 @@
 #define OPTIONS_H_
 
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
-#include <SDL2/SDL_ttf.h>
-
-#include "LTexture.h"
-#include "LWindow.h"
-
 class Options {
 
 public:	// Exclusive for this game
-
-	// Mouse cursor
-	LTexture gCursor;
 
 
 public:	// functions

@@ -336,7 +336,7 @@ void Players::Update(Map &map,
 					int mex, int mey, int camx, int camy,
 					float spawnX, float spawnY,
 					LWindow gWindow, SDL_Renderer* gRenderer,
-					LTexture gText, TTF_Font *gFont, SDL_Color color,
+					SDL_Color color,
 					bool &RestartLevel,
 					int LevelWeLoaded, bool &ShakeCamera)
 {
@@ -1282,7 +1282,7 @@ void Players::Update(Map &map,
 
 // Render Player
 void Players::Render(int mx, int my, int camx, int camy, LWindow gWindow, SDL_Renderer* gRenderer,
-					 SDL_Color color, int &PARTICLES, LTexture gText) {
+					 SDL_Color color, int &PARTICLES) {
 	gText.setAlpha(255);
 	// If alive
 	if (alive){

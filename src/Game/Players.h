@@ -189,13 +189,13 @@ public:	// functions
 				int mx, int my, int camx, int camy,
 				float spawnX, float spawnY,
 				LWindow gWindow, SDL_Renderer* gRenderer,
-				LTexture gText, TTF_Font *gFont, SDL_Color color,
+				SDL_Color color,
 				bool &RestartLevel,
 				int LevelWeLoaded, bool &ShakeCamera);
 
 	void Render(int mx, int my, int camX, int camY, LWindow gWindow,
 				SDL_Renderer* gRenderer,
-				SDL_Color color, int &PARTICLES, LTexture gText);
+				SDL_Color color, int &PARTICLES);
 
 	void RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentLevel);
 

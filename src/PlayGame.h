@@ -30,9 +30,11 @@
 #include "Settings.h"
 
 
-class PlayGame : public Helper, public Options, public TextNFont {
+class PlayGame : public Helper, public Options {
 
 private:
+	TextNFont fonts;
+	Console console;
 	Settings settings;
 	void LoadAudioSettings();
 

@@ -87,6 +87,13 @@ public:	// Check if 2 line segments intersect
 	int orientation(Point p, Point q, Point r);
 
 	bool doIntersect(Point p1, Point q1, Point p2, Point q2);
+
+	struct Console {
+		void log(std::string text) {
+			std::cout << text << std::endl;
+		}
+	};
+
 };
 
 #endif /* LOCAL_HELPER_H_ */

@@ -745,7 +745,7 @@ void Boss::RenderShadow(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy
 	}
 }
 
-void Boss::RenderBack(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LTexture gText, int camx, int camy) {
+void Boss::RenderBack(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy) {
 	for (int i = 0; i < max; i++) {
 		if (boss[i].alive) {
 			if (!boss[i].renderInFront) {
@@ -844,7 +844,7 @@ void Boss::RenderBack(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LTe
 	}
 }
 
-void Boss::RenderFront(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LTexture gText, int camx, int camy) {
+void Boss::RenderFront(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy) {
 	for (int i = 0; i < max; i++) {
 		if (boss[i].alive) {
 			if (boss[i].renderInFront) {
@@ -1010,7 +1010,7 @@ void Boss::RenderUI(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy) {
 	}
 }
 
-void Boss::RenderDebug(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LTexture gText, int camx, int camy) {
+void Boss::RenderDebug(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy) {
 	for (int i = 0; i < max; i++) {
 		if (boss[i].alive) {
 

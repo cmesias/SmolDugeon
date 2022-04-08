@@ -84,13 +84,13 @@ public:	// Core Functions
 
 	void RenderShadow(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy);
 
-	void RenderBack(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTexture gText, int camx, int camy);
+	void RenderBack(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy);
 
-	void RenderFront(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTexture gText, int camx, int camy);
+	void RenderFront(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy);
 
 	void RenderUI(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy);
 
-	void RenderDebug(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTexture gText, int camx, int camy);
+	void RenderDebug(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy);
 
 	void RenderHand(SDL_Renderer *gRenderer, Mob mob[], int newMx, int newMy,
 						  int mex, int mey, int camx, int camy);

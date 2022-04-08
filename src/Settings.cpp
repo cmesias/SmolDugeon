@@ -8,8 +8,6 @@
 #include "Settings.h"
 
 
-// TODO [ ]  - get rid of old options thing, and put this in PlayGame
-
 void Settings::SaveAudioCFG()
 {
 	// open config file

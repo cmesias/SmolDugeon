@@ -172,16 +172,20 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	// load media for other classes
 	bos.Load(gRenderer);
 	mb.Load(gRenderer);
+
 	part.load(gRenderer);
 	spaw.load(gRenderer);
+
 	player.Load(gRenderer);
+
 	tl.load(gRenderer);
 	tb.load(gRenderer);
+
 	tlc.Load();
 	ite.Load(gRenderer);
 
 	// Other classes Fonts
-	LoadFonts();
+	fonts.LoadFonts();
 	//settings.LoadAudio();
 }
 
@@ -206,7 +210,7 @@ void PlayGame::Free() {
 	ite.Free();
 
 	// Other classes Fonts
-	FreeFonts();
+	fonts.FreeFonts();
 	settings.FreeAudio();
 }
 
@@ -843,7 +847,7 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 					  mex, mey, camx, camy,
 					  spawnX, spawnY,
 					  gWindow, gRenderer,
-					  gText, gFont26, {255,255,255},
+					  {255,255,255},
 					  RestartLevel,
 					  LevelToLoad, playerCallingToShakeCamera);
 
@@ -1173,20 +1177,20 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 			RenderTileBreakingBehind();
 
 			// Render Mob
-			mb.RenderBack(gRenderer, mob, gFont12, gText, camx, camy);
+			mb.RenderBack(gRenderer, mob, camx, camy);
 
 			// Render Boss
-			bos.RenderBack(gRenderer, boss, gFont12, gText, camx, camy);
+			bos.RenderBack(gRenderer, boss, camx, camy);
 
 			// Render our player
 			player.Render(mex, mey, camx, camy, gWindow,
-					  gRenderer, {255,255,255}, part.count, gText);
+					  gRenderer, {255,255,255}, part.count);
 
 			// Render Mob
-			mb.RenderFront(gRenderer, mob, gFont12, gText, camx, camy);
+			mb.RenderFront(gRenderer, mob, camx, camy);
 
 			// Render Boss
-			bos.RenderFront(gRenderer, boss, gFont12, gText, camx, camy);
+			bos.RenderFront(gRenderer, boss, camx, camy);
 
 		// Render items
 		ite.RenderOnTopOfPlayer(gRenderer, item, camx, camy);
@@ -1264,10 +1268,10 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 		tlc.Render(gRenderer, tilec, 0, camx, camy);
 
 		// Render Boss text
-		bos.RenderDebug(gRenderer, boss, gFont12, gText, camx, camy);
+		bos.RenderDebug(gRenderer, boss, camx, camy);
 
 		// Render Mob text
-		mb.RenderDebug(gRenderer, mob, gFont12, gText, camx, camy);
+		mb.RenderDebug(gRenderer, mob, camx, camy);
 
 		// Render Item text
 		ite.RenderDebug(gRenderer, item, camx, camy);
@@ -1280,9 +1284,9 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 				// Render text
 				std::stringstream tempss;
 				tempss << "id: " << item[i].id << ", d: " << item[i].damage;
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont12);
-				gText.setAlpha(255);
-				gText.render(gRenderer, item[i].x-camx, item[i].y-gText.getHeight()-camy, gText.getWidth(), gText.getHeight());
+				fonts.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, fonts.gFont12);
+				fonts.gText.setAlpha(255);
+				fonts.gText.render(gRenderer, item[i].x-camx, item[i].y-fonts.gText.getHeight()-camy, fonts.gText.getWidth(), fonts.gText.getHeight());
 
 			}
 		}
@@ -1297,9 +1301,9 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 					// Render text
 					std::stringstream tempss;
 					tempss << "x: " << *object[i].xFollow << ", y: " << *object[i].yFollow;
-					gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont26);
-					gText.setAlpha(255);
-					gText.render(gRenderer, object[i].x-camx, object[i].y-gText.getHeight()-camy, gText.getWidth(), gText.getHeight());
+					fonts.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, fonts.gFont26);
+					fonts.gText.setAlpha(255);
+					fonts.gText.render(gRenderer, object[i].x-camx, object[i].y-fonts.gText.getHeight()-camy, fonts.gText.getWidth(), fonts.gText.getHeight());
 
 				}
 
@@ -1354,9 +1358,9 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 				/*	   << ", layer: " 		<< tl.layer<< ", tlc.layer: " << tlc.layer << ", editor: " << editor
 			   << ", tl.multiW: " 	<< tl.multiW << ", tl.multiH: " << tl.multiH << ", tl.count: " << tl.tileCount;
 		tempss << ", tlc.multiW: " 	<< tlc.multiW << ", tlc.multiH: " << tlc.multiH << ", tlc.count: " << tlc.count;*/
-		gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont12, 250);
-		gText.setAlpha(255);
-		gText.render(gRenderer, 0+screenWidth-gText.getWidth(), 50, gText.getWidth(), gText.getHeight());
+		fonts.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, fonts.gFont12, 250);
+		fonts.gText.setAlpha(255);
+		fonts.gText.render(gRenderer, 0+screenWidth-fonts.gText.getWidth(), 50, fonts.gText.getWidth(), fonts.gText.getHeight());
 	}
 
 	// Editor debug menu
@@ -1422,17 +1426,17 @@ void PlayGame::RenderText(SDL_Renderer *gRenderer, LWindow &gWindow)
 
 			// Render always on the top left corner of the screen (general debug information)
 			if (text[i].type == 0) {
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), text[i].color, gFont26);
-				gText.setAlpha(text[i].alpha);
-				gText.render(gRenderer, 0, 0 + i*28, text[i].w, text[i].h);
+				fonts.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), text[i].color, fonts.gFont26);
+				fonts.gText.setAlpha(text[i].alpha);
+				fonts.gText.render(gRenderer, 0, 0 + i*28, text[i].w, text[i].h);
 			}
 
 			// These texts have an x & y coordinate, render these (like damage text)
 			else if (text[i].type == 1) {
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), text[i].color, gFont26);
-				gText.setAlpha(text[i].alpha);
-				gText.render(gRenderer, text[i].x-gText.getWidth()/2-camx, text[i].y-camy,
-						gText.getWidth(), gText.getHeight());
+				fonts.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), text[i].color, fonts.gFont26);
+				fonts.gText.setAlpha(text[i].alpha);
+				fonts.gText.render(gRenderer, text[i].x-fonts.gText.getWidth()/2-camx, text[i].y-camy,
+						fonts.gText.getWidth(), fonts.gText.getHeight());
 			}
 		}
 	}

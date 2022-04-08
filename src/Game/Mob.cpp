@@ -776,7 +776,7 @@ void Mob::RenderShadow(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy) {
 	}
 }
 
-void Mob::RenderBack(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTexture gText, int camx, int camy) {
+void Mob::RenderBack(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy) {
 	for (int i = 0; i < max; i++) {
 		if (mob[i].alive) {
 			if (!mob[i].renderInFront) {
@@ -797,7 +797,7 @@ void Mob::RenderBack(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTextu
 	}
 }
 
-void Mob::RenderFront(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTexture gText, int camx, int camy) {
+void Mob::RenderFront(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy) {
 	for (int i = 0; i < max; i++) {
 		if (mob[i].alive) {
 			if (mob[i].renderInFront) {
@@ -858,7 +858,7 @@ void Mob::RenderUI(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy) {
 	}
 }
 
-void Mob::RenderDebug(SDL_Renderer *gRenderer, Mob mob[], TTF_Font *gFont, LTexture gText, int camx, int camy) {
+void Mob::RenderDebug(SDL_Renderer *gRenderer, Mob mob[], int camx, int camy) {
 	for (int i = 0; i < max; i++) {
 		if (mob[i].alive) {
 
