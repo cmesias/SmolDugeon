@@ -7,6 +7,8 @@
 
 #include "Settings.h"
 
+// TODO [x] fix memory leak here
+
 
 void Settings::SaveAudioCFG()
 {
@@ -183,6 +185,11 @@ void Settings::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 	// Clear everytime we come back
 	vButtons.clear();
 
+	// Other classes fonts
+	textNFont.LoadFonts();
+	pauseLoop = true;
+	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
+
 	// Load audio files (we need to load them here or else we cannot apply the audio CFG to them
 	LoadAudio();
 
@@ -190,11 +197,6 @@ void Settings::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 	LoadAudioCFG();
 	LoadVideoCFG();
 	ApplyAudioCfgToSFX();
-
-	// Other classes fonts
-	textNFont.LoadFonts();
-	pauseLoop = true;
-	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
 
 	// Initialize buttons
 	audioBtn.Init("Audio", "Index1", 70, 10);
@@ -266,12 +268,9 @@ void Settings::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 				if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
 					switch (e.key.keysym.sym) {
 					case SDLK_ESCAPE:
-						settingsResult	= Back;
-						pauseLoop = false;
-						FreeAudio();
-						gCursor.free();
+						//settingsResult	= Back;
 						// TODO [ ] this crashers program, but we need to call this to fix memory leak
-						textNFont.FreeFonts();
+						pauseLoop = false;
 						break;
 					case SDLK_DOWN:
 						//
@@ -300,28 +299,39 @@ void Settings::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 				// Results
 				switch (settingsResult)  {
 					case Back:				// Back (to Main Menu)
-						settingsResult	= Back;
-						pauseLoop = false;
-						FreeAudio();
-						textNFont.FreeFonts();
-						gCursor.free();
-						std::cout << "\nfreeing 1 stuff..\n";
+						//settingsResult	= Back;
+						pauseLoop 	= false;
+						//FreeAudio();
+						//textNFont.FreeFonts();
+						///gCursor.free();
 						break;
 					case ShowingMenu:
 						settingsResult	= ShowingMenu;
 						pauseLoop 	= false;
 						FreeAudio();
-						textNFont.FreeFonts();
 						gCursor.free();
-						std::cout << "\nfreeing 2 stuff..\n";
+						textNFont.FreeFonts();
+
+						// Load buttons
+						for (unsigned int i=0; i<vButtons.size(); i++) {
+							vButtons[i]->Free();
+						}
+						// Clear everytime we come back
+						vButtons.clear();
 						return;
 					case Exit:
 						settingsResult	= Exit;
 						pauseLoop 	= false;
 						FreeAudio();
-						textNFont.FreeFonts();
 						gCursor.free();
-						std::cout << "\nfreeing 3 stuff..\n";
+						textNFont.FreeFonts();
+
+						// Load buttons
+						for (unsigned int i=0; i<vButtons.size(); i++) {
+							vButtons[i]->Free();
+						}
+						// Clear everytime we come back
+						vButtons.clear();
 						return;
 				}
 			}
@@ -626,12 +636,16 @@ void Settings::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 			SDL_Delay((1000 / helper.FRAMES_PER_SECOND ) - helper.fps.get_ticks());
 
 	}
-	// Free audio
 	FreeAudio();
-
-	// Other classes fonts
-	textNFont.FreeFonts();
 	gCursor.free();
+	textNFont.FreeFonts();
+
+	// Load buttons
+	for (unsigned int i=0; i<vButtons.size(); i++) {
+		vButtons[i]->Free();
+	}
+	// Clear everytime we come back
+	vButtons.clear();
 }
 
 

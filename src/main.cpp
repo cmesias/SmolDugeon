@@ -122,6 +122,10 @@ int main(int argc, char *argv[]) {
  * 						  [ ] Figure out if we should spawn back monsters or keep them dead.
  * 						  [ ] Autosave when the player takes a key from an area, and keep it gone.
  *
+ *
+ *  TODO [ ] fix memory leak in Settings.cpp
+ *
+ *
  * TODO [x] (3-29-2022) - Create shadows for particles/projectiles
  *
  *

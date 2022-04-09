@@ -423,7 +423,7 @@ void Tilec::RenderUI(SDL_Renderer *gRenderer, Tilec tilec[], int camx, int camy)
 			if (tilec[i].promptSelf) {
 				std::stringstream tempsi;
 				tempsi << "E";
-				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont20);
 				gText.render(gRenderer, tilec[i].x+tilec[i].w/2-gText.getWidth()/2-camx,
 										tilec[i].y+tilec[i].h/2-gText.getHeight()/2-camy,
 										gText.getWidth(),

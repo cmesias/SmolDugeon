@@ -20,7 +20,6 @@
 #include "Game/Mob.h"
 #include "Game/TextNFont.h"
 #include "Helper.h"
-#include "Options.h"
 #include <cassert>
 #include <cstdio>
 #include <fstream>
@@ -30,11 +29,10 @@
 #include "Settings.h"
 
 
-class PlayGame : public Helper, public Options {
+class PlayGame : public Helper {
 
 private:
 	TextNFont fonts;
-	Console console;
 	Settings settings;
 	void LoadAudioSettings();
 

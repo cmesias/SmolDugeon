@@ -1415,7 +1415,7 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 			if (deathScreen)
 			{
 				// Render Text
-				gText.loadFromRenderedText(gRenderer, "You have died. Continue?", {255,255,255}, gFont24);
+				gText.loadFromRenderedText(gRenderer, "You have died. Continue?", {255,255,255}, gFont20);
 				gText.render(gRenderer, screenWidth/2-gText.getWidth()/2, screenHeight/2-gText.getHeight()/2-50, gText.getWidth(), gText.getHeight());
 
 				// Render buttons: Yes
@@ -1431,18 +1431,18 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 				SDL_RenderDrawRect(gRenderer, &continueButton[2]);
 
 				// Render button texts: Yes or No
-				gText.loadFromRenderedText(gRenderer, "Yes", {255,255,255}, gFont24);
+				gText.loadFromRenderedText(gRenderer, "Yes", {255,255,255}, gFont20);
 				gText.render(gRenderer,  continueButton[0].x+continueButton[0].w/2-gText.getWidth()/2,
 										 continueButton[0].y+continueButton[0].h/2-gText.getHeight()/2,
 										 gText.getWidth(), gText.getHeight());
 
-				gText.loadFromRenderedText(gRenderer, "No", {255,255,255}, gFont24);
+				gText.loadFromRenderedText(gRenderer, "No", {255,255,255}, gFont20);
 				gText.render(gRenderer,  continueButton[1].x+continueButton[1].w/2-gText.getWidth()/2,
 										 continueButton[1].y+continueButton[1].h/2-gText.getHeight()/2,
 										 gText.getWidth(), gText.getHeight());
 
 				// Render Text
-				gText.loadFromRenderedText(gRenderer, "Reset High Scores", {255,255,255}, gFont24);
+				gText.loadFromRenderedText(gRenderer, "Reset High Scores", {255,255,255}, gFont20);
 				gText.render(gRenderer, continueButton[2].x+continueButton[2].w/2-gText.getWidth()/2,
 										 continueButton[2].y+continueButton[2].h/2-gText.getHeight()/2,
 										 gText.getWidth(), gText.getHeight());
@@ -1458,13 +1458,13 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 				SDL_RenderDrawRect(gRenderer, &continueButton[2]);
 
 				// Render Text
-				gText.loadFromRenderedText(gRenderer, "PLAY", {255,255,255}, gFont24);
+				gText.loadFromRenderedText(gRenderer, "PLAY", {255,255,255}, gFont20);
 				gText.render(gRenderer, continueButton[0].x+continueButton[0].w/2-gText.getWidth()/2,
 										 continueButton[0].y+continueButton[0].h/2-gText.getHeight()/2,
 										 gText.getWidth(), gText.getHeight());
 
 				// Render Text
-				//gText.loadFromRenderedText(gRenderer, "Reset High Scores", color, gFont24);
+				//gText.loadFromRenderedText(gRenderer, "Reset High Scores", color, gFont20);
 				//gText.render(gRenderer, continueButton[2].x+continueButton[2].w/2-gText.getWidth()/2,
 				//						 continueButton[2].y+continueButton[2].h/2-gText.getHeight()/2,
 				//						 gText.getWidth(), gText.getHeight());
@@ -1638,7 +1638,7 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 		marginH = 4;
 		tempsi.str( std::string() );
 		tempsi  << " x " << this->coins;
-		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont20);
 		gText.render(gRenderer, 100 + 24/2 - gText.getWidth()/2, 32*2  + 24 + marginH, gText.getWidth(), gText.getHeight());
 	}*/
 
@@ -1661,7 +1661,7 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 		// Render Text
 		/*tempsi.str( std::string() );
 		tempsi << " x " <<this->silverKeys;
-		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont20);
 		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());*/
 	}
 
@@ -1684,7 +1684,7 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 		// Render Text
 		/*tempsi.str( std::string() );
 		tempsi  << " x " << this->goldKeys;
-		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont20);
 		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());*/
 	}
 
@@ -1707,7 +1707,7 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 		// Render Text
 		/*tempsi.str( std::string() );
 		tempsi  << " x " << this->bombs;
-		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont20);
 		gText.render(gRenderer, tempX + 32 + 4, tempY, gText.getWidth(), gText.getHeight());*/
 	}
 
@@ -1717,27 +1717,27 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY, int CurrentL
 		// Highscore text
 		tempsi.str( std::string() );
 		tempsi << this->damage << " - " << this->slashAtkSpe << " - " << this->castDamage;
-		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {244, 144, 20}, gFont24);
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {244, 144, 20}, gFont20);
 		gText.render(gRenderer, screenWidth-gText.getWidth()*2-15, 75+28*3, gText.getWidth(), gText.getHeight());
 
 		/*tempsi.str( std::string() );
 		tempsi << "Score: " << this->score;
-		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont20);
 		gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*4, gText.getWidth(), gText.getHeight());
 
 		tempsi.str( std::string() );
 		tempsi << "Level: " << CurrentLevel;
-		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont20);
 		gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*5, gText.getWidth(), gText.getHeight());
 
 		tempsi.str( std::string() );
 		tempsi << "Damage +" << this->damage;
-		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont20);
 		gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*13, gText.getWidth(), gText.getHeight());
 
 		tempsi.str( std::string() );
 		tempsi << "Cast Damage +" << this->castDamage;
-		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+		gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont20);
 		gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*14, gText.getWidth(), gText.getHeight());*/
 	}
 }
@@ -1764,17 +1764,17 @@ void Players::RenderDebug(SDL_Renderer *gRenderer, int camX, int camY)
 
 	std::stringstream tempsi;
 	tempsi << "x: " << x << ", y: " << y;
-	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255,255,255}, gFont24);
+	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255,255,255}, gFont20);
 	gText.render(gRenderer, x-camX, y-camY-gText.getHeight(), gText.getWidth(), gText.getHeight());
 
 	tempsi.str( std::string() );
 	tempsi << "E: " << this->pressedEquipKey;
-	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255,255,255}, gFont24);
+	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255,255,255}, gFont20);
 	gText.render(gRenderer, 0, 57, gText.getWidth(), gText.getHeight());
 
 	/*tempsi.str( std::string() );
 	tempsi << "Health: " << health;
-	gText.loadFromRenderedText(tempsi.str().c_str(), {0,255,0}, gFont24, gRenderer);
+	gText.loadFromRenderedText(tempsi.str().c_str(), {0,255,0}, gFont20, gRenderer);
 	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 58, gText.getWidth(), gText.getHeight());*/
 
 	// Check what keys are pressed

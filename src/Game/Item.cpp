@@ -379,7 +379,7 @@ void Item::RenderUI(SDL_Renderer *gRenderer, Item item[], int camx, int camy) {
 			if (item[i].promptSelf) {
 				std::stringstream tempsi;
 				tempsi << "E";
-				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont20);
 				gText.render(gRenderer, item[i].x+item[i].w/2-gText.getWidth()/2-camx,
 									    item[i].y+item[i].hoverAmount*0.6-gText.getHeight()-camy,
 										gText.getWidth(), gText.getHeight());

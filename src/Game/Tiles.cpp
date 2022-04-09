@@ -726,7 +726,7 @@ void Tile::RenderUI(SDL_Renderer *gRenderer, Tile tile[], int camx, int camy) {
 
 				std::stringstream tempsi;
 				tempsi << "E";
-				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont20);
 				gText.render(gRenderer, tile[i].x+tile[i].w/2-gText.getWidth()/2-camx,
 						tile[i].y+tile[i].hoverAmount-gText.getWidth()-camy,
 										gText.getWidth(), gText.getHeight());
@@ -754,7 +754,7 @@ void Tile::renderTileDebug(SDL_Renderer *gRenderer, Tile tile[], int newMx, int 
 			if (tile[i].id == 306) {
 				std::stringstream tempsi;
 				tempsi << "w: " << tile[i].w << ", h" << tile[i].h;
-				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+				gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont20);
 				gText.render(gRenderer, tile[i].x-camx, tile[i].y-gText.getHeight()-camy,
 										gText.getWidth(), gText.getHeight());
 			}

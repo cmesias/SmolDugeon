@@ -240,6 +240,14 @@ void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuRes
 
 						break;
 				}
+
+				// Customize Character results
+				switch (settings.settingsResult)  {
+				case Settings::Exit:				// Exit Desktop
+					result = MainMenu::Exit;
+					quit = true;
+					break;
+				}
 			}
 		}
 
@@ -251,26 +259,6 @@ void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuRes
 					menuIndex = i;
 				}
 			}
-		}
-
-		// Customize Character results
-		switch (settings.settingsResult)  {
-		case Settings::Back:				// Exit to Main Menu
-			quit = true;
-			break;
-		case Settings::Nothing:
-			//
-			break;
-		case Settings::StartGame:
-			//
-			break;
-		case Settings::ShowingMenu:
-			//
-			break;
-		case Settings::Exit:				// Exit Desktop
-			result = MainMenu::Exit;
-			quit = true;
-			break;
 		}
 
 		// Clear render screen

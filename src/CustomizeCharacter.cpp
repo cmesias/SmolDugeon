@@ -245,7 +245,7 @@ void CustomizeCharacter::Show(LWindow &gWindow, SDL_Renderer *gRenderer, Customi
 				tempS[1] = "Body";
 				tempS[2] = "Hair";
 				tempss << tempS[index];
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont24);
+				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont20);
 				gText.setAlpha(255);
 			gText.render(gRenderer, 10 , 10, gText.getWidth(), gText.getHeight());
 

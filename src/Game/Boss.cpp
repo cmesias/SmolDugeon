@@ -975,7 +975,7 @@ void Boss::RenderUI(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy) {
 
 				std::stringstream tempss;
 				tempss << "THE FATTEST BOSS FIGHT EVER";
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255, 255, 255}, gFont36);
+				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255, 255, 255}, gFont20);
 				gText.render(gRenderer, uiX, uiY, gText.getWidth(), gText.getHeight());
 			}
 

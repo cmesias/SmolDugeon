@@ -10,6 +10,8 @@
 #include <limits>
 #include <math.h>
 #include <sstream>
+#include <iomanip>
+#include <memory>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -20,9 +22,6 @@
 #include "Particless.h"
 
 #include "PlayGame.h"
-
-#include <iomanip>
-#include <memory>
 
 void PlayGame::Init() {
 
@@ -186,7 +185,7 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 
 	// Other classes Fonts
 	fonts.LoadFonts();
-	//settings.LoadAudio();
+	settings.LoadAudio();
 }
 
 void PlayGame::Free() {
@@ -1301,7 +1300,7 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 					// Render text
 					std::stringstream tempss;
 					tempss << "x: " << *object[i].xFollow << ", y: " << *object[i].yFollow;
-					fonts.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, fonts.gFont26);
+					fonts.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, fonts.gFont20);
 					fonts.gText.setAlpha(255);
 					fonts.gText.render(gRenderer, object[i].x-camx, object[i].y-fonts.gText.getHeight()-camy, fonts.gText.getWidth(), fonts.gText.getHeight());
 
@@ -1426,14 +1425,14 @@ void PlayGame::RenderText(SDL_Renderer *gRenderer, LWindow &gWindow)
 
 			// Render always on the top left corner of the screen (general debug information)
 			if (text[i].type == 0) {
-				fonts.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), text[i].color, fonts.gFont26);
+				fonts.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), text[i].color, fonts.gFont20);
 				fonts.gText.setAlpha(text[i].alpha);
 				fonts.gText.render(gRenderer, 0, 0 + i*28, text[i].w, text[i].h);
 			}
 
 			// These texts have an x & y coordinate, render these (like damage text)
 			else if (text[i].type == 1) {
-				fonts.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), text[i].color, fonts.gFont26);
+				fonts.gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), text[i].color, fonts.gFont20);
 				fonts.gText.setAlpha(text[i].alpha);
 				fonts.gText.render(gRenderer, text[i].x-fonts.gText.getWidth()/2-camx, text[i].y-camy,
 						fonts.gText.getWidth(), fonts.gText.getHeight());
